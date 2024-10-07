@@ -1,0 +1,8 @@
+scripts/fmriprep/*
+scripts/fmriprep/run_files.*
+scripts/mriqc/*logs/
+scripts/mriqc/run_files.*
+scripts/mriqc/tmp/tmp_resources_submit_3,6-200.sh
+scripts/old_scripts/
+*.tsv
+*.txt

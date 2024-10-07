@@ -1,0 +1,95 @@
+#!/bin/bash
+
+# subj variables, input/output/run paths, singularity info
+inp_loc=S3ORNGDR
+subj_id=SUBJECTID
+ses_id=SESID
+mriqc_vr=PREPROC_VR
+log_num=LOGNUM
+data_dir=SCRATCHDIR
+inp_ngdr=NGDR
+inp_bucket=INBUCKET
+data_bucket=OUTBUCKET
+run_dir=RUNDIR
+singularity=`which singularity`
+sif_img=SIGINF
+mriqclog_dir=${run_dir}/mriqc_${ses_id}_logs
+compdate=$(date)
+completed_file=${run_dir}/${ses_id}_completed.tsv
+failed_file=${run_dir}/${ses_id}_failed.tsv
+
+# Check if completed/failed_file exists, if not create it
+if [ ! -f "$completed_file" ]; then
+    touch "$completed_file"
+fi
+
+if [ ! -f "$failed_file" ]; then
+    touch "$failed_file"
+fi
+
+# Pull down data from s3 or ngdr to BIDS folder
+if [ ! -d ${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ses-${ses_id} ]; then
+	mkdir -p ${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ses-${ses_id}
+
+	# copy data from s3bucket or ngdr, depending on input location
+	if [ "${inp_loc}" == "s3bucket" ]; then
+		s3cmd sync --recursive "${inp_bucket}/sub-${subj_id}" "${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/"	
+	elif [ "${inp_loc}" == "ngdr" ]; then
+		cp -r "${inp_ngdr}/sub-${subj_id}/ses-${ses_id}" "${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/"
+	else
+		echo "Location ${inp_loc} is not of s3bucket or ngdr, exitting."
+		exit 1
+	fi
+fi
+
+
+# remove bval/bvec from wrong folder
+rm -f ${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ses-${ses_id}/fmap/*acq-dwi_dir*
+rm -f ${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ses-${ses_id}/fmap/*acq-func_dir-both_*
+rm -rf ${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ses-${ses_id}/dwi/
+
+# Delete short runs to reduce MRIQC errors
+for f in ${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ses-${ses_id}/func/sub-*.nii.gz ; do     
+	file=$(basename "$f")
+	vol=$(fslinfo "$f" | awk '$1=="dim4"{print $2}')
+	if [[ "$file" == *.json || "$file" == *.nii.gz ]] && (( $(echo "$vol < 51" | bc -l) )); then         
+		rm $f ; echo "Vols: $vol ; Removed $file "     
+	fi 
+done
+
+# copy dataset_description.json for validation purposes and create output dirs
+cp ${run_dir}/dataset_description.json ${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/
+mkdir -p ${data_dir}/processed/sub-${subj_id}_ses-${ses_id}
+mkdir -p ${data_dir}/work_dir/sub-${subj_id}_ses-${ses_id}
+
+
+# --- Run MRIQC ---- 
+singularity run --cleanenv \
+	-B ${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}:/bids_dir \
+	-B ${data_dir}/processed/sub-${subj_id}_ses-${ses_id}:/output_dir \
+	-B ${data_dir}/work_dir//sub-${subj_id}_ses-${ses_id}:/wd \
+	${sif_img} \
+	/bids_dir /output_dir participant \
+	--ants-nthreads 10 \
+	--nprocs 12 \
+	--mem_gb 40 \
+	-vv \
+	--verbose-reports \
+	-w /wd \
+	-m bold T1w T2w
+
+for log in ${log_num} ; do
+        comp=$(cat ${mriqclog_dir}/*_${log}.out | grep "Participant level finished successfully" | sed -e 's/^[[:space:]]*//' -e 's/[[:punct:]]//g' )
+        mriqc_error_msg=$(cat ${mriqclog_dir}/*_${log}.err | grep 'Error' | tr -d '\n')
+
+        if [ "${comp}" == "Participant level finished successfully" ]; then
+                echo -e "${subj_id}\t${ses_id}\t*_${log}.out\t${compdate}\t${mriqc_error_msg}" >> ${completed_file}
+        else
+            	echo -e "${subj_id}\t${ses_id}\t*_${log}.err\t${compdate}\t${mriqc_error_msg}" >> ${failed_file}
+        fi
+done
+
+echo "MRIQC run ended. Uploading to ${data_bucket}"
+# push processed outputs to bucket
+s3cmd sync -F --recursive -v ${data_dir}/processed/sub-${subj_id}_ses-${ses_id}/ ${data_bucket}/derivatives/${mriqc_vr}/ses-${ses_id}/sub-${subj_id}/
+
