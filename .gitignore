@@ -6,3 +6,5 @@ scripts/mriqc/tmp/tmp_resources_submit_3,6-200.sh
 scripts/old_scripts/
 *.tsv
 *.txt
+grp-text.ipynb
+.DS_Store

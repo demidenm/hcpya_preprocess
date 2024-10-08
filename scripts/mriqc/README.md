@@ -1,6 +1,6 @@
-# ABCD-BIDS: MRIQC Preprocessing Pipeline
+# HCP-YA: MRIQC Preprocessing Pipeline
 
-This code is to rerun MRIQC preprocessing. The general overview:
+This code is to run MRIQC preprocessing. The general overview:
 
 - template.mriqc
     - This is the template used to copy data to a tmp area to preprocess locally. It also includes the singularity run for MRIQC + the sync to s3
@@ -20,11 +20,20 @@ singularity run --cleanenv \
     -B ${data_dir}/work_dir//sub-${subj_id}_ses-${ses_id}:/wd \
     ${sif_img} \
     /bids_dir /output_dir participant \
-    --ants-nthreads 8 \
+    --ants-nthreads 12 \
     --nprocs 12 \
-    --mem_gb 30 \
+    --mem_gb 40 \
     -vv \
     --verbose-reports \
     -w /wd \
     -m bold T1w T2w
 ```
+
+## BOLD Brief Summaries
+![BOLD mriqc summary](../../imgs/bold_mriqc-plot.png)
+
+## T1w Brief Summaries
+![T1w mriqc summaries](../../imgs/T1w_mriqc-plot.png)
+
+## T2w Brief Summaries
+![T2w mriqc summaries](../../imgs/T2w_mriqc-plot.png)
