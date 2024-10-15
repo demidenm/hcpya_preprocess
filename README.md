@@ -46,7 +46,7 @@ This code base is continued to be modified to make submission and QA more effici
 Below is a progress report for the number of subjects marked as "completed" or "failed" for submitted sbatch fMRIprep/MRIQC jobs.
 
 ### fMRIPrep
-Below is the completion rate of HCP-YA subjects for fMRIPrep. For a more detailed report and description, see the [mriqc folder](./scripts/mriqc/)
+Below is the completion rate of HCP-YA subjects for fMRIPrep. For a more detailed report and description, see the [fMRI folder](./scripts/fmriprep/)
 
 ![Subject counts for fmriprep](./imgs/fmriprep_subject_counts.png)
 
