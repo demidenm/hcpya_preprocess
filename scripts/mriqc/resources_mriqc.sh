@@ -3,9 +3,9 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=10
-#SBATCH --mem=80G
+#SBATCH --mem=160G # normally use 60GB total, some edge cases fail so need 2-3x memory.
 #SBATCH --tmp=375gb
-#SBATCH -t 02:30:00
+#SBATCH -t 05:00:00 # generally, 1.5hrs is  good but fails for more larger sized data
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=mdemiden@umn.edu
 #SBATCH -p msismall,agsmall#agsmall # amdsmall

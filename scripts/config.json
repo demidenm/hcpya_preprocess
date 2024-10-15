@@ -7,7 +7,7 @@
     "path_s3bucket_out": "s3://hcp-youth",
     "version": "fmriprep_v24_0_1",
     "scratch_dir": "/scratch.local/${USER}",
-    "sub_file": "subjects_3t.txt",
+    "sub_file": "hcp-ya_subs.txt",
     "usr_email": "${USER}@umn.edu",
     "sif_path": "/home/faird/shared/code/external/pipelines/fmriprep/fmriprep_24.0.1.sif",
     "freesurf_key": "/home/feczk001/mdemiden/slurm_ABCD_s3/preprocess/freesurf_license.txt"

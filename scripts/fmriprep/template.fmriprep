@@ -1,0 +1,119 @@
+#!/bin/bash
+
+# --- Input Variables: Define paths, IDs, and settings ---
+inp_loc=S3ORNGDR
+fmriprep_ver=PREPROC_VR
+subj_id=SUBJECTID
+ses_id=SESID
+data_dir=SCRATCHDIR
+inp_ngdr=NGDR
+inp_bucket=INBUCKET
+data_bucket=OUTBUCKET
+run_dir=RUNDIR
+log_num=LOGNUM
+singularity=$(which singularity || { echo "Singularity not found. Exiting."; exit 1; })
+singularity_img=SIGINF
+freesurfer_license=FSLICENSE
+fplog_dir="${run_dir}/fmriprep_${ses_id}_logs"
+completed_file="${run_dir}/${ses_id}_completed.tsv"
+failed_file="${run_dir}/${ses_id}_failed.tsv"
+compdate=$(date)
+
+# Check if completed/failed_file exists, if not create it
+if [ ! -f "$completed_file" ]; then
+    touch "$completed_file"
+fi
+
+if [ ! -f "$failed_file" ]; then
+    touch "$failed_file"
+fi
+
+# Data Syncing: S3 or NGDR
+bids_dir="${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/"
+
+if [ ! -d "$bids_dir" ]; then
+	mkdir -p "$bids_dir"
+	echo "Created BIDS directory $bids_dir"
+
+	if [ "$inp_loc" == "s3bucket" ]; then
+		s3cmd sync --recursive --exclude "*/dwi/*" "${inp_bucket}/sub-${subj_id}" "$bids_dir"
+		check_command_status $? "Failed to sync from S3 bucket."
+	elif [ "$inp_loc" == "ngdr" ]; then
+		cp -r "${inp_ngdr}/sub-${subj_id}/ses-${ses_id}" "$bids_dir"
+		check_command_status $? "Failed to copy from NGDR."
+	else
+		echo "Invalid input location: $inp_loc. Exiting."
+		exit 1
+	fi
+fi
+
+# Clean up Files 
+fmap_path="${bids_dir}/sub-${subj_id}/ses-${ses_id}/fmap"
+rm -f ${fmap_path}/*acq-dwi_dir*
+rm -f ${fmap_path}/*acq-func_dir-both_*
+rm -rf "${fmap_path}/../dwi/"
+rm -f "${fmap_path}/../*.html"
+
+
+# This is NOT to delete fmaps but cases when number of runs *AP_run-01_epi.json* >1
+# remove instance of *AP_epi.*(should not occur as more than 1 run)
+count=$(find ${fmap_path} -type f -name "sub-${subj_id}_ses-${ses_id}_acq-func_dir-AP_*epi.json" | wc -l)
+if [ $count -gt 1 ]; then
+	rm ${fmap_path}/sub-${subj_id}_ses-${ses_id}_acq-func_dir-AP_epi.*
+	rm ${fmap_path}/sub-${subj_id}_ses-${ses_id}_acq-func_dir-PA_epi.*
+fi
+
+# Copy dataset_description.json to avoid BIDS validation error
+cp ${run_dir}/dataset_description.json ${bids_dir}
+mkdir -p ${data_dir}/processed/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}
+mkdir -p ${data_dir}/work_dir/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}
+
+
+# --- Run FMRIPrep ---- 
+singularity run --cleanenv \
+    -B "${bids_dir}:/bids_dir" \
+    -B "${data_dir}/processed/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}:/output_dir" \
+    -B "${data_dir}/work_dir/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}:/wd" \
+    -B "${freesurfer_license}:/freesurf_license.txt" \
+    "${singularity_img}" \
+    /bids_dir /output_dir participant \
+    --participant-label "${subj_id}" \
+    --fs-license-file /freesurf_license.txt \
+    --ignore slicetiming \
+    --use-syn-sdc warn \
+    --force-syn \
+    --fd-spike-threshold .5 \
+    --output-space MNI152NLin2009cAsym:res-2 \
+    --cifti-output 91k \
+    -vv \
+    -w /wd
+
+
+# Log FMRIPrep Results
+for log in ${log_num} ; do 
+	comp=$(cat ${fplog_dir}/*_${log}.out | grep "fMRIPrep finished successfully" | sed -e 's/^[[:space:]]*//' -e 's/[[:punct:]]//g' ) 
+	
+	fMRIprep_error_msg=$(cat ${fplog_dir}/*_${log}.err | grep 'Error' | tr -d '\n\t')
+	
+	if [ -z "$fMRIprep_error_msg" ]; then
+    		fMRIprep_error_msg=$(cat ${fplog_dir}/*_${log}.out | grep 'Error' | tr -d '\n\t')
+	fi
+	
+	# dependent on whether failed/successful, print into to file. Remove instance of subject before doing so
+	if [ "${comp}" == "fMRIPrep finished successfully" ]; then
+		sed -i "/${subj_id}/d" ${completed_file}
+		echo -e "${subj_id}\t${ses_id}\tALL\t*_${log}.out\t${compdate}\t${fMRIprep_error_msg}" >> ${completed_file}
+	else
+		sed -i "/${subj_id}/d" ${failed_file}
+		echo -e "${subj_id}\t${ses_id}\tALL\t*_${log}.err\t${compdate}\t${fMRIprep_error_msg}" >> ${failed_file}
+	fi
+done
+
+#push processed outputs to bucket: preprocessed info; sourcedata/freesurfer, .html report
+s3cmd sync -F --recursive -v ${data_dir}/processed/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ ${data_bucket}/derivatives/${fmriprep_ver}/ses-${ses_id}/sub-${subj_id}/
+s3cmd sync -F --recursive -v ${data_dir}/processed/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}.html ${data_bucket}/derivatives/${fmriprep_ver}/ses-${ses_id}/sub-${subj_id}.html
+s3cmd sync -F --recursive -v ${data_dir}/processed/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}/sourcedata/freesurfer/sub-${subj_id}/ ${data_bucket}/derivatives/${fmriprep_ver}/ses-${ses_id}/sourcedata/freesurfer/sub-${subj_id}/
+
+# run filemapper
+echo "sync'd ${subj_id} to $data_bucket ${ses_id}"
+echo

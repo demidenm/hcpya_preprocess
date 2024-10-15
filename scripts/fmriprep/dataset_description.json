@@ -1,0 +1,23 @@
+{
+    "Acknowledgements": "Data used in the preparation of this preprocessed data based on data collected via the Human Connectome Project (HCP; https://www.humanconnectome.org/).",
+    "Authors": [
+        "Michael I. Demidenko",
+        "rae McCollumn",
+	"Nicholas E Souter",
+        "Brenden Tervo-Clemmens"
+    ],
+    "BIDSVersion": "1.8.0",
+    "DatasetDOI": "NDA Study ID: TBD",
+    "Funding": [
+        "GRANT #1",
+        "GRANT #2"
+    ],
+    "HowToAcknowledge": "This FMRIPrep Preprocessed data are in collaboration with the CDNI BIDS Input Files, handled by Brenden Tervo-Clemmens, rae McCollum, and Nicholas Souter.",
+    "License": "These derivatives inherit the data usage policies describe by the NIMH Data Archive: https://nda.nih.gov/abcd/abcd-citing",
+    "Name": "HCP-YA fMRIPrep v24.0.1 Derivatives",
+    "ReferencesAndLinks": [
+        "Van Essen et al. (2013). The WU-Minn Human Connectome Project: An Overview. Neuroimage. https://doi.org/10.1016/j.neuroimage.2013.05.041",
+	"Barch et al. (2013). Function in the Human Connectome: Task-fMRI and individual differences in behavior. NeuroImage. https://10.1016/j.neuroimage.2013.05.033"
+
+    ]
+}
