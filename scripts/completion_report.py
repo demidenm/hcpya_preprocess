@@ -6,7 +6,7 @@ import seaborn as sns
 import numpy as np
 
 
-input_dir = './scripts'
+input_dir = './'
 output_dir = './imgs'
 grp_fold = './mriqc/group_mriqc/out_group'
 
