@@ -3,12 +3,12 @@ import pandas as pd
 import subprocess
 import matplotlib.pyplot as plt
 import seaborn as sns
-from numpy import np
+import numpy as np
 
 
 input_dir = './scripts'
 output_dir = './imgs'
-grp_fold = './scripts/mriqc/group_mriqc/output'
+grp_fold = './mriqc/group_mriqc/out_group'
 
 os.makedirs(output_dir, exist_ok=True)
 

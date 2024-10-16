@@ -60,7 +60,7 @@ cp ${mriqc_in}/group* ${out_dir}/${filename}/
 
 cat $subs | while read sub ; do
 	rm -r ${bids_dir}/sub-${sub}*
-	rm -r ${work_dir}/sub-${sub}*
+	rm -r ${work_dir}/*
 	rm -r ${mriqc_in}/sub-${sub}*
 done
 

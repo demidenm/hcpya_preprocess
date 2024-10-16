@@ -1,12 +1,12 @@
 #!/bin/bash -l
 #SBATCH -J mriqc_grp_base
-#SBATCH --array=1-3 # 4-7 # 8-10
+#SBATCH --array=1,8-10#4-7 #1-3 # 8-10
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=8G
 #SBATCH --tmp=200gb
-#SBATCH -t 12:00:00
+#SBATCH -t 05:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=mdemiden@umn.edu
 #SBATCH -p msismall,agsmall
