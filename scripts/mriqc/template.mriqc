@@ -33,7 +33,7 @@ if [ ! -d ${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ses-$
 
 	# copy data from s3bucket or ngdr, depending on input location
 	if [ "${inp_loc}" == "s3bucket" ]; then
-		s3cmd sync --recursive "${inp_bucket}/sub-${subj_id}" "${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/"	
+		s3cmd sync --recursive --exclude "*/dwi/*" --exclude "*/ses-7T*/" "${inp_bucket}/sub-${subj_id}" "${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/"	
 	elif [ "${inp_loc}" == "ngdr" ]; then
 		cp -r "${inp_ngdr}/sub-${subj_id}/ses-${ses_id}" "${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/"
 	else

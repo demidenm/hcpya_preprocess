@@ -77,16 +77,13 @@ for img_key in plot_metrics.keys():
     pull_cols = ['bids_name'] + plot_metrics[img_key]
     df = pd.read_csv(f'{grp_fold}/group_{img_key}.tsv', sep='\t', usecols=pull_cols)
     
-    if img_key == 'bold':
-        df['session'] = df['bids_name'].str.split('_').str[1].str.split('-').str[1]
-        df['task_names'] = df['bids_name'].str.split('_').str[2].str.split('-').str[1]
-        df['run'] = np.where(df['bids_name'].str.split('_').str[3].str.split('-').str[0] == 'run',
-                        df['bids_name'].str.split('_').str[3].str.split('-').str[1], '01')
-    else:
-        df['session'] = df['bids_name'].str.split('_').str[1].str.split('-').str[1]
-        df['task_names'] = df['bids_name'].str.split('_').str[2]
-        df['run'] = np.where(df['bids_name'].str.split('_').str[3].str.split('-').str[0] == 'run',
-                             df['bids_name'].str.split('_').str[3].str.split('-').str[1], '01')
+    isplit_items = df['bids_name'].str.split('_')
+
+    df['session'] = split_items.str[1].str.split('ses-').str[-1]
+    df['task_names'] = split_items.str[2].str.split('task-').str[-1]
+    df['img_type'] = split_items.str[-1]
+
+    df['run'] = split_items.apply(lambda x: x[4].split('run-')[-1] if len(x) > 4 and 'run-' in x[4] else '01')
         
     columns_to_plot = plot_metrics[img_key]
     sess_list = list(df['session'].unique())
