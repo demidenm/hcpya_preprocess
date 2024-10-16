@@ -24,7 +24,6 @@ singularity run --cleanenv \
     /bids_dir /output_dir participant \
     --participant-label "${subj_id}" \
     --fs-license-file /freesurf_license.txt \
-    --bids-filter-file /task_list.json \
     --ignore slicetiming \
     --fd-spike-threshold .5 \
     --output-space MNI152NLin2009cAsym:res-2 \
