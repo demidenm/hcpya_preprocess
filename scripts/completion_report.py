@@ -7,10 +7,12 @@ import numpy as np
 
 
 input_dir = './'
-output_dir = './imgs'
+tmp = './tmp'
+output_dir = '../imgs'
 grp_fold = './mriqc/group_mriqc/out_group'
 
 os.makedirs(output_dir, exist_ok=True)
+os.makedirs(tmp, exist_ok=True)
 
 plot_metrics = {
     'bold': ['fd_mean', 'fwhm_avg', 'snr', 'tsnr'],
@@ -33,7 +35,7 @@ for preproc_type in folders:
                 session, status = filename.split('_')[:2]
                 filepath = os.path.join(folder, filename)
                 # create tmp for first sub column to avoid parsing errors
-                tmp_file = f'{output_dir}/subs_{preproc_type}_{session}{status}'
+                tmp_file = f'{tmp}/subs_{preproc_type}_{session}{status}'
                 subprocess.run(f"awk '{{ print $1 }}' {filepath} > {tmp_file}", shell=True, check=True)
                 subj_count = len(pd.read_csv(tmp_file, header=None)[0].unique())
 
@@ -77,12 +79,11 @@ for img_key in plot_metrics.keys():
     pull_cols = ['bids_name'] + plot_metrics[img_key]
     df = pd.read_csv(f'{grp_fold}/group_{img_key}.tsv', sep='\t', usecols=pull_cols)
     
-    isplit_items = df['bids_name'].str.split('_')
+    split_items = df['bids_name'].str.split('_')
 
     df['session'] = split_items.str[1].str.split('ses-').str[-1]
     df['task_names'] = split_items.str[2].str.split('task-').str[-1]
     df['img_type'] = split_items.str[-1]
-
     df['run'] = split_items.apply(lambda x: x[4].split('run-')[-1] if len(x) > 4 and 'run-' in x[4] else '01')
         
     columns_to_plot = plot_metrics[img_key]
