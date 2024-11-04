@@ -17,7 +17,6 @@ freesurfer_license=FSLICENSE
 fplog_dir="${run_dir}/fmriprep_${ses_id}_logs"
 completed_file="${run_dir}/${ses_id}_completed.tsv"
 failed_file="${run_dir}/${ses_id}_failed.tsv"
-compdate=$(date)
 
 # Check if completed/failed_file exists, if not create it
 if [ ! -f "$completed_file" ]; then
@@ -70,24 +69,30 @@ mkdir -p ${data_dir}/work_dir/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}
 
 
 # --- Run FMRIPrep ---- 
+# notes: nprocs -> number of cpus for slurm req; mem-mb is mem-per-cu gb (1000*GB*cpus) or total  mem gb (1000*GB)
 singularity run --cleanenv \
-    -B "${bids_dir}:/bids_dir" \
-    -B "${data_dir}/processed/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}:/output_dir" \
-    -B "${data_dir}/work_dir/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}:/wd" \
-    -B "${freesurfer_license}:/freesurf_license.txt" \
-    "${singularity_img}" \
-    /bids_dir /output_dir participant \
-    --participant-label "${subj_id}" \
-    --fs-license-file /freesurf_license.txt \
-    --ignore slicetiming \
-    --level minimal \
-    --use-syn-sdc warn \
-    --fd-spike-threshold .5 \
-    --output-space MNI152NLin2009cAsym:res-2 \
-    --cifti-output 91k \
-    -vv \
-    -w /wd
+	-B "${bids_dir}:/bids_dir" \
+	-B "${data_dir}/processed/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}:/output_dir" \
+	-B "${data_dir}/work_dir/${fmriprep_ver}/sub-${subj_id}_ses-${ses_id}:/wd" \
+	-B "${freesurfer_license}:/freesurf_license.txt" \
+	"${singularity_img}" \
+	/bids_dir /output_dir participant \
+	--participant-label "${subj_id}" \
+	--fs-license-file /freesurf_license.txt \
+	--ignore slicetiming \
+	--use-syn-sdc warn \
+	--fd-spike-threshold .5 \
+	--output-space MNI152NLin2009cAsym:res-2 \
+	--cifti-output 91k \
+	--nthreads 12 \
+	--omp-nthreads 7 \
+	--mem-mb 96000 \
+	-vv \
+	-w /wd
 
+
+# completed time / date
+compdate=$(date)
 
 # Log FMRIPrep Results
 for log in ${log_num} ; do 

@@ -64,15 +64,15 @@ mkdir -p ${data_dir}/work_dir/sub-${subj_id}_ses-${ses_id}
 
 
 # --- Run MRIQC ---- 
+# notes: nprocs --> number of cpus max useage for processes based on slurm request. mem is the GB memory max usage for processes
 singularity run --cleanenv \
 	-B ${data_dir}/bids_dir/sub-${subj_id}_ses-${ses_id}:/bids_dir \
 	-B ${data_dir}/processed/sub-${subj_id}_ses-${ses_id}:/output_dir \
-	-B ${data_dir}/work_dir//sub-${subj_id}_ses-${ses_id}:/wd \
+	-B ${data_dir}/work_dir/sub-${subj_id}_ses-${ses_id}:/wd \
 	${sif_img} \
 	/bids_dir /output_dir participant \
-	--ants-nthreads 10 \
-	--nprocs 12 \
-	--mem_gb 40 \
+	--nprocs 7 \
+	--mem 60 \
 	-vv \
 	--verbose-reports \
 	-w /wd \

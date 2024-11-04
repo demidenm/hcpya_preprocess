@@ -20,9 +20,9 @@ else
       echo "Submitting the following jobs for fMRIprep processing now: $array"
       echo ""
 
-      sed "s/SESS/${ses}/g" resources_fmriprep.sh > ./tmp/tmp_resources_submit_${array}.sh
+      sed "s/SESS/${ses}/g" resources_fmriprep.sh > ./tmp/tmp_resources_alt.sh
       #fmriprep_abcd=$(sbatch --parsable -a $array resources_fmriprep_${ses}.sh )
-      fmriprep_abcd=$(sbatch --parsable -a $array ./tmp/tmp_resources_submit_${array}.sh )
+      fmriprep_abcd=$(sbatch --parsable -a $array ./tmp/tmp_resources_alt.sh )
       echo "fmriprep_v24.0.1 JOB ID: $fmriprep_abcd"
 
       echo ""
