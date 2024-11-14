@@ -13,7 +13,7 @@ then
       echo ""
 
 else
-      echo "Please choose a value baselineYear1Arm1 or 2YearFollowUpYArm1:"
+      echo "Please choose a value 3T or 7T:"
       read ses
 
       echo ""

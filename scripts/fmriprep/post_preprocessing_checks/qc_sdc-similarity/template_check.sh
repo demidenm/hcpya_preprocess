@@ -4,20 +4,17 @@ sub=SUBJECT
 ses=SESSION 
 type=dice
 nda_dir=/spaces/ngdr/ref-data/abcd/nda-3165-2020-09
-fmriprep_vr=fmriprep_v23_1_4
+fmriprep_vr=fmriprep_v24_0_1
 tmp=/scratch.local/${USER}/similarity_check
 out_file=${curr_dir}/tmp/sub-${sub}_${ses}_check-html-similarity.tsv
 main_file=${curr_dir}/../${ses}_check-html-similarity.tsv
+s3_bucket="s3://hcp-youth" # store fmriprep here
+s3_raw="s3://HCP_YA/BIDS" # input bids data
 
-if [[ "$ses" == "baselineYear1Arm1" ]] ; then
-        s3_bucket="s3://abcd-mriqc-fmriprep" # store Baseline here
-elif [[ "$ses" == "2YearFollowUpYArm1" ]] ; then
-        s3_bucket="s3://ABCD_BIDS" # Store 2Year here
-else
-    	echo "wrong session option"
-        exit 1
+# if file exists,  remove occurs of ID to not have redundant content
+if [ -f "${ses}_check-html-similarity.tsv" ]; then
+	sed -i "/${sub}/d" "${ses}_check-html-similarity.tsv"
 fi
-
 
 # set director; and copy down from s3 and nda folder; get number of fieldmaps (using AP only here)
 mkdir -p ${tmp}
@@ -29,23 +26,15 @@ cd ${tmp}/sub-${sub}/ses-${ses}/anat/
 file=$(ls *_desc-brain_mask.nii.gz | grep -v "MNI152") # exclude MNI152 brain mask
 mri_convert brain.mgz fs_brain.nii.gz
 
-# copy first run anat or T1w.nii.gz; sometimes multile T1ws, using run-01 to avoid affine error in dice calc
-if [ -e ${nda_dir}/sub-${sub}/ses-${ses}/anat/*_run-01_T1w.nii.gz ] ; then
-	cp ${nda_dir}/sub-${sub}/ses-${ses}/anat/*_run-01_T1w.nii.gz ${tmp}/sub-${sub}/ses-${ses}/anat/
-else
-	cp ${nda_dir}/sub-${sub}/ses-${ses}/anat/*_T1w.nii.gz ${tmp}/sub-${sub}/ses-${ses}/anat/
-fi
+# T1w.nii.gz; sometimes multile T1ws, so only taking the first one
+first_nii=$(s3cmd ls ${s3_raw}/sub-${sub}/ses-${ses}/anat/ | grep "T1w" | grep "\.nii" | head -n 1 | awk '{print $4}')
+first_json=$(s3cmd ls ${s3_raw}/sub-${sub}/ses-${ses}/anat/ | grep "T1w" | grep "\.json" | head -n 1 | awk '{print $4}')
 
-
-# if fmap exists, check AP num
-if [ -d "${nda_dir}/sub-${sub}/ses-${ses}/fmap/" ]; then
-	num_ap_fm=$(ls "${nda_dir}/sub-${sub}/ses-${ses}/fmap/"*-AP*epi.nii.gz | wc -l)
-else
-	num_ap_fm=0
-fi
+s3cmd get "$first_nii" ${tmp}/sub-${sub}/ses-${ses}/anat/
+s3cmd get "$first_json" ${tmp}/sub-${sub}/ses-${ses}/anat/
 
 # extract html contents 
-bold_runs=$(cat ${tmp}/sub-${sub}.html | grep -E '<h2 class="sub-report-group">Reports for: session <span class="bids-entity">'"$ses"'</span>, task' | awk -F'[<>]' '{ print $9,$13 }')
+bold_runs=$(cat ${tmp}/sub-${sub}.html | grep -E '<h2 class="sub-report-group mt-4">Reports for: session <span class="bids-entity">'"$ses"'</span>, task' | awk -F'[<>]' '{ print $9,$17 }')
 sdc_runs=$(cat ${tmp}/sub-${sub}.html | grep "distortion correction:" | awk -F" " '{ print $4}')
 
 # set subject session in folder
@@ -68,7 +57,7 @@ echo "$bold_runs" | while read run ; do
         	if [ ${sim_error} -eq 0 ]; then
                 	echo "Python Similarity ( $task $run ) estimate completed successfully!"
 			vals=($output)
-                	echo -e "${sub}\t${ses}\t${task}\t${run}\t${sdc_type}\t${num_ap_fm}\t${vals[0]}\t${vals[1]}\t${vals[2]}\t${vals[3]}\t${vals[4]}" >> ${out_file}
+                	echo -e "${sub}\t${ses}\t${task}\t${run}\t${sdc_type}\t${vals[0]}\t${vals[1]}" >> ${out_file}
         	else
             		echo "Python Similarity ( $task $run ) failed."
                 	exit 1
@@ -82,12 +71,11 @@ echo "$bold_runs" | while read run ; do
                         echo "Python Similarity ( $task empty run ) estimate completed successfully!"
                         run=01
 			vals=($output)
-                        echo -e "${sub}\t${ses}\t${task}\t${run}\t${sdc_type}\t${num_ap_fm}\t${vals[0]}\t${vals[1]}\t${vals[2]}\t${vals[3]}\t${vals[4]}" >> ${out_file}
+                        echo -e "${sub}\t${ses}\t${task}\t${run}\t${sdc_type}\t${vals[0]}\t${vals[1]}" >> ${out_file}
 		else
                         echo "Python Similarity ( $task empty run ) failed."
                         exit 1
                 fi
-
 	fi
 done
 

@@ -1,21 +1,21 @@
 #!/bin/bash 
 
-echo "Please choose a value baselineYear1Arm1 or 2YearFollowUpYArm1:"
+echo "Please choose a session value 3T or 7T:"
 read ses
 
 if [ -n "${ses}" ]; then
-    if [[ "$ses" == "baselineYear1Arm1" || "$ses" == "2YearFollowUpYArm1" ]]; then
+    if [[ "$ses" == "3T" || "$ses" == "7T" ]]; then
         echo "${ses} chosen as ses, continuing."
     else
         echo
-        echo "should be baselineYear1Arm1 or 2YearFollowUpYArm1, provided ${ses}. Exiting."
+        echo "should be 3T or 7T, provided ${ses}. Exiting."
         echo
         exit 1
     fi
 
 else
         echo
-        echo "Variable is empty, expected: baselineYear1Arm1 or 2YearFollowUpYArm1. Exiting"
+        echo "Variable is empty, expected string. Exiting"
         echo
         exit 1
 
@@ -30,7 +30,7 @@ check_folder="${run_folder}/run_files.${session}"
 check_template="${run_folder}/template_check.sh"
 #subj_list=${run_folder}/subject_list/${session}_ids.txt
 subj_list=${run_folder}/../../${session}_completed.tsv
-subset_n=10836
+subset_n=1013
 
 email=`echo $USER@umn.edu`
 group=`groups|cut -d" " -f1`
