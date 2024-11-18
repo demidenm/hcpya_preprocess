@@ -45,10 +45,10 @@ fi
 
 # Set output directories and variables for run files
 scratch_dir="${scratch_dir}/${version}_out"  # Temporary data output directory
-curr_folder="$(pwd)/${preproc}"  # Current working directory for the selected preprocessing option
+curr_folder="$(pwd)"  # Current working directory for the selected preprocessing option
 sub_list="$(pwd)/subj_list/${sub_file}"  # Subject list file path
 run_folder="${curr_folder}/fsrerun.${version}_${session}"  # Folder for generated run files
-preproc_template="template.fmriprep_rerunfreesurfer" 
+preproc_template="template.fmriprep_rerunfs"
 
 # Create the run folder if it doesn't already exist
 if [[ ! -d "${run_folder}" ]]; then

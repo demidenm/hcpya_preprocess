@@ -1,13 +1,13 @@
 {
   "fmriprep": {
-    "ngdr_or_s3bucket": "ngdr",
-    "ses": "2YearFollowUpYArm1",
-    "path_ngdr": "/spaces/ngdr/ref-data/abcd/nda-3165-2020-09",
-    "path_s3bucket_in": "s3://ABCC_year2",
-    "path_s3bucket_out": "s3://ABCD_BIDS",
+    "ngdr_or_s3bucket": "s3bucket",
+    "ses": "3T",
+    "path_ngdr": "",
+    "path_s3bucket_in": "s3://HCP_YA/BIDS",
+    "path_s3bucket_out": "s3://hcp-youth",
     "version": "fmriprep_v24_0_1",
     "scratch_dir": "/scratch.local/${USER}",
-    "sub_file": "subjects_2YearFollowUpYArm1.txt",
+    "sub_file": "hcp-rerun_subs.txt",
     "usr_email": "${USER}@umn.edu",
     "sif_path": "/home/faird/shared/code/external/pipelines/fmriprep/fmriprep_24.0.1.sif",
     "freesurf_key": "/home/feczk001/mdemiden/slurm_ABCD_s3/preprocess/freesurf_license.txt"

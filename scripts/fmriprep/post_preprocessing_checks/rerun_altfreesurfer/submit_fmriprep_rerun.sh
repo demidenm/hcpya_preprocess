@@ -13,16 +13,10 @@ then
       echo ""
 
 else
-      echo "Please choose a value baselineYear1Arm1 or 2YearFollowUpYArm1:"
-      read ses
 
-      echo ""
-      echo "Submitting the following jobs for fMRIprep 23.1.4 processing now: $array"
-      echo ""
+      fmriprep=$(sbatch --parsable -a $array resources_fmriprep.sh )
 
-      fmriprep_abcd=$(sbatch --parsable -a $array resources_fmriprep_v23_1_4_rerun_${ses}.sh )
-
-      echo "fmriprep_v23_1_4 JOB ID: $fmriprep_abcd"
+      echo "fmriprep JOB ID: $fmriprep "
 
       echo ""
       echo "Use 'squeue -al --me' to monitor jobs."
