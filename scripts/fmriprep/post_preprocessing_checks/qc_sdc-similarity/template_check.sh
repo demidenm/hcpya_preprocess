@@ -3,11 +3,14 @@ curr_dir=`pwd`
 sub=SUBJECT
 ses=SESSION 
 type=dice
-nda_dir=/spaces/ngdr/ref-data/abcd/nda-3165-2020-09
+roi_path=/home/feczk001/mdemiden/slurm_ABCD_s3/hcpya_preprocess/scripts/fmriprep/post_preprocessing_checks/qc_sdc-similarity/roi_mask/leftvisual.nii.gz
 fmriprep_vr=fmriprep_v24_0_1
 tmp=/scratch.local/${USER}/similarity_check
-out_file=${curr_dir}/tmp/sub-${sub}_${ses}_check-html-similarity.tsv
-main_file=${curr_dir}/../${ses}_check-html-similarity.tsv
+out_dir=${tmp}/peristim/
+out_sim=${curr_dir}/tmp/sub-${sub}_${ses}_check-html-similarity.tsv
+main_sim=${curr_dir}/../${ses}_check-html-similarity.tsv
+out_peristim=${curr_dir}/tmp/sub-${sub}_${ses}_check-peristim.tsv
+main_peristim=${curr_dir}/../${ses}_check-peristim.tsv
 s3_bucket="s3://hcp-youth" # store fmriprep here
 s3_raw="s3://HCP_YA/BIDS" # input bids data
 
@@ -64,52 +67,67 @@ sdc_runs=$(cat ${tmp}/sub-${sub}.html | grep "distortion correction:" | awk -F" 
 # set subject session in folder
 sess_inp=${tmp}/sub-${sub}/ses-${ses}
 
-# extract and save
 num=0
 echo "$bold_runs" | while read run ; do 
 	((num++))
 	sdc_type=$(echo "$sdc_runs" | sed -n "${num}p")
 	task=$(echo $run | awk -F" " '{ print $1 }')
 	run=$(echo $run | awk -F" " '{ print $2 }')
-        
+
+	# Determine if events exist
 	if ls ${tmp}/sub-${sub}/ses-${ses}/func/sub-${sub}_ses-${ses}_task-${task}_*_run-${run}_events.tsv 1> /dev/null 2>&1; then
-                events_exist="Exists"
-        else
-            	events_exist="None"
-        fi
+		events_exist="Exists"
+	else
+		events_exist="None"
+	fi
+
+	# Default to run 01 if empty
+	if [ -z "$run" ]; then
+		run="01"
+		echo "${num}. Calculating similarity for sub-${sub}, task-${task}, run empty, defaulting to run-${run}"
+	else
+		echo "${num}. Calculating similarity for sub-${sub}, task-${task}, run-${run}"
+	fi
 
 	# RUN PYTHON CODE TO EXTRACT SIMILARITY ESTIMATES
-	if [ -n "$run" ]; then
-		echo "${num}. Calculating similarity for sub-${sub}, task-${task}, run-${run} "
-		output=$(python ${curr_dir}/../similarity_check.py --in_dat ${sess_inp} --task ${task} --run ${run} --stype ${type} )
-        	sim_error=$?
+	sim_out=$(python ${curr_dir}/../similarity_check.py --in_dat ${sess_inp} --task ${task} ${run:+--run $run} --stype ${type}) 2>&1
+	sim_error=$?
 
-        	if [ ${sim_error} -eq 0 ]; then
-                	echo "Python Similarity ( $task $run ) estimate completed successfully!"
-			vals=($output)
-                	echo -e "${sub}\t${ses}\t${task}\t${run}\t${events_exist}\t${sdc_type}\t${vals[0]}\t${vals[1]}" >> ${out_file}
-        	else
-            		echo "Python Similarity ( $task $run ) failed."
-                	exit 1
-        	fi
+	if [ ${sim_error} -eq 0 ]; then
+		echo "Python Similarity ( $task $run ) estimate completed successfully!"
+		vals=($sim_out)
+		echo -e "${sub}\t${ses}\t${task}\t${run}\t${events_exist}\t${sdc_type}\t${vals[0]}\t${vals[1]}" >> ${out_sim}
+		echo "Stimilarity finished Successfully"
+
 	else
-		echo "${num}. Calculating similarity for sub-${sub}, task-${task}, run empty, 1-run "
-		output=$(python ${curr_dir}/../similarity_check.py --in_dat ${sess_inp} --task ${task} --stype ${type})
-                sim_error=$?
-
-                if [ ${sim_error} -eq 0 ]; then
-                        echo "Python Similarity ( $task empty run ) estimate completed successfully!"
-                        run=01
-			vals=($output)
-                        echo -e "${sub}\t${ses}\t${task}\t${run}\t${events_exist}\t${sdc_type}\t${vals[0]}\t${vals[1]}" >> ${out_file}
-		else
-                        echo "Python Similarity ( $task empty run ) failed."
-                        exit 1
-                fi
+		echo "Python Similarity ( $task $run ) failed."
+		exit 1
 	fi
 done
 
-cat $out_file >> $main_file
-rm $out_file
+# RUN PYTHON TO EXTRA PERISTIMULUS DATA ONLY FOR MOTOR TASK
+mkdir -p ${out_dir}/sub-${sub}/ses-${ses}/func
+peristim_out=$(python ${curr_dir}/../create_peristim.py --in_dir ${tmp} --sub_id ${sub} --task "motor" --roi_mask ${roi_path} --out_path "${out_dir}/sub-${sub}/ses-${ses}/func" ) 2>&1
+peristim_error=$?
+
+if [ ${peristim_error} -eq 0 ]; then
+	echo "Python Similarity ( $task $run ) estimate completed successfully!"
+	perivals=($peristim_out)
+	echo -e "${sub}\t${ses}\tmotor\tleft_visual\t${perivals[0]}\t${perivals[1]}\t${perivals[2]}" >> ${out_peristim}
+	s3cmd --recursive put ${tmp}/sub-${sub}/ses-${ses}/func/*_timeseries-roi.tsv ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sourcedata/events_files/sub-${sub}/ses-${ses}/func/
+	s3cmd --recursive put ${tmp}/sub-${sub}/ses-${ses}/func/*_plot-peristim.tsv ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sourcedata/events_files/sub-${sub}/ses-${ses}/func/
+	echo "Peristim finished Successfully" 
+
+else
+	echo "Python Similarity ( $task $run ) failed."
+	exit 1
+fi
+
+# save tmp output to main then delete tmp
+cat $out_sim >> $main_sim
+cat $out_peristim >> $main_peristim
+rm $out_sim
+rm $out_peristim
+
 
 echo "Finished Successfully"
