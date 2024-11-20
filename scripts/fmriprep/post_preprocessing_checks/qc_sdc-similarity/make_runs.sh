@@ -30,7 +30,7 @@ check_folder="${run_folder}/run_files.${session}"
 check_template="${run_folder}/template_check.sh"
 #subj_list=${run_folder}/subject_list/${session}_ids.txt
 subj_list=${run_folder}/../../${session}_completed.tsv
-subset_n=1013
+subset_n=$(cat ${run_folder}/../../${session}_completed.tsv | wc -l )
 
 email=`echo $USER@umn.edu`
 group=`groups|cut -d" " -f1`

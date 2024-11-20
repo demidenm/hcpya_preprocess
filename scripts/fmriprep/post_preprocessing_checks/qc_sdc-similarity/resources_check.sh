@@ -4,8 +4,8 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=6
 #SBATCH --mem-per-cpu=6G
-#SBATCH -t 00:45:00
-#SBATCH --tmp=150g
+#SBATCH -t 01:00:00
+#SBATCH --tmp=160g
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=mdemiden@umn.edu
 #SBATCH -p msismall,amdsmall#agsmall#amdsmall

@@ -14,14 +14,14 @@ main_peristim=${curr_dir}/../${ses}_check-peristim.tsv
 s3_bucket="s3://hcp-youth" # store fmriprep here
 s3_raw="s3://HCP_YA/BIDS" # input bids data
 
-# if file exists,  remove occurs of ID to not have redundant content
+# if file exists,  remove row of matching ID to not have redundant content
 if [ -f "${ses}_check-html-similarity.tsv" ]; then
 	sed -i "/${sub}/d" "${ses}_check-html-similarity.tsv"
 fi
 
 # set director; and copy down from s3 and nda folder; get number of fieldmaps (using AP only here)
 mkdir -p ${tmp}
-s3cmd sync --recursive ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sub-${sub} ${tmp}/ --exclude "*goodvoxels*" --exclude "*91k*" --exclude "*.gii" --exclude "*.json" --exclude "*desc-preproc_bold.nii.gz"
+s3cmd sync --recursive ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sub-${sub} ${tmp}/ --exclude "*goodvoxels*" --exclude "*91k*" --exclude "*.gii" --exclude "*.json" --exclude "*_boldref.nii.gz" --exclude "*_xfm.txt"
 s3cmd sync ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sourcedata/freesurfer/sub-${sub}/mri/brain.mgz ${tmp}/sub-${sub}/ses-${ses}/anat/
 
 # convert fressurfer brain to .nii.gz, bin image, resample to brain-mask.nii.gz
@@ -42,7 +42,7 @@ s3cmd sync --recursive --include="*_events.tsv" ${s3_raw}/sub-${sub}/ses-${ses}/
 # rename the events files to match by RUN with BOLD
 for tsv in ${tmp}/sub-${sub}/ses-${ses}/func/*_events.tsv; do
 	base="${tsv%_events.tsv}"  # Remove "_events.tsv" suffix
-	nii_file=$(ls ${base}*_bold.nii.gz 2>/dev/null)  # Find matching bold file
+	nii_file=$(ls ${base}*_bold.nii.gz 2>/dev/null | head -n 1)  # Find matching bold file
 	if [[ -n $nii_file ]]; then  # Check if the bold file exists
 		run=$(echo "$nii_file" | grep -o "_run-[0-9]_")  # Extract _run-<number>_
 		if [[ -n $run ]]; then
@@ -58,7 +58,9 @@ for tsv in ${tmp}/sub-${sub}/ses-${ses}/func/*_events.tsv; do
 done
 
 # sync events files to s3 fmriprep sourcedata folder
-s3cmd --recursive put ${tmp}/sub-${sub}/ses-${ses}/func/*_events.tsv ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sourcedata/events_files/sub-${sub}/ses-${ses}/func/
+for event_file in ` ls ${tmp}/sub-${sub}/ses-${ses}/func/sub-${sub}_ses-${ses}_task-motor_*_run-*_events.tsv ` ; do
+	s3cmd put $event_file ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sourcedata/event_files/sub-${sub}/ses-${ses}/func/
+done
 
 # extract html contents 
 bold_runs=$(cat ${tmp}/sub-${sub}.html | grep -E '<h2 class="sub-report-group mt-4">Reports for: session <span class="bids-entity">'"$ses"'</span>, task' | awk -F'[<>]' '{ print $9,$17 }')
@@ -105,29 +107,36 @@ echo "$bold_runs" | while read run ; do
 	fi
 done
 
+cat $out_sim >> $main_sim
+rm $out_sim
+
+
 # RUN PYTHON TO EXTRA PERISTIMULUS DATA ONLY FOR MOTOR TASK
-mkdir -p ${out_dir}/sub-${sub}/ses-${ses}/func
-peristim_out=$(python ${curr_dir}/../create_peristim.py --in_dir ${tmp} --sub_id ${sub} --task "motor" --roi_mask ${roi_path} --out_path "${out_dir}/sub-${sub}/ses-${ses}/func" ) 2>&1
-peristim_error=$?
+motor_exist=$(ls ${tmp}/sub-${sub}/ses-${ses}/func/sub-${sub}_ses-${ses}_task-motor_dir-*_run-*_bold.nii.gz 2>/dev/null )
+num_files=$(echo "$motor_exist" | wc -l)
 
-if [ ${peristim_error} -eq 0 ]; then
-	echo "Python Similarity ( $task $run ) estimate completed successfully!"
-	perivals=($peristim_out)
-	echo -e "${sub}\t${ses}\tmotor\tleft_visual\t${perivals[0]}\t${perivals[1]}\t${perivals[2]}" >> ${out_peristim}
-	s3cmd --recursive put ${tmp}/sub-${sub}/ses-${ses}/func/*_timeseries-roi.tsv ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sourcedata/events_files/sub-${sub}/ses-${ses}/func/
-	s3cmd --recursive put ${tmp}/sub-${sub}/ses-${ses}/func/*_plot-peristim.tsv ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sourcedata/events_files/sub-${sub}/ses-${ses}/func/
-	echo "Peristim finished Successfully" 
+if [ "$num_files" -ge 2 ]; then
+	mkdir -p ${out_dir}/sub-${sub}/ses-${ses}/func
+	peristim_out=$(python ${curr_dir}/../create_peristim.py --in_dir ${tmp} --sub_id ${sub} --task "motor" --roi_mask ${roi_path} --out_path "${out_dir}/sub-${sub}/ses-${ses}/func" ) 2>&1
+	peristim_error=$?
 
+	if [ ${peristim_error} -eq 0 ]; then
+		echo "Python Peristimulus estimate completed successfully!"
+		perivals=($peristim_out)
+		echo -e "${sub}\t${ses}\tmotor\tleft_visual\t${perivals[0]}\t${perivals[1]}\t${perivals[2]}" >> ${out_peristim}
+		s3cmd --recursive put ${out_dir}/sub-${sub}/ses-${ses}/func/*_timeseries-roi.tsv ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sourcedata/out_files/sub-${sub}/ses-${ses}/func/
+		s3cmd --recursive put ${out_dir}/sub-${sub}/ses-${ses}/func/*_plot-peristim.png ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sourcedata/out_files/sub-${sub}/ses-${ses}/func/
+		echo "Peristim finished Successfully" 
+		cat $out_peristim >> $main_peristim
+		rm $out_peristim
+	else
+		echo "Python Peristimulus failed."
+		exit 1
+	fi
 else
-	echo "Python Similarity ( $task $run ) failed."
-	exit 1
+	echo "Subject ${sub} doesnt have motor task"
+
 fi
 
-# save tmp output to main then delete tmp
-cat $out_sim >> $main_sim
-cat $out_peristim >> $main_peristim
-rm $out_sim
-rm $out_peristim
 
-
-echo "Finished Successfully"
+echo "QC Runs Finished Successfully"
