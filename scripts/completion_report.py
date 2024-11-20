@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-
+# set folders
 input_dir = './'
 tmp = './tmp'
 output_dir = '../imgs'
 grp_fold = './mriqc/group_mriqc/out_group'
+qc_out = './scripts/fmriprep/post_preprocessing_checks/qc_sdc-similarity'
 
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(tmp, exist_ok=True)
@@ -52,6 +53,7 @@ df = pd.DataFrame(data, columns=['Type', 'Session', 'Status', 'Count'])
 
 sns.set(style="whitegrid")
 
+# Create Complete plots for FMRIPrep / MRIQC
 for preprocessing_type, group_data in df.groupby('Type'):
     print(preprocessing_type, group_data)
     plt.figure(figsize=(8, 6))
@@ -73,7 +75,8 @@ for preprocessing_type, group_data in df.groupby('Type'):
     plt.close() 
 
 
-# create summary plots
+# Create Summary Plots of Group Derivatives MRIQC
+
 for img_key in plot_metrics.keys():
     pull_cols = plot_metrics[img_key]
     pull_cols = ['bids_name'] + plot_metrics[img_key]
@@ -116,3 +119,90 @@ for img_key in plot_metrics.keys():
     plt.tight_layout()
     plt.savefig(f'{output_dir}/{img_key}_mriqc-plot.png')
     plt.close() 
+
+# summaries peristimulus plots
+if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
+    peristim_df = pd.read_csv(f'{qc_out}/3T_check-peristim.tsv', sep = '\t', 
+                              names=['sub','sess','task','region','peak_tr','peak_mean', 'peak_se']).drop_duplicates(subset='sub')
+    peri_sub_n = len(peristim_df)
+    # make plot
+    sns.set(style="whitegrid")
+    fig, axes = plt.subplots(1, 3, figsize=(15, 10))  # 1 row, 3 columns
+
+    # Define custom y-axis labels for each column
+    y_labels = {
+        'peak_tr': "Peak TR",
+        'peak_mean': "Mean Signal at Peak",
+        'peak_se': "SE Signal at Peak"
+    }
+
+    # columns and colors 
+    columns_of_interest = ['peak_tr', 'peak_mean', 'peak_se']
+    colors = sns.color_palette("Set2", len(columns_of_interest))
+
+    for ax, col, color in zip(axes, y_labels.keys(), colors):
+        # violin plot
+        sns.violinplot(data=peristim_df, y=col, ax=ax, color=color, inner=None, alpha=0.6, cut=0)
+        # strip plot points
+        sns.stripplot(data=peristim_df, y=col, ax=ax, color='gray', jitter=0.5, alpha=0.6)
+        
+        ax.set_ylabel(y_labels[col])  # Use the custom label
+        ax.set_xlabel("col")  
+
+        # expand min/max to avoid weird cut-offs
+        ax.set_ylim(peristim_df[col].min() - 0.5, peristim_df[col].max() + 0.5)
+
+    plt.suptitle(f'Max TR (.720sec) from Peristimulus Plots across N = {peri_sub_n}', fontsize=14)
+    plt.savefig(f'{output_dir}/peristim_distributions.png')
+    plt.close() 
+
+
+# summaries qc-similarity estimates and fmriprep reports
+if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
+    fs_sim_df = pd.read_csv(f'{qc_out}/3T_check-html-similarity.tsv', sep = '\t', 
+                          names=['sub','sess','task','run','event_files', 'sdc_type', 'sim.freesurf_anat', 'sim.anat-bold'])
+    sub_n = len(fs_sim_df.drop_duplicates(subset='sub'))
+    # percent non-resting runs with where events_file == exists
+    task_event_exists = fs_sim_df[fs_sim_df['task'] != 'rest'].assign(
+        event_files_notna=fs_sim_df['event_files'].notna()
+    ).groupby('task')['event_files_notna'].mean() * 100
+
+
+    plt.figure(figsize=(18, 6))
+
+    # Percent of Tasks (not "rest") with Event Files
+    plt.subplot(131)
+    sns.barplot(x=task_event_exists.index, y=task_event_exists.values, palette="Set2")
+    plt.title("Percent of Non-Rest Task Runs w/ Event Files")
+    plt.xlabel('Task')
+    plt.ylabel('% w/ File')
+
+    # Distribution of `sdc_type` by Task
+    plt.subplot(132)
+    sns.countplot(data=fs_sim_df, x='task', hue='sdc_type', palette="Set2")
+    plt.title("Type SDC per Run")
+    plt.xlabel('Task')
+    plt.ylabel('Count')
+
+    # Distribution of `sim.freesurf_anat` and `sim.anat-bold`
+    plt.subplot(133)
+    sns.kdeplot(data=fs_sim_df['sim.freesurf_anat'], label='Dice(Freesurf, Anatmsk)', fill=True, color='b', alpha=0.6)
+    sns.kdeplot(data=fs_sim_df['sim.anat-bold'], label='Dice(Anatmsk,BOLDmsk)', fill=True, color='r', alpha=0.6)
+    plt.title("Distribution of Similarity Fressurfer ~ Native Mask & MNI Anat ~ BOLD masks")
+    plt.xlabel('Value')
+    plt.ylabel('Density')
+    plt.legend(loc='upper center', ncol=2)
+    plt.tight_layout()
+    plt.savefig(f'{output_dir}/qc-similarity_distributions.png')
+    plt.close() 
+
+    # Counts across runs/tasks/sdc type
+
+    task_run_summary = fs_sim_df.groupby(['task', 'run', 'sdc_type']).size().reset_index(name='count')
+    plt.figure(figsize=(10, 6))
+    sns.heatmap(task_run_summary.pivot_table(index=['task', 'run'], columns='sdc_type', values='count', fill_value=0), annot=True, cmap='Blues')
+    plt.title('Task Run Counts')
+    plt.xlabel('SDC Type')
+    plt.ylabel('Task ~ Run')
+    plt.savefig(f'{output_dir}/fmriprep_task-run-sdc_counts.png')
+    plt.close()

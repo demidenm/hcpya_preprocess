@@ -69,6 +69,9 @@ Low-cost manual quality control checks evaluate fMRIPrep results and the alignme
   <img src="./imgs/hcp_brainsim.png" alt="Overlap estimate" />
 </div>
 
+
+### Check Event-locked BOLD Timeseries
+
 **Alignment of BOLD and Events**
 Peristimulus plots are generated using `masked_timeseries` from the [PyReliMRI package](https://pyrelimri.readthedocs.io/en/latest/timeseries_extract.html). The script [create_peristim.py](./scripts/fmriprep/post_preprocessing_checks/qc_sdc-similarity/create_peristim.py) performs the following:
 

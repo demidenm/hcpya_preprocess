@@ -1,6 +1,6 @@
 # ABCD-BIDS: FMRIPrep Preprocessing Pipeline
 
-This code is to rerun fMRIPrep preprocessing. The general overview:
+This code is to run fMRIPrep preprocessing. The general overview:
 
 - template.fmriprep
     - This is the template used to copy data to a tmp area to preprocess locally. It also includes the singularity run for fMRIPrep + the sync to s3
