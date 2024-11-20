@@ -63,10 +63,10 @@ out_df = masked_timeseries.extract_postcue_trs_for_conditions(events_data=eventp
                                                               trial_name=trialcol, bold_tr=scan_tr, bold_vols=volumes, time_series=timeseries, 
                                                               conditions=conditioncol, tr_delay=tr_delay, list_trpaths=sub_in)
 
-masked_timeseries.plot_responses(df=out_df, tr=scan_tr, delay=tr_delay, style= 'white', save_path = f'{savedir}/{sub}_ses-{ses}_task-{task}_plot-peristim.png', show_plot=False, ylim = (-2, 2))
+masked_timeseries.plot_responses(df=out_df, tr=scan_tr, delay=tr_delay, style= 'white', save_path = f'{savedir}/sub-{sub}_ses-{ses}_task-{task}_plot-peristim.png', show_plot=False, ylim = (-2, 2))
 
 # save df and extract values
-out_df.to_csv(f'{savedir}/{sub}_ses-{ses}_task-{task}_timeseries-roi.tsv', sep = '\t')
+out_df.to_csv(f'{savedir}/sub-{sub}_ses-{ses}_task-{task}_timeseries-roi.tsv', sep = '\t')
 summary_df = out_df.groupby(['TR', 'Cue']).agg(
     Mean_Signal=('Mean_Signal', 'mean'),
     SE_Signal=('Mean_Signal', lambda x: x.std() / (len(x)**0.5))
