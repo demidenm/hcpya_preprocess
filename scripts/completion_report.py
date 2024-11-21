@@ -10,7 +10,7 @@ input_dir = './'
 tmp = './tmp'
 output_dir = '../imgs'
 grp_fold = './mriqc/group_mriqc/out_group'
-qc_out = './scripts/fmriprep/post_preprocessing_checks/qc_sdc-similarity'
+qc_out = './fmriprep/post_preprocessing_checks/qc_sdc-similarity'
 
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(tmp, exist_ok=True)
@@ -78,6 +78,7 @@ for preprocessing_type, group_data in df.groupby('Type'):
 # Create Summary Plots of Group Derivatives MRIQC
 
 for img_key in plot_metrics.keys():
+    print("Making Group Deriv MRIQC Plots")
     pull_cols = plot_metrics[img_key]
     pull_cols = ['bids_name'] + plot_metrics[img_key]
     df = pd.read_csv(f'{grp_fold}/group_{img_key}.tsv', sep='\t', usecols=pull_cols)
@@ -122,6 +123,7 @@ for img_key in plot_metrics.keys():
 
 # summaries peristimulus plots
 if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
+    print("Making Peristimulus Summary Plots")
     peristim_df = pd.read_csv(f'{qc_out}/3T_check-peristim.tsv', sep = '\t', 
                               names=['sub','sess','task','region','peak_tr','peak_mean', 'peak_se']).drop_duplicates(subset='sub')
     peri_sub_n = len(peristim_df)
@@ -156,10 +158,12 @@ if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
     plt.suptitle(f'Max TR (.720sec) from Peristimulus Plots across N = {peri_sub_n}', fontsize=14)
     plt.savefig(f'{output_dir}/peristim_distributions.png')
     plt.close() 
-
+else:
+    print(f'\tFILE: \n{qc_out}/3T_check-peristim.tsv doesnt exist')
 
 # summaries qc-similarity estimates and fmriprep reports
-if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
+if os.path.exists(f'{qc_out}/3T_check-html-similarity.tsv'):
+    print("Making Similarity Summary Plots")
     fs_sim_df = pd.read_csv(f'{qc_out}/3T_check-html-similarity.tsv', sep = '\t', 
                           names=['sub','sess','task','run','event_files', 'sdc_type', 'sim.freesurf_anat', 'sim.anat-bold'])
     sub_n = len(fs_sim_df.drop_duplicates(subset='sub'))
@@ -176,14 +180,14 @@ if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
     sns.barplot(x=task_event_exists.index, y=task_event_exists.values, palette="Set2")
     plt.title(f'Percent of Non-Rest Task Runs w/ Event Files \n across N = {sub_n} subjects')
     plt.xlabel('')
-    plt.xticks(rotation=45, ha='right')
+    plt.xticks(rotation=45, ha='center')
     plt.ylabel('% w/ File')
 
     # Distribution of `sdc_type` by Task
     plt.subplot(132)
     sns.countplot(data=fs_sim_df, x='task', hue='sdc_type', palette="Set2")
     plt.title(f'Type SDC \n per Run')
-    plt.xticks(rotation=45, ha='right')
+    plt.xticks(rotation=45, ha='center')
     plt.xlabel('')
     plt.ylabel('Count')
 
@@ -214,3 +218,5 @@ if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
     plt.ylabel('Task ~ Run')
     plt.savefig(f'{output_dir}/fmriprep_task-run-sdc_counts.png')
     plt.close()
+else:
+    print(f'\t FILE: {qc_out}/3T_check-html-similarity.tsv doesnt exist')
