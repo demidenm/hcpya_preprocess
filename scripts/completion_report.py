@@ -147,11 +147,12 @@ if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
         sns.stripplot(data=peristim_df, y=col, ax=ax, color='gray', jitter=0.5, alpha=0.6)
         
         ax.set_ylabel(y_labels[col])  # Use the custom label
-        ax.set_xlabel("col")  
+        ax.set_xlabel("")  
 
         # expand min/max to avoid weird cut-offs
         ax.set_ylim(peristim_df[col].min() - 0.5, peristim_df[col].max() + 0.5)
 
+    plt.subplots_adjust(wspace=0.5)  # Adjust horizontal spacing between plots
     plt.suptitle(f'Max TR (.720sec) from Peristimulus Plots across N = {peri_sub_n}', fontsize=14)
     plt.savefig(f'{output_dir}/peristim_distributions.png')
     plt.close() 
