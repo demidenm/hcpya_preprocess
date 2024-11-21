@@ -31,3 +31,27 @@ singularity run --cleanenv \
     -vv \
     -w /wd
 ```
+
+## fMRIPrep Automated QC
+
+Below are some summaries on the fMRIPrep'd results.
+
+### Counts: Runs, Task, SDC
+
+The HCP dataset collections seven separate task and resting state BOLD. The tasks include working memory, emotion, gambling, language, motor, relational and social tasks. Each task has up to two fMRI BOLD runs and the resting state data have up to XX fMRI BOLD runs. fMRIPrep generates an HTML the lists the 1) task name, 2) the run, and 3) the type of signal distortion correction (SDC) that is applied. The counts are plotted across the preprocessed subjects' reports.
+
+![Subject counts for fmriprep](../../imgs/fmriprep_task-run-sdc_counts.png)
+
+
+### Event Files, SDC Runs, Dice Similarity
+
+The below figure figure summarizes the percent of non-rest task runs that have an associate event file (*_events.tsv), the count of SDC correction across tasks, and the distribution of the similarity (Dice coefficient) for 1) the fMRIPrep produced Freesufer brain-by-native anatomy mask and 2) the MNI anatomy mask-by-MNI BOLD mask (per run and task)
+
+![Similarity distributions](../../imgs/qc-similarity_distributions.png)
+
+
+### Peristimulus Results
+
+The below figure summarizes the maximum TR from the peristimulus plots. The maximum TR (.720sec) is the max(value) for the first 15 TRs (10.8sec). The histogram covers the Peak TR value, Mean Signal at the Peak TR and the Standard Eroor at the Peak RT.
+
+![Peristimulus distributions](../../imgs//peristim_distributions.png)
