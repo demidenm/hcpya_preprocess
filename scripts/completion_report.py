@@ -174,14 +174,16 @@ if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
     plt.subplot(131)
     sns.barplot(x=task_event_exists.index, y=task_event_exists.values, palette="Set2")
     plt.title(f'Percent of Non-Rest Task Runs w/ Event Files \n across N = {sub_n} subjects')
-    plt.xlabel('Task')
+    plt.xlabel('')
+    plt.xticks(rotation=45, ha='right')
     plt.ylabel('% w/ File')
 
     # Distribution of `sdc_type` by Task
     plt.subplot(132)
     sns.countplot(data=fs_sim_df, x='task', hue='sdc_type', palette="Set2")
-    plt.title('Type SDC \n per Run')
-    plt.xlabel('Task')
+    plt.title(f'Type SDC \n per Run')
+    plt.xticks(rotation=45, ha='right')
+    plt.xlabel('')
     plt.ylabel('Count')
 
     # Distribution of `sim.freesurf_anat` and `sim.anat-bold`
@@ -191,7 +193,7 @@ if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
     plt.subplot(133)
     sns.kdeplot(data=unique_sub_df['sim.freesurf_anat'], label='Dice(Freesurf, Anatmsk)', fill=True, color='b', alpha=0.6)
     sns.kdeplot(data=fs_sim_df['sim.anat-bold'], label='Dice(Anatmsk,BOLDmsk)', fill=True, color='r', alpha=0.6)
-    plt.title('Distribution: Similarity Fressurfer ~ Native Mask \n & MNI Anat ~ BOLD masks')
+    plt.title(f'Distribution: Similarity Fressurfer ~ Native Mask \n & MNI Anat ~ BOLD masks')
     plt.xlabel('Value')
     plt.ylabel('Density')
     plt.legend(loc='upper center', ncol=2)
@@ -203,7 +205,9 @@ if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
 
     task_run_summary = fs_sim_df.groupby(['task', 'run', 'sdc_type']).size().reset_index(name='count')
     plt.figure(figsize=(10, 6))
-    sns.heatmap(task_run_summary.pivot_table(index=['task', 'run'], columns='sdc_type', values='count', fill_value=0), annot=True, cmap='Blues')
+    sns.heatmap(task_run_summary.pivot_table(index=['task', 'run'], columns='sdc_type', values='count', fill_value=0), 
+                annot=True, cmap='Blues',
+                fmt='d')
     plt.title(f'Task Run Counts across \n N = {sub_n} subjects')
     plt.xlabel('SDC Type')
     plt.ylabel('Task ~ Run')
