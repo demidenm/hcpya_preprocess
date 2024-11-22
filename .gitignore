@@ -12,3 +12,4 @@ grp-text.ipynb
 scripts/fmriprep/tmp/*
 scripts/fmriprep/post_preprocessing_checks/qc_sdc-similarity/run_files.3T
 scripts/fmriprep/post_preprocessing_checks/rerun_altfreesurfer/fsrerun.fmriprep_*
+scripts/xcp_d/run_files.xcpd*

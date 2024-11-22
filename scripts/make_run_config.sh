@@ -12,20 +12,22 @@ if [[ ! -f "$config_file" ]]; then
 fi
 
 # Ask the user to choose between mriqc or fmriprep preprocessing tools
-echo "Please choose either 'mriqc' or 'fmriprep' for preprocessing."
+echo "Please choose either 'mriqc', 'fmriprep' or 'xcp_d' for preprocessing."
 read -r preproc
 
 # Validate user input for preprocessing tool choice
 preproc=$(echo "$preproc" | xargs)  # Trim leading/trailing spaces
 
 if [[ "$preproc" == "mriqc" ]]; then
-    # Load MRIQC specific settings from JSON
-    config=$(jq -r '.mriqc' "$config_file")
+	# Load MRIQC specific settings from JSON
+	config=$(jq -r '.mriqc' "$config_file")
 elif [[ "$preproc" == "fmriprep" ]]; then
-    # Load fMRIPrep specific settings from JSON
-    config=$(jq -r '.fmriprep' "$config_file")
+	# Load fMRIPrep specific settings from JSON
+	config=$(jq -r '.fmriprep' "$config_file")
+elif [[ "$preproc" == "xcp_d" ]] ; then
+	config=$(jq -r '.xcp_d' "${config_file}")
 else
-    echo "Invalid option. Should be 'mriqc' or 'fmriprep'. Provided: '$preproc'. Exiting."
+    echo "Invalid option. Should be 'mriqc', 'fmriprep' or 'xcp_d'. Provided: '$preproc'. Exiting."
     exit 1
 fi
 

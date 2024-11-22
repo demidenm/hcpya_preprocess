@@ -1,0 +1,40 @@
+{
+    "Acknowledgements": "Data used in the post-processed is the fMRIprep v24.0.1 derivatives for the Human Connectome Project (HCP; https://www.humanconnectome.org/).",
+    "Authors": [
+        "Michael I. Demidenko"
+    ],
+    "BIDSVersion": "1.8.0",
+    "DatasetDOI": "NDA Study ID: TBD",
+    "Funding": [
+        "GRANT #1",
+        "GRANT #2"
+    ],
+    "HowToAcknowledge": "This is the XCP-D processed data based on the preprocessed fMRIPrep Input Files",
+    "License": "These derivatives inherit the data usage policies described by the NIMH Data Archive: https://nda.nih.gov/abcd/abcd-citing",
+    "Name": "HCP-YA XCP-D v0.9.0 Derivatives",
+    "ReferencesAndLinks": [
+        "Mehta et al. (2024). XCP-D: A Robust Pipeline for the postprocessing of fMRI data. Imaging Neuroscience. https://doi.org/10.1162/imag_a_00257",
+        "Barch et al. (2013). Function in the Human Connectome: Task-fMRI and individual differences in behavior. NeuroImage. https://doi.org/10.1016/j.neuroimage.2013.05.033"
+    ],
+    "Description": "Post-processed resting-state BOLD data from the Human Connectome Project (HCP). These data have been processed using the XCP-D v0.9.0 pipeline for the enhancement of resting-state fMRI signals.",
+    "Mode": "abcd",
+    "PostprocessingDetails": {
+        "PipelineVersion": "XCP-D v0.9.0",
+        "ButterworthBandpassFilter": {
+            "LowerCutoffFrequencyHz": 0.009
+        },
+        "MotionFilterSettings": {
+            "FilterType": "notch",
+            "StopBandMinBPM": 12,
+            "StopBandMaxBPM": 18,
+            "FilterOrder": "Determined by --motion-filter-order"
+        },
+        "FunctionalConnectivityMeasures": [
+            "Denoised BOLD signals",
+            "Bandpass-filtered data",
+            "Motion-parameter filtering"
+        ]
+    },
+    "IntendedUsage": "These derivatives are intended for analyses of resting-state functional connectivity, including but not limited to seed-based connectivity, graph-theoretic measures, and ICA."
+}
+

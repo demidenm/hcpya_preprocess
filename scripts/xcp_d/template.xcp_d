@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# --- Input Variables: Define paths, IDs, and settings ---
+inp_loc=S3ORNGDR
+xcpd_ver=PREPROC_VR
+subj_id=SUBJECTID
+ses_id=SESID
+data_dir=SCRATCHDIR
+inp_bucket=INBUCKET
+data_bucket=OUTBUCKET
+run_dir=RUNDIR
+log_num=LOGNUM
+singularity=$(which singularity || { echo "Singularity not found. Exiting."; exit 1; })
+singularity_img=SIGINF
+freesurfer_license=FSLICENSE
+fplog_dir="${run_dir}/xcp_d_${ses_id}_logs"
+completed_file="${run_dir}/${ses_id}_completed.tsv"
+failed_file="${run_dir}/${ses_id}_failed.tsv"
+
+# Check if completed/failed_file exists, if not create it
+if [ ! -f "$completed_file" ]; then
+    touch "$completed_file"
+fi
+
+if [ ! -f "$failed_file" ]; then
+    touch "$failed_file"
+fi
+
+# Data Syncing: S3 or NGDR
+fmriprep_dir="${data_dir}/fmriprep_dir/sub-${subj_id}_ses-${ses_id}/"
+
+if [ ! -d "$fmriprep_dir" ]; then
+	mkdir -p "$fmriprep_dir"
+	echo "Created BIDS directory $fmriprep_dir"
+
+	s3cmd sync --recursive "${inp_bucket}/sub-${subj_id}" "$fmriprep_dir"
+
+fi
+
+cp ${run_dir}/dataset_description.json ${fmriprep_dir}
+
+mkdir -p ${data_dir}/processed/${xcpd_ver}/sub-${subj_id}_ses-${ses_id}
+mkdir -p ${data_dir}/work_dir/${xcpd_ver}/sub-${subj_id}_ses-${ses_id}
+
+
+# --- Run XCPD ---- 
+
+singularity run --cleanenv \
+  -B "${fmriprep_dir}:/fmriprep_dir" \
+  -B "${data_dir}/processed/${xcpd_ver}/sub-${subj_id}_ses-${ses_id}:/output_dir" \
+  -B "${data_dir}/work_dir/${xcpd_ver}/sub-${subj_id}_ses-${ses_id}:/wd" \
+  -B "${freesurfer_license}:/opt/freesurfer/license.txt " \
+  "${singularity_img}" \
+  /fmriprep_dir /output_dir participant \
+  --mode abcd \
+  -m \
+  --participant-label ${subj_id} \
+  --task-id rest \
+  --nthreads 8 \
+  --omp-nthreads 5 \
+  --mem-gb 60 \
+  --lower-bpf 0.009 \
+  --motion-filter-type notch --band-stop-min 12 --band-stop-max 18 \
+  --clean-workdir \
+  -vv \
+  -w /wd
+
+# completed time / date
+compdate=$(date)
+
+# Log FMRIPrep Results
+#for log in ${log_num} ; do 
+#	comp=$(cat ${fplog_dir}/*_${log}.out | grep "fMRIPrep finished successfully" | sed -e 's/^[[:space:]]*//' -e 's/[[:punct:]]//g' ) 
+#	
+#	fMRIprep_error_msg=$(cat ${fplog_dir}/*_${log}.err | grep 'Error' | tr -d '\n\t')
+#	
+#	if [ -z "$fMRIprep_error_msg" ]; then
+#    		fMRIprep_error_msg=$(cat ${fplog_dir}/*_${log}.out | grep 'Error' | tr -d '\n\t')
+#	fi
+#	
+#	# dependent on whether failed/successful, print into to file. Remove instance of subject before doing so
+#	if [ "${comp}" == "fMRIPrep finished successfully" ]; then
+#		sed -i "/${subj_id}/d" ${completed_file}
+#		echo -e "${subj_id}\t${ses_id}\tALL\t*_${log}.out\t${compdate}\t${fMRIprep_error_msg}" >> ${completed_file}
+#	else
+#		sed -i "/${subj_id}/d" ${failed_file}
+#		echo -e "${subj_id}\t${ses_id}\tALL\t*_${log}.err\t${compdate}\t${fMRIprep_error_msg}" >> ${failed_file}
+#	fi
+#done
+
+#push processed outputs to bucket: preprocessed info; sourcedata/freesurfer, .html report
+s3cmd sync -F --recursive -v ${data_dir}/processed/${xcpd_ver}/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ ${data_bucket}/derivatives/${xcpd_ver}/ses-${ses_id}/sub-${subj_id}/
+
+# run filemapper
+echo "sync'd ${subj_id} to $data_bucket ${ses_id}"
+echo

@@ -1,9 +1,9 @@
 {
-    "Acknowledgements": "Data used in the preparation of this preprocessed data based on data collected via the Human Connectome Project (HCP; https://www.humanconnectome.org/).",
+    "Acknowledgements": "Data used in the preparation of this preprocessed data is based on data collected via the Human Connectome Project (HCP; https://www.humanconnectome.org/).",
     "Authors": [
         "Michael I. Demidenko",
         "rae McCollumn",
-	"Nicholas E Souter",
+        "Nicholas E Souter",
         "Brenden Tervo-Clemmens"
     ],
     "BIDSVersion": "1.8.0",
@@ -12,12 +12,48 @@
         "GRANT #1",
         "GRANT #2"
     ],
-    "HowToAcknowledge": "This FMRIPrep Preprocessed data are in collaboration with the CDNI BIDS Input Files, handled by Brenden Tervo-Clemmens, rae McCollum, and Nicholas Souter.",
-    "License": "These derivatives inherit the data usage policies describe by the NIMH Data Archive: https://nda.nih.gov/abcd/abcd-citing",
+    "HowToAcknowledge": "This fMRIPrep preprocessed data was prepared in collaboration with the CDNI BIDS Input Files, handled by Brenden Tervo-Clemmens, rae McCollum, and Nicholas Souter.",
+    "License": "These derivatives inherit the data usage policies described by the NIMH Data Archive: https://nda.nih.gov/abcd/abcd-citing",
     "Name": "HCP-YA fMRIPrep v24.0.1 Derivatives",
     "ReferencesAndLinks": [
         "Van Essen et al. (2013). The WU-Minn Human Connectome Project: An Overview. Neuroimage. https://doi.org/10.1016/j.neuroimage.2013.05.041",
-	"Barch et al. (2013). Function in the Human Connectome: Task-fMRI and individual differences in behavior. NeuroImage. https://10.1016/j.neuroimage.2013.05.033"
-
-    ]
+        "Barch et al. (2013). Function in the Human Connectome: Task-fMRI and individual differences in behavior. NeuroImage. https://doi.org/10.1016/j.neuroimage.2013.05.033"
+    ],
+    "Description": "Preprocessed data derived from Human Connectome Project (HCP) datasets using the fMRIPrep v24.0.1 pipeline. These derivatives facilitate analyses of brain connectivity and neural dynamics while maintaining reproducibility and adherence to BIDS specifications.",
+    "Mode": "abcd",
+    "PreprocessingDetails": {
+        "PipelineVersion": "fMRIPrep v24.0.1",
+        "DistortionCorrection": {
+            "Method": "If available, uses fieldmaps for correction. If not, uses fieldmap-less distortion correction via --use-sync-sdc warn",
+            "Behavior": "Warn if unsuccessful"
+        },
+        "FramewiseDisplacementThreshold": 0.5,
+        "OutputSpaces": [
+            "MNI152NLin2009cAsym:res-2"
+        ],
+        "CIFTIOutput": {
+            "Format": "Dense timeseries",
+            "Grayordinates": "91k"
+        }
+    },
+    "ProcessingSettings": {
+        "--use-syn-sdc": {
+            "Description": "Use fieldmap-less distortion correction based on anatomical image",
+            "Behavior": "Warn if unsuccessful"
+        },
+        "--fd-spike-threshold": {
+            "Description": "Threshold for flagging frames as outliers based on framewise displacement",
+            "Value": 0.5
+        },
+        "--output-spaces": {
+            "Description": "Spatial reference spaces for anatomical and functional images",
+            "Value": ["MNI152NLin2009cAsym:res-2"]
+        },
+        "--cifti-output": {
+            "Description": "Output preprocessed BOLD as a CIFTI dense timeseries",
+            "Grayordinates": "91k"
+        }
+    },
+    "IntendedUsage": "These derivatives are intended for analyses of brain connectivity, neural dynamics, and task-free fMRI. Outputs are optimized for spatial normalization, motion correction, and distortion correction using advanced preprocessing techniques."
 }
+
