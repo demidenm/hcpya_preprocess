@@ -1,25 +1,28 @@
-# HCP-Young Adult: MRIQC & FMRIPrep Preprocessing Pipeline
+# HCP-Young Adult: MRIQC & FMRIPrep Preprocessing & XCP-D Post-processing Pipeline
 
 This repository contains the scripts and configurations required for preprocessing fMRI data using **fMRIPrep** and **MRIQC**. The pipeline is for the [Human Connectome Project (HCP) Young Adult (HCP-YA) sample](https://www.humanconnectome.org/#promo-1-content)
 
-As of October 8, 2024, the pipeline uses fMRIPrep [v24.0.1](https://pypi.org/project/fmriprep/24.0.1/) and MRIQC [v23.1.0](https://pypi.org/project/mriqc/23.1.0/)
+As of November 26, 2024, the pipeline uses fMRIPrep [v24.0.1](https://pypi.org/project/fmriprep/24.0.1/), MRIQC [v23.1.0](https://pypi.org/project/mriqc/23.1.0/) & XCP-D [v0.9.0](https://xcp-d.readthedocs.io/en/0.9.0/)
 
 ## Repository Structure
 
 ```bash
 ├── README.md                 # General overview of the project
-└── scripts/                  # Scripts and configurations for data preprocessing
-    ├── config.json           # This is the main configuration to set input/output paths, specs and file names
-    ├── fmriprep/             # [COMING SOON] Scripts to run batch preprocessing base on run files and log into output files
+└── scripts/                  # Scripts and configurations for data processing
+    ├── config.json           # Main configuration to set input/output paths, specs, and filenames
+    ├── fmriprep/             # Scripts for preprocessing fMRI data
     │   ├── README.md         
     │   ├── dataset_description.json
     │   ├── misc/             # Miscellaneous scripts (e.g., sbatch scripts, data checks)
-    │   ├── post_preprocessing_checks/  # Scripts to validate validating fmriprep outputs and check subs on s3
-    │   ├── rerun_altfreesurfer/        # When freesurfer fails (based on checks and others) rerun freesufer here
-    ├── mriqc/                # Scripts to run batch preprocessing base on run files and log into output files
+    │   ├── post_preprocessing_checks/  # Scripts to validate fMRIPrep outputs and check subs on S3
+    │   ├── rerun_altfreesurfer/        # Scripts to rerun FreeSurfer when failures occur
+    ├── mriqc/                # Scripts for MRI quality control
     │   ├── README.md         
     │   ├── group_mriqc/      # Group-level MRIQC results
-    │   └── review_results/   # reviewing results / completion on s3
+    │   └── review_results/   # Reviewing results/completion on S3
+    ├── xcpd/                 # Scripts for postprocessing fMRI data
+        ├── README.md
+        ├── dataset_description.json
 ```
 
 ## Key Components
@@ -32,26 +35,37 @@ As of October 8, 2024, the pipeline uses fMRIPrep [v24.0.1](https://pypi.org/pro
 - **Quality Control**: Performs individual and group-level quality control checks for MRI scans. Outputs QC metrics in `.tsv` format for modalities such as T1w, T2w, and BOLD.
 - **Error Handling**: Includes rerun scripts and mechanisms for managing failed processes.
 
+### XCP-D
+- **Postprocessing Pipeline**: Uses **XCP-D v0.9.0** to generate postprocessed derivatives for resting-state fMRI, including denoised BOLD signals, bandpass-filtered data, and motion-parameter filtering.
+
 ## Usage
 
 1. Update the configuration file (`config.json`) with your specific filenames, sessions, folders, and bucket paths.
-2. Submit preprocessing jobs using `sbatch` scripts located in the `fmriprep/` or `mriqc/` directories (e.g., `./submit_*`).
-3. Review outputs using the post-processing and QC scripts available in `post_preprocessing_checks/` and `review_results/`.
+2. Submit preprocessing jobs using `sbatch` scripts located in the `fmriprep/`, `mriqc/` or `xcp_d/` directories (e.g., `./submit_*`).
+3. Review outputs using the post-processing and QC scripts available in `post_preprocessing_checks/` and `review_results/` for fMRIPrep.
 
 This codebase is continuously refined for more efficient submission and QA processes.
 
 ## Subject Progress
-
-### fMRIPrep
-The following chart illustrates the completion rate of HCP-YA subjects for fMRIPrep. Detailed reports and descriptions are available in the [fMRI folder](./scripts/fmriprep/).
-
-![Subject counts for fmriprep](./imgs/fmriprep_subject_counts.png)
 
 ### MRIQC
 The completion rate of HCP-YA subjects for MRIQC is shown below. Detailed reports and descriptions are available in the [MRIQC folder](./scripts/mriqc/).
 
 <div style="text-align: center;">
   <img src="./imgs/mriqc_subject_counts.png" alt="Subject counts for MRIQC" />
+</div>
+
+### fMRIPrep
+The following chart illustrates the completion rate of HCP-YA subjects for fMRIPrep. Detailed reports and descriptions are available in the [fMRI folder](./scripts/fmriprep/).
+
+![Subject counts for fmriprep](./imgs/fmriprep_subject_counts.png)
+
+
+### XCP-D
+The completion rate of HCP-YA subjects for XCP-D is shown below. Detailed reports and descriptions are available in the [XCP-D folder](./scripts/xcp_d/).
+
+<div style="text-align: center;">
+  <img src="./imgs/xcp_d_subject_counts.png" alt="Subject counts for XCP-D" />
 </div>
 
 ## Subject QC

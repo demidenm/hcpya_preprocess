@@ -22,7 +22,7 @@ plot_metrics = {
 }
 
 # specify preproc types & data dict
-folders = ['mriqc', 'fmriprep']
+folders = ['mriqc', 'fmriprep','xcp_d']
 
 subject_counts = {}
 
@@ -53,11 +53,13 @@ df = pd.DataFrame(data, columns=['Type', 'Session', 'Status', 'Count'])
 
 sns.set(style="whitegrid")
 
-# Create Complete plots for FMRIPrep / MRIQC
+# Create Complete plots for FMRIPrep / MRIQC / XCP-D
 for preprocessing_type, group_data in df.groupby('Type'):
     print(preprocessing_type, group_data)
+    group_data['Status'] = pd.Categorical(group_data['Status'], categories=["completed", "failed"], ordered=True)
+    
     plt.figure(figsize=(8, 6))
-    ax = sns.barplot(x='Status', y='Count', hue='Session', data=group_data, palette='Set3')
+    ax = sns.barplot(x='Status', y='Count', hue='Session', data=group_data, palette='tab10')
     
     plt.title(preprocessing_type)
     plt.xlabel('Completion Status')
@@ -120,6 +122,7 @@ for img_key in plot_metrics.keys():
     plt.tight_layout()
     plt.savefig(f'{output_dir}/{img_key}_mriqc-plot.png')
     plt.close() 
+
 
 # summaries peristimulus plots
 if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
