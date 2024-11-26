@@ -32,8 +32,7 @@ fmriprep_dir="${data_dir}/fmriprep_dir/sub-${subj_id}_ses-${ses_id}/"
 if [ ! -d "$fmriprep_dir" ]; then
 	mkdir -p "$fmriprep_dir"
 	echo "Created BIDS directory $fmriprep_dir"
-
-	s3cmd sync --recursive "${inp_bucket}/sub-${subj_id}" "$fmriprep_dir"
+	s3cmd sync --recursive "${inp_bucket}/sub-${subj_id}" "$fmriprep_dir" --exclude="*{WM,emotion,language,motor,relational,social}*"
 
 fi
 
@@ -57,8 +56,9 @@ singularity run --cleanenv \
   --participant-label ${subj_id} \
   --task-id rest \
   --nthreads 8 \
-  --omp-nthreads 5 \
-  --mem-gb 60 \
+  --omp-nthreads 3 \
+  --mem-gb 100 \
+  --min-time 0 \
   --lower-bpf 0.009 \
   --motion-filter-type notch --band-stop-min 12 --band-stop-max 18 \
   --clean-workdir \
@@ -68,25 +68,25 @@ singularity run --cleanenv \
 # completed time / date
 compdate=$(date)
 
-# Log FMRIPrep Results
-#for log in ${log_num} ; do 
-#	comp=$(cat ${fplog_dir}/*_${log}.out | grep "fMRIPrep finished successfully" | sed -e 's/^[[:space:]]*//' -e 's/[[:punct:]]//g' ) 
-#	
-#	fMRIprep_error_msg=$(cat ${fplog_dir}/*_${log}.err | grep 'Error' | tr -d '\n\t')
-#	
-#	if [ -z "$fMRIprep_error_msg" ]; then
-#    		fMRIprep_error_msg=$(cat ${fplog_dir}/*_${log}.out | grep 'Error' | tr -d '\n\t')
-#	fi
-#	
-#	# dependent on whether failed/successful, print into to file. Remove instance of subject before doing so
-#	if [ "${comp}" == "fMRIPrep finished successfully" ]; then
-#		sed -i "/${subj_id}/d" ${completed_file}
-#		echo -e "${subj_id}\t${ses_id}\tALL\t*_${log}.out\t${compdate}\t${fMRIprep_error_msg}" >> ${completed_file}
-#	else
-#		sed -i "/${subj_id}/d" ${failed_file}
-#		echo -e "${subj_id}\t${ses_id}\tALL\t*_${log}.err\t${compdate}\t${fMRIprep_error_msg}" >> ${failed_file}
-#	fi
-#done
+# Log XCP Results
+for log in ${log_num} ; do 
+	comp=$(cat ${fplog_dir}/*_${log}.out | grep "XCP-D finished successfully" | sed -e 's/^[[:space:]]*//' -e 's/[[:punct:]]//g' ) 
+	
+        run_error_msg=$(cat ${fplog_dir}/*_${log}.err | grep 'Error' | tr -d '\n\t')
+	
+	if [ -z "$run_error_msg" ]; then
+    		error_msg=$(cat ${fplog_dir}/*_${log}.out | grep 'Error' | tr -d '\n\t')
+	fi
+	
+	# dependent on whether failed/successful, print into to file. Remove instance of subject before doing so
+	if [ "${comp}" == "XCPD finished successfully" ]; then
+		sed -i "/${subj_id}/d" ${completed_file}
+		echo -e "${subj_id}\t${ses_id}\trest\t*_${log}.out\t${compdate}\t${error_msg}" >> ${completed_file}
+	else
+		sed -i "/${subj_id}/d" ${failed_file}
+		echo -e "${subj_id}\t${ses_id}\trest\t*_${log}.err\t${compdate}\t${error_msg}" >> ${failed_file}
+	fi
+done
 
 #push processed outputs to bucket: preprocessed info; sourcedata/freesurfer, .html report
 s3cmd sync -F --recursive -v ${data_dir}/processed/${xcpd_ver}/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ ${data_bucket}/derivatives/${xcpd_ver}/ses-${ses_id}/sub-${subj_id}/

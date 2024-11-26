@@ -27,7 +27,9 @@
             "FilterType": "notch",
             "StopBandMinBPM": 12,
             "StopBandMaxBPM": 18,
-            "FilterOrder": "Determined by --motion-filter-order"
+            "FilterOrder": "Determined by --motion-filter-order",
+            "MinTime": "Post-scrubbing threshold (--min-time) is disabled by setting to 0"
+
         },
         "FunctionalConnectivityMeasures": [
             "Denoised BOLD signals",
