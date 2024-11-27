@@ -31,6 +31,14 @@
             "MinTime": "Post-scrubbing threshold (--min-time) is disabled by setting to 0"
 
         },
+        "Parcellations": {
+            "Parcel 1": "4S1056Parcels: Shaefer 1000 + 56subcor/cerebellar (https://github.com/PennLINC/AtlasPack/blob/main/atlas-4S1056Parcels_dseg.tsv; https://doi.org /10.1093/cercor/bhx179)",
+            "Parcel 2": "Glasser: Glasser functional atlas (https://www.nature.com/articles/nature18933)",
+            "Parcel 3": "Gordon: Gordon functional atlas (https://academic.oup.com/cercor/article/26/1/288/2367115) ",
+            "Parcel 4": "HCP Thalmic atlas (https://doi.org/10.1038/sdata .2018.270)",
+            "Note": "Per Doc: all atlases have been harmonized with QSIPrep (Cieslak etal., 2021) and ASLPrep (Adebimpe et al., 2022) to facilitate multi-modal network analyses"
+
+        },
         "FunctionalConnectivityMeasures": [
             "Denoised BOLD signals",
             "Bandpass-filtered data",

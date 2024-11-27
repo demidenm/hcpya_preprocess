@@ -34,7 +34,8 @@ if [ ! -d "$fmriprep_dir" ]; then
 	echo "Created BIDS directory $fmriprep_dir"
 	s3cmd sync --recursive \
                    --exclude="*figures*" \
-	           --exclude="*WM*" \
+                   --exclude="*gambling*" \
+	                 --exclude="*WM*" \
                    --exclude="*emotion*" \
                    --exclude="*language*" \
                    --exclude="*motor*" \

@@ -40,6 +40,53 @@ singularity run --cleanenv \
 
 ```
 
+## XCP-D Output files
+
+As described in [Mehta et al., 2024](https://doi.org/10.1162/imag_a_00257), XCP-D generates several files PER atlas.
+
+### Functional Outputs Brief Notes
+
+*Connectivity matrices for functional data:* "XCP-D extracts voxel-wise timeseries from the censored, denoised BOLD timeseries and outputs parcellated timeseries and correlation matrices for a variety of atlases bundled in the software." (pg. 14)
+
+- <source_entities>_space–<label>_ seg–<label>_stat–pearsoncorrelation_relmat.tsv
+- <source_entities>_space–fsLR_seg–<label>_den–91k_stat–pearsoncorrelation_relmat.tsv
+- <source_entities>_space–fsLR_seg–<label>_den–91k_statpearsoncorrelation_boldmap.pconn.nii
+
+*Mean timeseries:* "Before functional connectivity is estimated, any timeseries of all zeros (indicating voxels/vertices in the atlas that are not covered in the BOLD data) are replaced with NaNs, so that the mean timeseries from each parcel reflects the average of only covered voxels/vertices. The coverage threshold (with a default value of 0.5 or 50% coverage) applies to the warped versions of the atlasestherefore, if the normalization step removes a parcel, that parcel will contain NaNs in the parcellated timeseries." (pg 14)
+
+- <source_entities>_space–<label>_ seg–<label>_stat–mean_timeseries.tsv 
+- <source_entities>_space–fsLR_seg–<label>_den–91k_tstat–mean_timeseries.tsv 
+- <source_entities>_space–fsLR_seg–<label>_den–91k_stat–mean_timeseries.ptseries.nii
+
+*Outlier corrected BOLD file*: "After optional despiking, the BOLD data and confounds are fed into the interpolation workflow, in which highmotion outlier volumes are replaced with interpolated data.[...] These full-length timeseries can be leveraged for quality control to examine consistency in total run length across participants and to examine consistency of censored frames and artifacts in the Executive Summaries." (pg 13-14)
+- <source_entities>_space–<label>_desc–interpolated_bold.nii.gz 
+- <source_entities>_space–fsLR_den–91k_desc–interpolated_bold.dtseries.nii
+
+*ReHO* and *ALFF* outputs
+- ReHO: "Regional Homogeneity (ReHo) is a measure of local temporal uniformity in the BOLD signal computed at each voxel of the processed image. Greater ReHo values correspond to greater synchrony among BOLD activity patterns measured in a local neighborhood of voxels (Zang etal., 2004). ReHo is calculated as the coefficient of concordance among all voxels in a sphere centered on the target voxel (Zuo etal., 2013)... ReHo is performed on the denoised BOLD file, and the output is written out directly to the XCP-D derivatives folder." (pg 15)
+    - ./func/<source_entities>_space–<label>_seg–<label>_stat–reho_bold.tsv 
+    - ./func/<source_entities>_space–fsLR_seg–<label>_stat–reho_bold.tsv
+- ALFF: "amplitude of low-frequency fluctuations (ALFF)also called “fluctuation amplitude”—is a measure of regional intensity of BOLD signal fluctuation. Regional Homogeneity (ReHo) is a measure of local temporal uniformity in the BOLD signal computed at each voxel of the processed image. Greater ReHo values correspond to greater synchrony among BOLD activity patterns measured in a local neighborhood of voxels (Zang etal., 2004). ReHo is calculated as the coefficient of concordance among all voxels in a sphere centered on the target voxel (Zuo etal., 2013)... calculated on the denoised BOLD file and its output [is] smoothed (`_desc-smooth_`). ALFF is only calculated if band-pass filtering is applied. ALFF is computed by transforming the processed BOLD timeseries to the frequency domain" (pg. 15)
+    - ./func/<source_entities>_space–<label>_ stat–alff_boldmap.nii.gz
+    - ./func/<source_entities>_space–fsLR_den–91k_stat–alff_boldmap.dscalar.nii
+    - ./func/<source_entities>_space–<label>_stat–alff_desc–smooth_boldmap.nii.gz
+    - ./func/<source_entities>_space–fsLR_den–91k_stat– alff_desc–smooth_boldmap.dscalar.nii
+    - ./func/<source_entities>_space–<source_entities>_space–<label>_seg–<label>_stat–alff_bold.tsv
+    - ./func/<source_entities>_space–fsLR_seg–<label>_stat–alff_bold.tsv
+
+### Anatomical outputs
+ 
+*Sulcal depth/curvature and Cortical Thickness: "CP-D will parcellate morphometric surface files—including cortical thickness, depth, and curvaturegenerated in pre-processing by Freesurfer (Fischl, 2012), sMRIPrep (Esteban et al., 2020), and/or HCP (Glasser etal., 2013) pipelines. XCP-D parcellates these morphometric files using the same atlases that are used for creating functional connectivity matrices as well as other surface features like ALFF and ReHo. This functionality facilitates analyses of both fMRI and structural imaging features when data are processed using XCP-D." (pg. 16)
+- Depth
+    - ./anat/<source_entities>_space–fsLR_ den–32k_hemi–<L|R>_sulc.shape.gii
+    - ./anat/<source_entities>_space–fsLR_ seg–<label>_den–32k_stat–mean_desc–sulc_morph.tsv
+- Curvature 
+    - ./anat/<source_entities>_space–fsLR_ den–32k_hemi–<L|R>_curv.shape.gii
+    - ./anat/<source_entities>_space–fsLR_seg–<label>_den–32k_stat–mean_desc–curv_morph.tsv
+- Cortical thickness 
+    - ./anat/<source_entities>_space–fsLR_ den–32k_hemi–<L|R>_thickness.shape.gii
+    - ./anat/<source_entities>_space–fsLR_seg–<label>_den–32k_stat–mean_desc–thickness_morph.tsv
+    
 ## XCP-D Automated QC
 
 TBD
