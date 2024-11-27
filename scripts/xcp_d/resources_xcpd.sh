@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=100GB
 #SBATCH --tmp=250gb
-#SBATCH -t 05:00:00
+#SBATCH -t 03:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=mdemiden@umn.edu
 #SBATCH -p msismall,agsmall

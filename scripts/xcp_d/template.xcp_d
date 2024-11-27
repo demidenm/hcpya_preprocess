@@ -32,7 +32,14 @@ fmriprep_dir="${data_dir}/fmriprep_dir/sub-${subj_id}_ses-${ses_id}/"
 if [ ! -d "$fmriprep_dir" ]; then
 	mkdir -p "$fmriprep_dir"
 	echo "Created BIDS directory $fmriprep_dir"
-	s3cmd sync --recursive "${inp_bucket}/sub-${subj_id}" "$fmriprep_dir" --exclude="*{WM,emotion,language,motor,relational,social}*"
+	s3cmd sync --recursive \
+                   --exclude="*figures*" \
+	           --exclude="*WM*" \
+                   --exclude="*emotion*" \
+                   --exclude="*language*" \
+                   --exclude="*motor*" \
+                   --exclude="*relational*" \
+                   --exclude="*social*" "${inp_bucket}/sub-${subj_id}" "$fmriprep_dir"
 
 fi
 
@@ -61,6 +68,7 @@ singularity run --cleanenv \
   --min-time 0 \
   --lower-bpf 0.009 \
   --motion-filter-type notch --band-stop-min 12 --band-stop-max 18 \
+  --atlases 4S1056Parcels Glasser Gordon HCP \
   --clean-workdir \
   -vv \
   -w /wd
