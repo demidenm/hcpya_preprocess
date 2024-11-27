@@ -177,7 +177,10 @@ if os.path.exists(f'{qc_out}/3T_check-html-similarity.tsv'):
     print("Making Similarity Summary Plots")
     fs_sim_df = pd.read_csv(f'{qc_out}/3T_check-html-similarity.tsv', sep = '\t', 
                           names=['sub','sess','task','run','event_files', 'sdc_type', 'sim.freesurf_anat', 'sim.anat-bold'])
+    
+    fs_sim_df = fs_sim_df = fs_sim_df.drop_duplicates(subset=['sub', 'task', 'run', 'sdc_type', 'event_files', 'sdc_type', 'sim.freesurf_anat', 'sim.anat-bold'])
     sub_n = len(fs_sim_df.drop_duplicates(subset='sub'))
+    
     # percent non-resting runs with where events_file == exists
     task_event_exists = fs_sim_df[fs_sim_df['task'] != 'rest'].assign(
         event_files_notna=fs_sim_df['event_files'].notna()
