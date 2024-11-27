@@ -27,15 +27,23 @@ folders = ['mriqc', 'fmriprep','xcp_d']
 subject_counts = {}
 
 for preproc_type in folders:
+    print(f"Working on {preproc_type}")
+
     subject_counts[preproc_type] = {}
-    folder = os.path.join(input_dir, preproc_type)    
+    folder = os.path.join(input_dir, preproc_type)
     if os.path.exists(folder):
-        # each .tsv file in the preproc folders
+        # Each .tsv file in the preproc folders
         for filename in os.listdir(folder):
             if filename.endswith('.tsv'):
                 session, status = filename.split('_')[:2]
                 filepath = os.path.join(folder, filename)
-                # create tmp for first sub column to avoid parsing errors
+
+                # Check if the file is empty
+                if os.path.getsize(filepath) == 0:
+                    print(f"Skipping empty file: {filename}")
+                    continue
+
+                # Create tmp for first sub column to avoid parsing errors
                 tmp_file = f'{tmp}/subs_{preproc_type}_{session}{status}'
                 subprocess.run(f"awk '{{ print $1 }}' {filepath} > {tmp_file}", shell=True, check=True)
                 subj_count = len(pd.read_csv(tmp_file, header=None)[0].unique())
@@ -67,15 +75,15 @@ for preprocessing_type, group_data in df.groupby('Type'):
     
     # add labels to top
     for p in ax.patches:
-        ax.annotate(f'{int(p.get_height())}', 
-                    (p.get_x() + p.get_width() / 2., p.get_height()), 
-                    ha='center', va='bottom', 
-                    fontsize=10, color='black', 
-                    xytext=(0, 5), 
-                    textcoords='offset points')
+        if not pd.isna(p.get_height()):  # Skip NaN values
+            ax.annotate(f'{int(p.get_height())}', 
+                        (p.get_x() + p.get_width() / 2., p.get_height()), 
+                        ha='center', va='bottom', 
+                        fontsize=10, color='black', 
+                        xytext=(0, 5), 
+                        textcoords='offset points')
     plt.savefig(f'{output_dir}/{preprocessing_type}_subject_counts.png')
-    plt.close() 
-
+    plt.close()
 
 # Create Summary Plots of Group Derivatives MRIQC
 
