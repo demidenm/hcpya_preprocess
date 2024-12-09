@@ -390,5 +390,5 @@ else:
         axes[i].set_title(title_text, fontsize=9, color='black', backgroundcolor='white', alpha = 1)
         axes[-1].axis('off')
 
-        plt.savefig(f'{output_dir}/brain_corthick-rois.png')
-        plt.close()
+    plt.savefig(f'{output_dir}/brain_corthick-rois.png')
+    plt.close()
