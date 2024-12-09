@@ -129,7 +129,9 @@ try:
         cb_bold = pd.read_csv(f'{input_dir}/sub-{sub_id}/ses-3T/func/sub-{sub_id}_ses-3T_task-rest_space-fsLR_seg-{parcel_name}_stat-mean_timeseries.tsv', sep='\t')
         pear_corr = 'exists'
     else:
-        cb_bold = pd.read_csv(f'{input_dir}/sub-{sub_id}/ses-3T/func/sub-{sub_id}_ses-3T_task-rest_dir-RL_run-1_space-fsLR_seg-{parcel_name}_stat-mean_timeseries.tsv', sep = '\t')
+        cb_bold = pd.read_csv(
+            glob(f'{input_dir}/sub-{sub_id}/ses-3T/func/sub-{sub_id}_ses-3T_task-rest_dir-RL_run-*_space-fsLR_seg-{parcel_name}_stat-mean_timeseries.tsv')[0], 
+            sep = '\t')
         pear_corr = 'none'
 except:
     cb_bold = None
