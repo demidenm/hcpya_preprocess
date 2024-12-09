@@ -336,7 +336,7 @@ if os.path.exists(f'{xcpd_out}/3T_combined-anatfiles-check.tsv'):
 
     # Plot 2: XCP-P Pearson Corr relmat.tsv exists percentage
     sns.barplot(x=exists_percentage.index, y=exists_percentage, ax=ax1, palette='Blues')
-    ax1.set_title(f'Subject n = {n_subs} \n {np.round(exists_percentage.iloc[-1],1)}% *_realmat.tsv exits')
+    ax1.set_title(f'Subject n = {n_subs} \n {np.round(exists_percentage.iloc[0],1)}% *_realmat.tsv exits')
     ax1.set_ylabel('%')
     
     
