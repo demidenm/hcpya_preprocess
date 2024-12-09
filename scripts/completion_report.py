@@ -305,7 +305,7 @@ if os.path.exists(f'{xcpd_out}/3T_combined-network.tsv.tsv'):
         fig.delaxes(axes[j])
 
     
-    plt.savefig(f'{output_dir}/xcpd_{unique_networks}-network-summaries.png')
+    plt.savefig(f'{output_dir}/xcpd_{len(unique_networks)}-network-summaries.png')
     plt.close()
 
 else:
@@ -314,7 +314,7 @@ else:
 
 if os.path.exists(f'{xcpd_out}/3T_combined-anatfiles-check.tsv'):
     print("Making XCP-D Counts & Freesurfer Plots")
-    coldf_names = ["subject","parcel","pear_relmat","rest_runs"] + roi_check
+    coldf_names = ["subject","parcel","pear_relmat","rest_runs", "volumes"] + roi_check
 
     df = pd.read_csv(f'{xcpd_out}/3T_combined-anatfiles-check.tsv', sep='\t', on_bad_lines='skip', 
                      index_col=None, header=None, 
@@ -322,7 +322,7 @@ if os.path.exists(f'{xcpd_out}/3T_combined-anatfiles-check.tsv'):
     
     n_subs = len(df['subject'].unique())
     exists_percentage = np.round(df['pear_relmat'].value_counts(normalize=True) * 100,3)
-    
+
     # count 'rest_runs' values
     rest_run_counts = df['rest_runs'].value_counts()
     
@@ -336,7 +336,7 @@ if os.path.exists(f'{xcpd_out}/3T_combined-anatfiles-check.tsv'):
 
     # Plot 2: XCP-P Pearson Corr relmat.tsv exists percentage
     sns.barplot(x=exists_percentage.index, y=exists_percentage, ax=ax1, palette='Blues')
-    ax1.set_title(f'Subject n = {n_subs} \n {np.round(exists_percentage[0],1)}% *_realmat.tsv exits')
+    ax1.set_title(f'Subject n = {n_subs} \n {np.round(exists_percentage.iloc[-1],1)}% *_realmat.tsv exits')
     ax1.set_ylabel('%')
     
     
