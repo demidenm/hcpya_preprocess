@@ -89,5 +89,35 @@ As described in [Mehta et al., 2024](https://doi.org/10.1162/imag_a_00257), XCP-
     
 ## XCP-D Automated QC
 
-TBD
+XCP-D generates numerous files for each of the selected parcels. The number of resting state BOLD runs varies across subjects. If a subject has only a single BOLD run, a concatenated Pearson correlation FC (*pearsoncorrelation_relmat*) is not generated. The figure below summarizes two key values: the number of BOLD runs per subject and the percentage of subjects with a correlation matrix estimate.
+
+<div style="text-align: center;">
+  <img src="./imgs/xcpd_counts-pearcorrexist.png" alt="Subject counts for XCP-D" />
+</div>
+
+### Within & Between Network Edge FC 
+
+When Pearson correlation matrices are available, the aggregate within-network and between-network edgewise correlations are computed for each subject. This allows for a quick comparison of the brain’s network connectivity. Generally, within-network connectivity should be greater than between-network connectivity. While this is a crude metric, it can serve as an initial prompt for identifying potential subjects with bad data/maps.
+
+<div style="text-align: center;">
+  <img src="./imgs/xcpd_17-network-summaries.png" alt="Subject counts for XCP-D" />
+</div>
+
+### Cortical Thickness Distribution
+
+Cortical thickness estimates are extracted from five specific regions near the borders of cortical areas, which are prone to Freesurfer processing issues. These regions may exhibit inaccurate estimates or artifacts. 
+
+These distributions should not be used as the sole indicator of "quality data," but rather as a quick reference to identify subjects that may need further examination.
+
+<div style="text-align: center;">
+  <img src="./imgs/brain_corthick-rois.png" alt="Cortical Thickness Regions" />
+</div>
+
+The figure below illustrates the distribution of cortical thickness estimates for these regions.
+
+<div style="text-align: center;">
+  <img src="./imgs/xcpd_dist-corthick.png" alt="Cortical Thickness Distributions" />
+</div>
+
+
 

@@ -4,13 +4,19 @@ import subprocess
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import ptitprince as pt  
 
 # set folders
 input_dir = './'
 tmp = './tmp'
 output_dir = '../imgs'
+
 grp_fold = './mriqc/group_mriqc/out_group'
 qc_out = './fmriprep/post_preprocessing_checks/qc_sdc-similarity'
+
+xcpd_out = './xcp_d/xcpd_qc-output'
+roi_check = ['LH_Vis_43', 'LH_SomMot_84', 'LH_Limbic_OFC_12', 'LH_Default_PFC_40', 'RH_Limbic_OFC_1']
+
 
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(tmp, exist_ok=True)
@@ -61,7 +67,9 @@ df = pd.DataFrame(data, columns=['Type', 'Session', 'Status', 'Count'])
 
 sns.set(style="whitegrid")
 
-# Create Complete plots for FMRIPrep / MRIQC / XCP-D
+
+# Create RUN COMPLEITION PLOTS for FMRIPrep / MRIQC / XCP-D
+
 for preprocessing_type, group_data in df.groupby('Type'):
     print(preprocessing_type, group_data)
     group_data['Status'] = pd.Categorical(group_data['Status'], categories=["completed", "failed"], ordered=True)
@@ -85,7 +93,8 @@ for preprocessing_type, group_data in df.groupby('Type'):
     plt.savefig(f'{output_dir}/{preprocessing_type}_subject_counts.png')
     plt.close()
 
-# Create Summary Plots of Group Derivatives MRIQC
+
+# Create Summary Plots of GROUP DERIVATIVES MRIQC
 
 for img_key in plot_metrics.keys():
     print("Making Group Deriv MRIQC Plots")
@@ -132,7 +141,8 @@ for img_key in plot_metrics.keys():
     plt.close() 
 
 
-# summaries peristimulus plots
+# summaries PERISTIMULUS PLOT
+
 if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
     print("Making Peristimulus Summary Plots")
     peristim_df = pd.read_csv(f'{qc_out}/3T_check-peristim.tsv', sep = '\t', 
@@ -172,7 +182,9 @@ if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
 else:
     print(f'\tFILE: \n{qc_out}/3T_check-peristim.tsv doesnt exist')
 
-# summaries qc-similarity estimates and fmriprep reports
+
+# summaries QC SIMILARITY ESTIMATES AND FMRIPREP Reports
+
 if os.path.exists(f'{qc_out}/3T_check-html-similarity.tsv'):
     print("Making Similarity Summary Plots")
     fs_sim_df = pd.read_csv(f'{qc_out}/3T_check-html-similarity.tsv', sep = '\t', 
@@ -234,3 +246,148 @@ if os.path.exists(f'{qc_out}/3T_check-html-similarity.tsv'):
     plt.close()
 else:
     print(f'\t FILE: {qc_out}/3T_check-html-similarity.tsv doesnt exist')
+
+
+
+# plots of XCP-D QC CHECKS
+
+
+if os.path.exists(f'{xcpd_out}/3T_combined-network.tsv.tsv'):
+    # https://github.com/RainCloudPlots/RainCloudPlots?tab=readme-ov-file#making-rainclouds-in-python
+
+    print("Making XCP-D Network Estimate Rainclouds")
+
+    # load data, skip if rows are bad (e.g., unable to parse dude to inconsistent values in row)
+    df = pd.read_csv(f'{xcpd_out}/3T_combined-network.tsv.tsv', sep='\t', on_bad_lines='skip', 
+                     index_col=None, header=None, names=["subject","network","type","value"])
+    
+
+    unique_networks = df['network'].unique()
+    unique_networks = unique_networks[(unique_networks != 'no_r_mat') & ~pd.isna(unique_networks)]
+    
+    # Define the number of rows and columns for the grid
+    n_cols = 3  # Number of columns in the multi-panel figure
+    n_rows = -(-len(unique_networks) // n_cols)  # Calculate rows based on number of networks
+
+    # Create a multi-panel figure
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5 * n_rows), constrained_layout=True)
+    axes = axes.flatten()  # Flatten the axes array for easy iteration
+
+    # Create a color palette
+    palette = sns.color_palette("Set3")
+    
+    # Loop through each unique network and create a plot
+    for i, network in enumerate(unique_networks):
+        ax = axes[i]  # Get the current subplot axis
+        
+        # Subset data by network
+        network_data = df[df['network'] == network]
+        
+        # Create a palette for types within this network
+        types = network_data['type'].unique()
+        palette = {t: 'darkred' if t == 'wthn' else sns.color_palette("Set2", n_colors=len(types))[j]
+                   for j, t in enumerate(types)}
+        
+        # Plot the RainCloud plot
+        pt.RainCloud(
+            x='type', y='value', data=network_data, 
+            palette=palette, bw=.4, width_viol=0.8, orient="v", ax=ax
+        )
+        
+        # Set plot title and format
+        ax.set_title(rf'$\bf{network}$' + f'\nWithin & Between {len(unique_networks)} Network Correlations')
+        ax.set_xlabel('')
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=90, fontsize=9)
+        ax.set_ylabel('Aggregate Edgewise Mean (r)')
+
+    # Hide any unused subplots
+    for j in range(len(unique_networks), len(axes)):
+        fig.delaxes(axes[j])
+
+    
+    plt.savefig(f'{output_dir}/xcpd_{unique_networks}-network-summaries.png')
+    plt.close()
+
+else:
+    print(f"\t FILE: f'{xcpd_out}/3T_combined-network.tsv.tsv' doesnt exist")
+
+
+if os.path.exists(f'{xcpd_out}/3T_combined-network.tsv.tsv'):
+    print("Making XCP-D Counts & Freesurfer Plots")
+    coldf_names = ["subject","parcel","pear_relmat","rest_runs"] + roi_check
+
+    df = pd.read_csv(f'{xcpd_out}/3T_combined-anatfiles-check.tsv', sep='\t', on_bad_lines='skip', 
+                     index_col=None, header=None, 
+                     names=coldf_names)
+    
+    n_subs = len(df['subject'].unique())
+    exists_percentage = np.round(df['pear_relmat'].value_counts(normalize=True) * 100,3)
+    
+    # count 'rest_runs' values
+    rest_run_counts = df['rest_runs'].value_counts()
+    
+    # subplots for % & counts
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+    
+    # Plot 1: XCP-D rest_runs count
+    sns.barplot(x=rest_run_counts.index, y=rest_run_counts, ax=ax2, palette='Oranges')
+    ax2.set_title(f'Subject n = {n_subs} \n Num Rest Runs')
+    ax2.set_ylabel('Count')
+
+    # Plot 2: XCP-P Pearson Corr relmat.tsv exists percentage
+    sns.barplot(x=exists_percentage.index, y=exists_percentage, ax=ax1, palette='Blues')
+    ax1.set_title(f'Subject n = {n_subs} \n {np.round(exists_percentage[0],1)}% *_realmat.tsv exits')
+    ax1.set_ylabel('%')
+    
+    
+    
+    plt.tight_layout()
+    plt.savefig(f'{output_dir}/xcpd_counts-pearcorrexist.png')
+    plt.close()
+
+    df_melted = df[roi_check].melt(var_name='ROI', value_name='Value')
+
+    # Create the violin plot
+    plt.figure(figsize=(10, 6))
+    
+    pt.RainCloud(x='ROI', y='Value', data=df_melted, bw=0.2, width_viol=0.6, orient="h")
+    # Set plot title and labels
+    plt.title('Violin Plot of ROI Values')
+    plt.xlabel('Freesurfer Cortical Thickness')
+    plt.ylabel('Schaefer Region')
+    
+    plt.savefig(f'{output_dir}/xcpd_dist-corthick.png')
+    plt.close()
+else:
+    print(f"\t FILE: f'{xcpd_out}/3T_combined-network.tsv.tsv' doesnt exist")
+
+
+if os.path.exists(f'{output_dir}/brain_corthick-rois.png'):
+    print(f"Schaefer ROI img exists, not recreating. \n \t f'{output_dir}/brain_corthick-rois.png")
+else:
+    print("Schaefer ROI image doesnt exist, creating using n = 1000 nilearn atlas. \n \t f'{output_dir}/brain_corthick-rois.png")
+    from nilearn.datasets import fetch_atlas_schaefer_2018
+    from nilearn.image import math_img
+    from nilearn import plotting
+
+    atlas = fetch_atlas_schaefer_2018(n_rois=1000,resolution_mm=2, yeo_networks=7)
+
+    label_indices = [43, 165, 300, 455, 813]
+    n_rows = 6 // 2
+
+    fig, axes = plt.subplots(n_rows, 2, figsize=(10, 4 * n_rows))
+    axes = axes.flatten()
+
+    for i, label_index in enumerate(label_indices):
+        # multiply by index + 1, since background is 0
+        specific_label_mask = math_img(f"img == {label_index + 1}", img=atlas.maps)
+        # plot and customize label, removing last axis since it is empty
+        plotting.plot_roi(specific_label_mask, display_mode='xz', draw_cross=False, figure=fig, axes=axes[i])
+        
+        # make black background white + text black
+        title_text = f"Label: {atlas.labels[label_index-1]}, index {label_index}"
+        axes[i].set_title(title_text, fontsize=9, color='black', backgroundcolor='white', alpha = 1)
+        axes[-1].axis('off')
+
+        plt.savefig(f'{output_dir}/brain_corthick-rois.png')
+        plt.close()

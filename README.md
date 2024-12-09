@@ -62,7 +62,7 @@ The following chart illustrates the completion rate of HCP-YA subjects for fMRIP
 
 
 ### XCP-D
-The completion rate of HCP-YA subjects for XCP-D is shown below. Detailed reports and descriptions are available in the [XCP-D folder](./scripts/xcp_d/).
+The completion rate of HCP-YA subjects for XCP-D is shown below. Detailed reports and descriptions are available in the [XCP-D folder](./scripts/xcp_d/). 
 
 <div style="text-align: center;">
   <img src="./imgs/xcp_d_subject_counts.png" alt="Subject counts for XCP-D" />
@@ -104,4 +104,13 @@ Peristimulus plots are generated using `masked_timeseries` from the [PyReliMRI p
 
 <div style="text-align: center;">
   <img src="./imgs/sub-id_ses-3T_task-motor_plot-peristim.png" alt="Peristimulus plot example" />
+</div>
+
+
+### Check XCP-D Outputs
+
+[XCP-D folder](./scripts/xcp_d/) contains summaries of network and cortical thickness estimates. Specifically, across the 17 networks from the [Shaefer 1000 atlas](https://github.com/PennLINC/AtlasPack/blob/main/atlas-4S1056Parcels_dseg.tsv), when the pearson correlation matrices exists for a given subject the aggregate within and between edgewise correlations are calculated. Then, for five separate regions near bordering edges where Freesurfer issues may arise (figure below), cortical thickness estimates are extracted and plotted for each subject. 
+
+<div style="text-align: center;">
+  <img src="./imgs/brain_corthick-rois.png" alt="Subject counts for XCP-D" />
 </div>
