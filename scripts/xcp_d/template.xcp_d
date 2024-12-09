@@ -98,7 +98,29 @@ for log in ${log_num} ; do
 done
 
 #push processed outputs to bucket: preprocessed info; sourcedata/freesurfer, .html report
-s3cmd sync -F --recursive -v ${data_dir}/processed/${xcpd_ver}/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ ${data_bucket}/derivatives/${xcpd_ver}/ses-${ses_id}/sub-${subj_id}/
+s3cmd sync -F --recursive -v ${data_dir}/processed/${xcpd_ver}/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ \
+	${data_bucket}/derivatives/${xcpd_ver}/ses-${ses_id}/sub-${subj_id}/
+s3cmd sync -F --recursive -v ${data_dir}/processed/${xcpd_ver}/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}.html \
+	${data_bucket}/derivatives/${xcpd_ver}/ses-${ses_id}/
+
+# check s3 sync error
+# Count files in S3
+count=$(s3cmd ls ${data_bucket}/derivatives/${xcpd_ver}/ses-${ses_id}/sub-${subj_id} | wc -l)
+
+
+# Check if 2 files/folders on s3
+if [[ "$count" -ne 2 ]]; then
+	echo "File count is not 2. Re-running sync..."
+
+	# Sync data directory to S3
+	s3cmd sync -F --recursive -v ${data_dir}/processed/${xcpd_ver}/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}/ \
+		${data_bucket}/derivatives/${xcpd_ver}/ses-${ses_id}/sub-${subj_id}/
+	# Sync HTML file to S3
+	s3cmd sync -F --recursive -v ${data_dir}/processed/${xcpd_ver}/sub-${subj_id}_ses-${ses_id}/sub-${subj_id}.html \
+		${data_bucket}/derivatives/${xcpd_ver}/ses-${ses_id}/
+else
+	echo ">=2 Files/Folders found on S3 for sub-${subj_id}."
+fi
 
 # run filemapper
 echo "sync'd ${subj_id} to $data_bucket ${ses_id}"

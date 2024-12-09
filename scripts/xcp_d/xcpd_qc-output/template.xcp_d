@@ -1,0 +1,58 @@
+#!/bin/bash
+
+preproc="xcp_d"
+curr_dir=CURR_DIR
+config_file=${curr_dir}/../../config.json  # Path to the JSON configuration file
+
+# Check if config file exists
+if [[ ! -f "$config_file" ]]; then
+    echo "Config file $config_file not found! Exiting."
+    exit 1
+fi
+
+subj_id=SUBJECT
+config=$(jq -r '.xcp_d' "${config_file}")
+session=$(echo "$config" | jq -r '.ses')
+path_s3bucket_out=$(echo "$config" | jq -r '.path_s3bucket_out')
+version=$(echo "$config" | jq -r '.version')
+scratch_dir=/scratch.local/${USER}/derivatives/${version}/ses-${session}_qc
+tmp=${curr_dir}/tmp
+
+out_anatfiles=${curr_dir}/3T_combined-anatfiles-check.tsv  
+out_network=${curr_dir}/3T_combined-network.tsv.tsv
+
+mkdir -p ${tmp}
+mkdir -p ${scratch_dir}
+
+s3cmd sync --recursive \
+           --exclude="*figures*" \
+           --exclude="*log*" \
+           --exclude="*html" \
+           --exclude="*Glasser*" \
+           --exclude="*Gordon*" \
+           --exclude="*HCP*" \
+           --exclude="*.json" \
+           --exclude="*.nii*" \
+           --exclude="*.gii" \
+          ${path_s3bucket_out}/derivatives/${version}/ses-${session}/sub-${subj_id} ${scratch_dir}/
+
+
+python ${curr_dir}/qc_xcpd.py --in_dir ${scratch_dir} --sub_id ${subj_id} --tmp_out ${tmp} 
+
+xcpdchk_error=$?
+if [[ $xcpdchk_error -ne 0 ]]; then
+	echo -e "Error in XCP-D Check for sub-${subj_id}. Exiting with code \n${xcpdchk_error}."
+	exit $xcpdchk_error
+fi
+
+
+# Append the anat files, excluding the header (skip the first row)
+tail -n +2 "${tmp}/anat-files_${subj_id}.tsv" >> "${out_anatfiles}"
+rm ${tmp}/anat-files_${subj_id}.tsv
+# Append network data, excluding the header (skip the first row)
+tail -n +2 "${tmp}/network_${subj_id}.tsv" >> "${out_network}"
+rm "${tmp}/network_${subj_id}.tsv"
+
+# completed
+echo -e "\t Data appended successfully for sub-${subj_id}."
+echo

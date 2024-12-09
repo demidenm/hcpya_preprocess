@@ -13,3 +13,6 @@ scripts/fmriprep/tmp/*
 scripts/fmriprep/post_preprocessing_checks/qc_sdc-similarity/run_files.3T
 scripts/fmriprep/post_preprocessing_checks/rerun_altfreesurfer/fsrerun.fmriprep_*
 scripts/xcp_d/run_files.xcpd*
+scripts/xcp_d/xcpd_qc-output/run_files*
+scripts/xcp_d/xcpd_qc-output/xcp_check_logs*
+scripts/xcp_d/xcpd_qc-output/tmp
