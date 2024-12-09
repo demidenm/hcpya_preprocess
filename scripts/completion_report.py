@@ -265,42 +265,36 @@ if os.path.exists(f'{xcpd_out}/3T_combined-network.tsv.tsv'):
     unique_networks = df['network'].unique()
     unique_networks = unique_networks[(unique_networks != 'no_r_mat') & ~pd.isna(unique_networks)]
     
-    # Define the number of rows and columns for the grid
-    n_cols = 3  # Number of columns in the multi-panel figure
-    n_rows = -(-len(unique_networks) // n_cols)  # Calculate rows based on number of networks
+    # define cols/rows for multi-panel fig
+    n_cols = 2  
+    n_rows = -(-len(unique_networks) // n_cols)  
 
-    # Create a multi-panel figure
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5 * n_rows), constrained_layout=True)
-    axes = axes.flatten()  # Flatten the axes array for easy iteration
-
-    # Create a color palette
+    axes = axes.flatten()  
     palette = sns.color_palette("Set3")
     
-    # Loop through each unique network and create a plot
     for i, network in enumerate(unique_networks):
-        ax = axes[i]  # Get the current subplot axis
-        
-        # Subset data by network
+        ax = axes[i]  
+
+        # subset network
         network_data = df[df['network'] == network]
         
-        # Create a palette for types within this network
+        # red if wthin, else Set2
         types = network_data['type'].unique()
         palette = {t: 'darkred' if t == 'wthn' else sns.color_palette("Set2", n_colors=len(types))[j]
                    for j, t in enumerate(types)}
         
-        # Plot the RainCloud plot
         pt.RainCloud(
             x='type', y='value', data=network_data, 
             palette=palette, bw=.4, width_viol=0.8, orient="v", ax=ax
         )
         
-        # Set plot title and format
         ax.set_title(rf'$\bf{network}$' + f'\nWithin & Between {len(unique_networks)} Network Correlations')
         ax.set_xlabel('')
         ax.set_xticklabels(ax.get_xticklabels(), rotation=90, fontsize=9)
         ax.set_ylabel('Aggregate Edgewise Mean (r)')
 
-    # Hide any unused subplots
+    # hide unused frames
     for j in range(len(unique_networks), len(axes)):
         fig.delaxes(axes[j])
 
@@ -325,39 +319,37 @@ if os.path.exists(f'{xcpd_out}/3T_combined-anatfiles-check.tsv'):
 
     # count 'rest_runs' values
     rest_run_counts = df['rest_runs'].value_counts()
-    
-    # subplots for % & counts
+  
+
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
-    
     # Plot 1: XCP-D rest_runs count
     sns.barplot(x=rest_run_counts.index, y=rest_run_counts, ax=ax2, palette='Oranges')
     ax2.set_title(f'Subject n = {n_subs} \n Num Rest Runs')
     ax2.set_ylabel('Count')
-
     # Plot 2: XCP-P Pearson Corr relmat.tsv exists percentage
     sns.barplot(x=exists_percentage.index, y=exists_percentage, ax=ax1, palette='Blues')
     ax1.set_title(f'Subject n = {n_subs} \n {np.round(exists_percentage.iloc[0],1)}% *_realmat.tsv exits')
     ax1.set_ylabel('%')
     
-    
-    
     plt.tight_layout()
     plt.savefig(f'{output_dir}/xcpd_counts-pearcorrexist.png')
     plt.close()
 
-    df_melted = df[roi_check].melt(var_name='ROI', value_name='Value')
 
-    # Create the violin plot
+    # Plot 3: plot of thickness across regions
+    df_melted = df[roi_check].melt(var_name='ROI', value_name='Value')
     plt.figure(figsize=(10, 6))
     
     pt.RainCloud(x='ROI', y='Value', data=df_melted, bw=0.2, width_viol=0.6, orient="h")
     # Set plot title and labels
-    plt.title('Violin Plot of ROI Values')
-    plt.xlabel('Freesurfer Cortical Thickness')
-    plt.ylabel('Schaefer Region')
+    plt.title('Free Surfer Cortical Thickness (CT) Estimates Across 5 Shaefer 1000 ROIs')
+    plt.xlabel('CT Est.')
+    plt.ylabel('ROI')
     
+    plt.tight_layout()
     plt.savefig(f'{output_dir}/xcpd_dist-corthick.png')
     plt.close()
+
 else:
     print(f"\t FILE: f'{xcpd_out}/3T_combined-anatfiles-check.tsv' doesnt exist")
 
