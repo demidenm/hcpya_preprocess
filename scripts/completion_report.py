@@ -309,10 +309,10 @@ if os.path.exists(f'{xcpd_out}/3T_combined-network.tsv.tsv'):
     plt.close()
 
 else:
-    print(f"\t FILE: f'{xcpd_out}/3T_combined-network.tsv.tsv' doesnt exist")
+    print(f"\t FILE: f'{xcpd_out}/3T_combined-network.tsv' doesnt exist")
 
 
-if os.path.exists(f'{xcpd_out}/3T_combined-network.tsv.tsv'):
+if os.path.exists(f'{xcpd_out}/3T_combined-anatfiles-check.tsv'):
     print("Making XCP-D Counts & Freesurfer Plots")
     coldf_names = ["subject","parcel","pear_relmat","rest_runs"] + roi_check
 
@@ -359,7 +359,8 @@ if os.path.exists(f'{xcpd_out}/3T_combined-network.tsv.tsv'):
     plt.savefig(f'{output_dir}/xcpd_dist-corthick.png')
     plt.close()
 else:
-    print(f"\t FILE: f'{xcpd_out}/3T_combined-network.tsv.tsv' doesnt exist")
+    print(f"\t FILE: f'{xcpd_out}/3T_combined-anatfiles-check.tsv' doesnt exist")
+
 
 
 if os.path.exists(f'{output_dir}/brain_corthick-rois.png'):
