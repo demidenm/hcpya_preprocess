@@ -114,79 +114,102 @@ for img_key in plot_metrics.keys():
 
     columns_to_plot = plot_metrics[img_key]
     sess_list = list(df['session'].unique())
-
+    df['run_task'] = df['task_names'] + '_' + df['run']
+    
     # convert mriqc to numeric if not all ready
     for col in columns_to_plot:
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
     # size dependenint on colums * sessions
-    plt.figure(figsize=(12 * len(sess_list), len(columns_to_plot) * 5))
+    plt.figure(figsize=(15 * len(sess_list), len(columns_to_plot) * 5)) # w x h
 
     for i, col in enumerate(columns_to_plot):
         for j, sess in enumerate(sess_list):
             plt.subplot(len(columns_to_plot), len(sess_list), i * len(sess_list) + j + 1)  # Create subplot grid
             
-            # filter for session and plot each metrics
+            # Filter for session and plot each metric
             df_session = df[df['session'] == sess]
             
-            # boxplot for the current session and metric
-            spt.RainCloud(
-                x='task_names', y=col, hue='run', data=df_session,
-                palette='Set2', bw=0.2, width_viol=0.6, orient="v", ax=ax
+            # Sort data by 'run_task' for sorted x-axis labels
+            df_session = df_session.sort_values(by='run_task')
+            unique_hues = df_session['run'].nunique()
+            ax = plt.gca()
+            
+            # Create the RainCloud plot
+            rain = pt.RainCloud(
+                x='run_task', y=col, hue='task_names', data=df_session,
+                palette='Set2', bw=0.2, width_viol=0.6, orient="v",
+                ax=ax
             )
             
+            # Customize axis labels and titles
             if j == 0:
                 ax.set_ylabel(col.upper(), fontsize=12)
             ax.set_title(f'Ses: {sess} - {col.upper()}', fontsize=14, fontweight='bold')
-            ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+            
+            # Sort and update x-axis labels
+            ax.set_xticks(range(len(df_session['run_task'].unique())))
+            sorted_labels = sorted(df_session['run_task'].unique())  # Sorted x-axis labels
+            ax.set_xticklabels(sorted_labels, rotation=45)
             ax.set_xlabel("")
-            ax.legend(title='Run', bbox_to_anchor=(1.01, 0.5), loc='center left', borderaxespad=0.)
+            
+            # Modify and sort the legend
+            handles, labels = ax.get_legend_handles_labels()
+            sorted_indices = sorted(range(len(labels)), key=lambda k: labels[k])  # Sort legend labels
+            handles = [handles[idx] for idx in sorted_indices]
+            labels = [labels[idx] for idx in sorted_indices]
+            
 
     plt.tight_layout()
     plt.savefig(f'{output_dir}/{img_key}_mriqc-plot.png')
-    plt.close() 
-
+    plt.close()
 
 # summaries PERISTIMULUS PLOT
 
 if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
-    print("Making Peristimulus Summary Plots")
-    peristim_df = pd.read_csv(f'{qc_out}/3T_check-peristim.tsv', sep = '\t', 
-                              names=['sub','sess','task','region','peak_tr','peak_mean', 'peak_se']).drop_duplicates(subset='sub')
+    print("Making Peristimulus Summary RainCloud Plots")
+    peristim_df = pd.read_csv(f'{qc_out}/3T_check-peristim.tsv', sep='\t', 
+                              names=['sub', 'sess', 'task', 'region', 'peak_tr', 'peak_mean', 'peak_se']).drop_duplicates(subset='sub')
     peri_sub_n = len(peristim_df)
-    # make plot
+
     sns.set(style="whitegrid")
     fig, axes = plt.subplots(1, 3, figsize=(15, 10))  # 1 row, 3 columns
 
-    # Define custom y-axis labels for each column
+    # y-axis labels for each column
     y_labels = {
         'peak_tr': "Peak TR",
         'peak_mean': "Mean Signal at Peak",
         'peak_se': "SE Signal at Peak"
     }
 
-    # columns and colors 
+    # columns ~ palette
     columns_of_interest = ['peak_tr', 'peak_mean', 'peak_se']
     colors = sns.color_palette("Set2", len(columns_of_interest))
 
     for ax, col, color in zip(axes, y_labels.keys(), colors):
-        # violin plot
-        sns.violinplot(data=peristim_df, y=col, ax=ax, color=color, inner=None, alpha=0.6, cut=0)
-        # strip plot points
-        sns.stripplot(data=peristim_df, y=col, ax=ax, color='gray', jitter=0.5, alpha=0.6)
+        # RainCloud plot
+        pt.RainCloud(
+            y=col,
+            data=peristim_df,
+            palette=[color],  # Use a single color for this plot
+            bw=0.2,
+            width_viol=0.6,
+            orient="v",
+            ax=ax
+        )
         
-        ax.set_ylabel(y_labels[col])  # Use the custom label
-        ax.set_xlabel("")  
+        ax.set_ylabel(y_labels[col]) 
+        ax.set_xlabel("")
 
-        # expand min/max to avoid weird cut-offs
+        # Expand min/max to avoid weird cut-offs
         ax.set_ylim(peristim_df[col].min() - 0.5, peristim_df[col].max() + 0.5)
 
     plt.subplots_adjust(wspace=0.5)  # Adjust horizontal spacing between plots
     plt.suptitle(f'Max TR (.720sec) from Peristimulus Plots across N = {peri_sub_n}', fontsize=14)
-    plt.savefig(f'{output_dir}/peristim_distributions.png')
-    plt.close() 
+    plt.savefig(f'{output_dir}/peristim_distributions_rainclouds.png')
+    plt.close()
 else:
-    print(f'\tFILE: \n{qc_out}/3T_check-peristim.tsv doesnt exist')
+    print(f'\tFILE: \n{qc_out}/3T_check-peristim.tsv does not exist')
 
 
 # summaries QC SIMILARITY ESTIMATES AND FMRIPREP Reports
