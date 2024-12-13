@@ -109,6 +109,9 @@ for img_key in plot_metrics.keys():
     df['img_type'] = split_items.str[-1]
     df['run'] = split_items.apply(lambda x: x[4].split('run-')[-1] if len(x) > 4 and 'run-' in x[4] else '01')
         
+    # accidentally ran 7T, too, but  not needed
+    df = df[df['session'] != "7T"]
+
     columns_to_plot = plot_metrics[img_key]
     sess_list = list(df['session'].unique())
 
@@ -127,14 +130,17 @@ for img_key in plot_metrics.keys():
             df_session = df[df['session'] == sess]
             
             # boxplot for the current session and metric
-            sns.boxplot(x='task_names', y=col, hue='run', data=df_session)
+            spt.RainCloud(
+                x='task_names', y=col, hue='run', data=df_session,
+                palette='Set2', bw=0.2, width_viol=0.6, orient="v", ax=ax
+            )
             
             if j == 0:
-                plt.ylabel(col.upper(), fontsize=12)
-            plt.title(f'Ses: {sess} - {col.upper()}', fontsize=14, fontweight='bold')
-            plt.xticks(rotation=45)
-            plt.xlabel("")
-            plt.legend(title='Run', bbox_to_anchor=(1.01, 0.5), loc='center left', borderaxespad=0.)
+                ax.set_ylabel(col.upper(), fontsize=12)
+            ax.set_title(f'Ses: {sess} - {col.upper()}', fontsize=14, fontweight='bold')
+            ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+            ax.set_xlabel("")
+            ax.legend(title='Run', bbox_to_anchor=(1.01, 0.5), loc='center left', borderaxespad=0.)
 
     plt.tight_layout()
     plt.savefig(f'{output_dir}/{img_key}_mriqc-plot.png')
