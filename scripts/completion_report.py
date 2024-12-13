@@ -206,7 +206,7 @@ if os.path.exists(f'{qc_out}/3T_check-peristim.tsv'):
 
     plt.subplots_adjust(wspace=0.5)  # Adjust horizontal spacing between plots
     plt.suptitle(f'Max TR (.720sec) from Peristimulus Plots across N = {peri_sub_n}', fontsize=14)
-    plt.savefig(f'{output_dir}/peristim_distributions_rainclouds.png')
+    plt.savefig(f'{output_dir}/peristim_distributions.png')
     plt.close()
 else:
     print(f'\tFILE: \n{qc_out}/3T_check-peristim.tsv does not exist')
