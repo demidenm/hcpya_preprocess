@@ -16,3 +16,5 @@ scripts/xcp_d/run_files.xcpd*
 scripts/xcp_d/xcpd_qc-output/run_files*
 scripts/xcp_d/xcpd_qc-output/xcp_check_logs*
 scripts/xcp_d/xcpd_qc-output/tmp
+scripts/xcp_d/xcpd_qc-output/wb_opts/tmp
+scripts/xcp_d/xcpd_qc-output/wb_opts/mesh/MSCcodebase
