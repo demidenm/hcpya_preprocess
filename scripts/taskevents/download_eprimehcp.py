@@ -61,7 +61,7 @@ bucket_name = "hcp-openaccess"
 prefix = 'HCP_1200'
 profile = args.profile
 output_folder = args.output
-max_workers = args.workers
+max_workers = int(args.workers)
 
 # Create output directory if it doesn't exist
 os.makedirs(output_folder, exist_ok=True)

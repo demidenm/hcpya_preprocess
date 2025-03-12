@@ -165,7 +165,7 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
             long_format.append({
                 'onset': row['PresentMathFile.OnsetTime'] - adjust_by_trigger,
                 'duration': (row['PresentMathFile.FinishTime'] - row['PresentMathFile.OnsetTime']),
-                'trial_type': 'pres_math',
+                'trial_type': 'present_math',
                 'block': row['Block_Label']
             })
             

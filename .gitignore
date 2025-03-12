@@ -1,3 +1,5 @@
+*__pycache__/
+scripts/tmp/
 scripts/fmriprep/run_files.*
 scripts/fmriprep/*logs/
 *logs/
