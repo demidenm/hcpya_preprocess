@@ -8,7 +8,11 @@ The [Barch et al. (2013, pg 178-179)](https://www.sciencedirect.com/science/arti
 
 ## Basic Trial Structure
 
-The task includes "Face and "Shape" blocks. The tasks starts with the the presentation of whether a Shape or Face block (avg durations 2.9 [min/max, 2.9/3.1]). After the Cue, the stimuli appear. After the stimulus, there is a brief fixation before the consecutive stimulus. stimuli are consecutive after the fixation before the change in block, whereby a new Cue starts.
+The task includes "Face and "Shape" blocks. The tasks starts with the the presentation of whether a Shape or Face block (avg durations 2.9 [min/max, 2.9/3.1]). After the Cue, the stimuli appear. After the stimulus, there is a brief fixation before the consecutive stimulus. stimuli are consecutive after the fixation before the change in block, whereby a new Cue starts. See diagram below.
+
+<div style="text-align: center;">
+  <img src="./emotion_task_diagram.svg" />
+</div>
 
 The below distributions are from Run 1 across **all available subjects and trials**.
 
@@ -53,7 +57,6 @@ Third, the histogram of response time across stimulus type (Face/Shape) and bloc
 </div>
 
 
-### First / Last Onset and Duration
 
 ## Emotion Task E-Prime Column Details
 ### Labels
