@@ -177,6 +177,13 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
                 'block': row['Block_Label']
             })
             
+            long_format.append({
+                'onset': row['PresentMathFile.OnsetTime'] - adjust_by_trigger,
+                'duration': (row['PresentMathOptions.OnsetTime'] - row['PresentMathFile.OnsetTime']),
+                'trial_type': 'math_to_question',
+                'block': row['Block_Label']       
+            })
+            
             # Math options presentation
             long_format.append({
                 'onset': row['PresentMathOptions.OnsetTime'] - adjust_by_trigger,
@@ -1281,9 +1288,20 @@ def gamble_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
     for index, row in df_relab.iterrows():
         # Gambling trials
         if row['Procedure[Trial]'] == 'GamblingTrialPROC':
+            
+            # sometimes the first row has 0 for onset / durations, this accounts for it.
+            if row['FillerFixation.OnsetTime'] not in [0, None]:
+                quest_duration = row['FillerFixation.OnsetTime'] - row['QuestionMark.OnsetTime']
+                filler_onset = row['FillerFixation.OnsetTime'] - adjust_by_trigger
+                filler_duration = row['FillerFixation.OnsetToOnsetTime']
+            else:
+                quest_duration = row['QuestionMark.OnsetToOnsetTime']
+                filler_onset = None
+                filler_duration = None
+     
             long_format.append({
                 'onset': row['QuestionMark.OnsetTime'] - adjust_by_trigger,
-                'duration': row['FillerFixation.OnsetTime'] - row['QuestionMark.OnsetTime'],
+                'duration': quest_duration,
                 'trial_type': 'quest_mark',
                 'reward_type': row['TrialType'],
                 'response_time': row['QuestionMark.RT'],
@@ -1293,8 +1311,8 @@ def gamble_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
                 'block': row['Block_Label']
             })
             long_format.append({
-                'onset': row['FillerFixation.OnsetTime'] - adjust_by_trigger,
-                'duration': row['FillerFixation.OnsetToOnsetTime'],
+                'onset': filler_onset,
+                'duration': filler_duration,
                 'trial_type': 'filler',
                 'reward_type': row['TrialType'],
                 'response_time': row['QuestionMark.RT'],
@@ -1303,9 +1321,18 @@ def gamble_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
                 'feedback_type': np.nan,
                 'block': row['Block_Label']
             })
+
+            # sometimes the first row has 0 for onset / durations, this accounts for it.
+            if row['Feedback.OnsetTime'] not in [0, None]:
+                fb_onset = row['Feedback.OnsetTime'] - adjust_by_trigger
+                fb_duration = row['Feedback.OnsetToOnsetTime']
+            else:
+                fb_onset = None
+                fb_duration = None
+                
             long_format.append({
-                'onset': row['Feedback.OnsetTime'] - adjust_by_trigger,
-                'duration': row['Feedback.OnsetToOnsetTime'],
+                'onset': fb_onset,
+                'duration': fb_duration,
                 'trial_type': 'feedback',
                 'reward_type': row['TrialType'],
                 'response_time': np.nan,

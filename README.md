@@ -1,8 +1,10 @@
-# HCP-Young Adult: MRIQC & FMRIPrep Preprocessing & XCP-D Post-processing Pipeline
+# HCP-Young Adult: MRIQC & FMRIPrep Preprocessing, XCP-D Post-processing Pipeline & E-Prime to Events.tsv
 
 This repository contains the scripts and configurations required for preprocessing fMRI data using **fMRIPrep** and **MRIQC**. The pipeline is for the [Human Connectome Project (HCP) Young Adult (HCP-YA) sample](https://www.humanconnectome.org/#promo-1-content)
 
 As of November 26, 2024, the pipeline uses fMRIPrep [v24.0.1](https://pypi.org/project/fmriprep/24.0.1/), MRIQC [v23.1.0](https://pypi.org/project/mriqc/23.1.0/) & XCP-D [v0.9.0](https://xcp-d.readthedocs.io/en/0.9.0/)
+
+As of March 13, 2025, a pipleine has been included to convert the e-prime task data to events.tsv files. This provide expanded onset, durations and trial- and block-level details.
 
 ## Repository Structure
 
@@ -23,6 +25,12 @@ As of November 26, 2024, the pipeline uses fMRIPrep [v24.0.1](https://pypi.org/p
     ├── xcpd/                 # Scripts for postprocessing fMRI data
         ├── README.md
         ├── dataset_description.json
+    ├── taskevents/                 # Scripts for converting e-prime data to events.tsv
+        ├── README.md
+        ├── download_eprimehcp.py   # Script to download e-prime data from AWS for HCP
+        ├── preproc_taskeprime.py   # Script to clean and extract onsets, durations, trial and behavioral information
+        ├── preproc_util.py         # functions to label blocks and extract task-specific details
+        ├── task_summaries.ipynb    # notebook with testing functions and summarizing onsets/durations/response times 
 ```
 
 ## Key Components
@@ -37,6 +45,16 @@ As of November 26, 2024, the pipeline uses fMRIPrep [v24.0.1](https://pypi.org/p
 
 ### XCP-D
 - **Postprocessing Pipeline**: Uses **XCP-D v0.9.0** to generate postprocessed derivatives for resting-state fMRI, including denoised BOLD signals, bandpass-filtered data, and motion-parameter filtering.
+
+### E-Prime to Events.tsv
+
+This repository contains scripts for downloading and converting Human Connectome Project (HCP) E-Prime task data into BIDS-compatible event files.
+Key Features
+
+- AWS Setup: Instructions for configuring AWS credentials to access the HCP S3 bucket
+- Automated Downloading: Parallel download of E-Prime data files from HCP-1200 dataset (~1000+ subjects, 7 tasks, 2 runs each)
+- BIDS Conversion: Transforms raw E-Prime task data into standardized BIDS events.tsv files
+- Task Support: Processes data for all major HCP tasks (EMOTION, MOTOR, RELATIONAL, SOCIAL, WM, GAMBLING, LANGUAGE)
 
 ## Usage
 

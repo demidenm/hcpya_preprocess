@@ -132,7 +132,7 @@ The E-Prime data contains values that help us understand the structure of experi
 
 For initial blocks, timing information from E-Prime is included in parentheses to help validate the sequence of events.
 
-These are expanded on Below
+These are expanded on below.
 
 ### Language Task
 #### Labels
