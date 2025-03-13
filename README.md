@@ -30,7 +30,9 @@ As of March 13, 2025, a pipleine has been included to convert the e-prime task d
         ├── download_eprimehcp.py   # Script to download e-prime data from AWS for HCP
         ├── preproc_taskeprime.py   # Script to clean and extract onsets, durations, trial and behavioral information
         ├── preproc_util.py         # functions to label blocks and extract task-specific details
-        ├── task_summaries.ipynb    # notebook with testing functions and summarizing onsets/durations/response times 
+        ├── info_*/                 # task details / summaries
+        ├── imgs/                   # descriptives of task events
+
 ```
 
 ## Key Components
