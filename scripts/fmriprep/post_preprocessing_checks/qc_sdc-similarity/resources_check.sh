@@ -14,9 +14,9 @@
 #SBATCH -A feczk001 #faird
 
 #source $HOME/miniconda3/etc/profile.d/conda.sh
-source /home/faird/mdemiden/miniconda3/etc/profile.d/conda.sh
+#source /home/faird/mdemiden/miniconda3/etc/profile.d/conda.sh
+#conda activate fmri_env
 
-conda activate fmri_env
 module load fsl 
 module load freesurfer 
 cd run_files.${1}

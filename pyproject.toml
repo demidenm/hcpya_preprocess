@@ -18,17 +18,18 @@ classifiers = [
 ]
 
 dependencies = [
-    "numpy",
-    "matplotlib",
+    "numpy==1.23.5",        # Stable version that avoids breaking changes with other packages
+    "matplotlib==3.5.3",     # Compatible with Seaborn 0.11.2 and PtitPrince
     "nibabel",
     "nilearn",
     "nipype",
-    "pandas",
-    "seaborn",
+    "pandas==1.3.5",        # Works with Seaborn 0.11.2
+    "seaborn==0.11.2",      # Compatible with PtitPrince
     "ptitprince",
     "pyrelimri",
-    "svgwrite",
+    "svgwrite"
 ]
+
 
 [project.optional-dependencies]
 dev = [

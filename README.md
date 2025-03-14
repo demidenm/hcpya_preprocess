@@ -1,4 +1,8 @@
-# HCP-Young Adult: MRIQC & FMRIPrep Preprocessing, XCP-D Post-processing Pipeline & E-Prime to Events.tsv
+# HCP-Young Adult: Pre/Post Processing & BOLD Analysis.
+
+Pre-processing: MRIQC & FMRIPrep Preprocessing
+Post-processing: XCP-D & E-Prime to events.tsv conversion
+Analysis: Estimate XCP-D atlas [resting state] BOLD connectivity matrices. Soon to come: Subject-level task fMRI activation maps.
 
 This repository contains the scripts and configurations required for preprocessing fMRI data using **fMRIPrep** and **MRIQC**. The pipeline is for the [Human Connectome Project (HCP) Young Adult (HCP-YA) sample](https://www.humanconnectome.org/#promo-1-content)
 

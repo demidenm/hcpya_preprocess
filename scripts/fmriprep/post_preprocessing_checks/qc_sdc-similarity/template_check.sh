@@ -1,5 +1,7 @@
 #!/bin/bash
-curr_dir=`pwd`
+uv_proj_path=UV_PROJECT
+# get directory where script is
+curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 sub=SUBJECT
 ses=SESSION 
 type=dice
@@ -58,7 +60,7 @@ for tsv in ${tmp}/sub-${sub}/ses-${ses}/func/*_events.tsv; do
 done
 
 # sync events files to s3 fmriprep sourcedata folder
-for event_file in ` ls ${tmp}/sub-${sub}/ses-${ses}/func/sub-${sub}_ses-${ses}_task-motor_*_run-*_events.tsv ` ; do
+for event_file in ` ls ${tmp}/sub-${sub}/ses-${ses}/func/sub-${sub}_ses-${ses}_task-*_*_run-*_events.tsv ` ; do
 	s3cmd put $event_file ${s3_bucket}/derivatives/${fmriprep_vr}/ses-${ses}/sourcedata/event_files/sub-${sub}/ses-${ses}/func/
 done
 
@@ -92,7 +94,7 @@ echo "$bold_runs" | while read run ; do
 	fi
 
 	# RUN PYTHON CODE TO EXTRACT SIMILARITY ESTIMATES
-	sim_out=$(python ${curr_dir}/../similarity_check.py --in_dat ${sess_inp} --task ${task} ${run:+--run $run} --stype ${type}) 2>&1
+	sim_out=$(uv --project "${uv_proj_path}" run python "${curr_dir}/../similarity_check.py" --in_dat ${sess_inp} --task ${task} ${run:+--run $run} --stype ${type}) 2>&1
 	sim_error=$?
 
 	if [ ${sim_error} -eq 0 ]; then
@@ -117,7 +119,7 @@ num_files=$(echo "$motor_exist" | wc -l)
 
 if [ "$num_files" -ge 2 ]; then
 	mkdir -p ${out_dir}/sub-${sub}/ses-${ses}/func
-	peristim_out=$(python ${curr_dir}/../create_peristim.py --in_dir ${tmp} --sub_id ${sub} --task "motor" --roi_mask ${roi_path} --out_path "${out_dir}/sub-${sub}/ses-${ses}/func" ) 2>&1
+	peristim_out=$(uv --project "${uv_proj_path}" run python "${curr_dir}/../create_peristim.py" --in_dir ${tmp} --sub_id ${sub} --task "motor" --roi_mask ${roi_path} --out_path "${out_dir}/sub-${sub}/ses-${ses}/func" ) 2>&1
 	peristim_error=$?
 
 	if [ ${peristim_error} -eq 0 ]; then

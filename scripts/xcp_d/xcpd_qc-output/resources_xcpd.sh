@@ -13,8 +13,9 @@
 #SBATCH -e xcp_check_logs/%x_%A_%a.err
 #SBATCH -A feczk001 #faird
 
-source /home/faird/mdemiden/miniconda3/etc/profile.d/conda.sh
-conda activate fmri_env
+#source /home/faird/mdemiden/miniconda3/etc/profile.d/conda.sh
+#conda activate fmri_env
+# Using uv project path instead, see make_runs.sh
 
 cd run_files.3T
 

@@ -120,6 +120,23 @@ The script processes data for these HCP tasks by default:
 - LANGUAGE
 The names are UPPERCASE in the HCP E-PRIME input naming convesion. The task names are coverted to lowercase as part of the final file names.
 
+### Reproducible task-schematic svg files
+
+Task descriptions and trials structures were summarized to claudi.ai. This code was aggregated to create a reproducible task schematic function. To run for the options:
+- emotion
+- motor
+- relational
+- social
+- wm
+- gamble
+- language
+
+use the following code:
+```bash
+uv --project <uv_project_directory> run python make_schematics.py --task_name <task_name>>
+
+```
+
 ## Context within E-Prime Files
 
 The E-Prime data contains values that help us understand the structure of experimental trials, including:

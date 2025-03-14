@@ -289,7 +289,9 @@ if os.path.exists(f'{xcpd_out}/3T_combined-network.tsv.tsv'):
     # load data, skip if rows are bad (e.g., unable to parse dude to inconsistent values in row)
     df = pd.read_csv(f'{xcpd_out}/3T_combined-network.tsv.tsv', sep='\t', on_bad_lines='skip', 
                      index_col=None, header=None, names=["subject","network","type","value"])
-    
+    # convert value to numeric & drop nan to avoid errors in plotting below 
+    df['value'] = pd.to_numeric(df['value'], errors='coerce')
+    df = df.dropna(subset=['value'])
 
     unique_networks = df['network'].unique()
     unique_networks = unique_networks[(unique_networks != 'no_r_mat') & ~pd.isna(unique_networks)]
@@ -312,7 +314,7 @@ if os.path.exists(f'{xcpd_out}/3T_combined-network.tsv.tsv'):
         types = network_data['type'].unique()
         palette = {t: 'darkred' if t == 'wthn' else sns.color_palette("Set2", n_colors=len(types))[j]
                    for j, t in enumerate(types)}
-        
+
         pt.RainCloud(
             x='type', y='value', data=network_data, 
             palette=palette, bw=.4, width_viol=0.8, orient="v", ax=ax

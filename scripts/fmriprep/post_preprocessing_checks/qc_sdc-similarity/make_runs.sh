@@ -25,12 +25,15 @@ fi
 set +x 
 # determine data directory, run folders, and run templates
 session=${ses}
-run_folder=`pwd`
+run_folder=$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 check_folder="${run_folder}/run_files.${session}"
 check_template="${run_folder}/template_check.sh"
 #subj_list=${run_folder}/subject_list/${session}_ids.txt
 subj_list=${run_folder}/../../${session}_completed.tsv
 subset_n=$(cat ${run_folder}/../../${session}_completed.tsv | wc -l )
+# config file
+config_file=${run_folder}/../../../config.json
+uv_proj_path=$(jq -r '.uv_proj.proj_dir' "$config_file")
 
 email=`echo $USER@umn.edu`
 group=`groups|cut -d" " -f1`
@@ -51,7 +54,7 @@ cat $subj_list | head -n $subset_n | while read line ; do
 #cat $subj_list | while read line ; do
 	subj_id=`echo $line | awk -F' ' '{ print $1 }'`
 
-	sed -e "s|SUBJECT|${subj_id}|g" -e "s|SESSION|${ses_id}|g" ${check_template} > ${check_folder}/run${k}
+	sed -e "s|SUBJECT|${subj_id}|g" -e "s|UV_PROJECT|${uv_proj_path}|g" -e "s|SESSION|${ses_id}|g" ${check_template} > ${check_folder}/run${k}
 	k=$((k+1))
 done
 
