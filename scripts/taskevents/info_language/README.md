@@ -7,6 +7,8 @@ The [Barch et al. (2013, pg 177-178)](https://www.sciencedirect.com/science/arti
 
 "Language processing. The task being used in Phase II was developed by Binder et al. (2011) and used the E-prime scripts kindly provided by these investigators, which were then modified for our purposes. The task consists of two runs that each interleave 4 blocks of a story task and 4 blocks of a math task. As described in detail in Binder et. al. (2011), the goal of including the math blocks was to provide a comparison task that was attentionally demanding, similar in auditory and phonological input, and unlikely to generate activation of anterior temporal lobe regions involved in semantic processing, though likely to engage numerosity related processing in the parietal cortex. The lengths of the blocks vary (average of approximately 30 s), but the task was designed so that the math task blocks match the length of the story task blocks, with some additional math trials at the end of the task to complete the 3.8 min run as needed. The story blocks present participants with brief auditory stories (5–9 sentences) adapted from Aesop's fables, followed by a 2-alternative forcedchoice question that asks the participants about the topic of the story. The example provided in the original Binder paper (p. 1466) is “For example, after a story about an eagle that saves a man who had done him a favor, participants were asked, ‘That was about revenge or reciprocity?’” The math task also presents trials auditorily and requires the subjects to complete addition and subtraction problems. The trials present the subjects with a series of arithmetic operations (e.g., “Fourteen plus twelve”), followed by “equals” and then two choices (e.g., “twenty-nine or twenty-six”). The participants push a button to select either the first or the second answer. The math task is adaptive to maintain a similar level of difficulty across the participants. For more details on the task, see Binder et al. (2011)."
 
+*Note, between Story Option 1 and Story Option 2 presentations there is a brief, audible "or" for the Story block.*
+
 
 ## Basic Trial Structure
 Each block begins with either a Story or Math trial presentation. After the presentation, a corresponding question is shown for the respective trial type. This is followed by a response/answer window. Typically, a Change block follows each trial block. For Math trials, consecutive Math blocks often occur. See the diagram below.
@@ -97,10 +99,10 @@ Fisrt, the distirbutions of response times across trial type.
   - **PresentStoryOption1.RTTime:** Response time  
   - **PresentStoryOption1.RT:** Response time (ms)  
   - **PresentStoryOption1.RESP:** Button press (2/3, index/middle?)
-  - **OrAudio.OnsetTime:** Audio label   *[what is this? not documented in paper]*
-  - **OrAudio.FinishTime:** Audio end   *[what is this? not documented in paper]*
-  - **OrAudio.RTTime:**   *[what is this? not documented in paper]*
-  - **OrAudio.RT:**   *[what is this? not documented in paper]*
+  - **OrAudio.OnsetTime:** Audio label  of "Or" audio presentation between story options
+  - **OrAudio.FinishTime:** Audio end  of "Or" audio presentation between story options
+  - **OrAudio.RTTime:**  
+  - **OrAudio.RT:**   
   - **PresentStoryOption2.OnsetTime:** Response  
   - **PresentStoryOption2.FinishTime:** Response  
   - **PresentStoryOption2.RTTime:** Response time  

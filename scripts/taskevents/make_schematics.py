@@ -39,7 +39,7 @@ def create_language_task_diagram(save_to_path: str = None):
     or_width = 2      # Width for the "OR" text
     response_width = 60
     change_width = 40
-    gap_width = 20
+    gap_width = 0
 
     # Starting x position
     start_x = 50
@@ -50,10 +50,10 @@ def create_language_task_diagram(save_to_path: str = None):
                     stroke='black', stroke_width=2))
 
     # Add time markers
-    for i in range(6):  # Increased to 6 time markers
+    for i in range(8):  # Increased to 6 time markers
         x_pos = start_x + i * 100
         dwg.add(dwg.line(start=(x_pos, timeline_y-5), end=(x_pos, timeline_y+5), stroke='black', stroke_width=1))
-        dwg.add(dwg.text(f'{i*10}s', insert=(x_pos, timeline_y+20), text_anchor='middle', font_size=10, font_family='Arial'))
+    #    dwg.add(dwg.text(f'{i*10}s', insert=(x_pos, timeline_y+20), text_anchor='middle', font_size=10, font_family='Arial'))
 
     # Function to add a block
     def add_block(x, y, width, height, color, label, sublabel=None):
@@ -357,7 +357,7 @@ def create_relational_task_diagram(save_to_path: str = None):
     for i, time in enumerate(time_points):
         x_pos = start_x + (end_x - start_x) * (time / 150)
         dwg.add(dwg.line(start=(x_pos, timeline_y - tick_height/2), end=(x_pos, timeline_y + tick_height/2), stroke='black', stroke_width=1))
-        dwg.add(dwg.text(f"{time}s", insert=(x_pos, timeline_y + text_offset), text_anchor='middle', font_family='Arial', font_size=12))
+        #dwg.add(dwg.text(f"{time}s", insert=(x_pos, timeline_y + text_offset), text_anchor='middle', font_family='Arial', font_size=12))
 
     # Define blocks for a single run based on task description
     # 3 relational blocks (18s each), 3 matching blocks (18s each), 3 fixation blocks (16s each)
