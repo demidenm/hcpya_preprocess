@@ -337,8 +337,39 @@ def create_relational_task_diagram(save_to_path: str = None):
     colors = {
         'relational': '#4682B4',  # Blue
         'matching': '#FF6347',    # Red
-        'fixation': '#E0E0E0'     # Light gray
+        'fixation': '#E0E0E0',    # Light gray
+        'prompt': '#8A2BE2'       # Purple for prompts
     }
+
+    # Add legend
+    legend_y = 90
+    legend_x_start = 250
+    legend_spacing = 100
+    legend_rect_size = 15
+    
+    # Prompt legend item
+    dwg.add(dwg.rect(insert=(legend_x_start, legend_y), size=(legend_rect_size, legend_rect_size), 
+                     fill=colors['prompt'], stroke='black', stroke_width=1))
+    dwg.add(dwg.text('Prompt', insert=(legend_x_start + legend_rect_size + 5, legend_y + legend_rect_size - 2), 
+                     font_family='Arial', font_size=12))
+    
+    # Relational legend item
+    dwg.add(dwg.rect(insert=(legend_x_start + legend_spacing, legend_y), size=(legend_rect_size, legend_rect_size), 
+                     fill=colors['relational'], stroke='black', stroke_width=1))
+    dwg.add(dwg.text('Relational (R)', insert=(legend_x_start + legend_spacing + legend_rect_size + 5, legend_y + legend_rect_size - 2), 
+                     font_family='Arial', font_size=12))
+    
+    # Matching legend item
+    dwg.add(dwg.rect(insert=(legend_x_start + 2*legend_spacing, legend_y), size=(legend_rect_size, legend_rect_size), 
+                     fill=colors['matching'], stroke='black', stroke_width=1))
+    dwg.add(dwg.text('Matching (M)', insert=(legend_x_start + 2*legend_spacing + legend_rect_size + 5, legend_y + legend_rect_size - 2), 
+                     font_family='Arial', font_size=12))
+    
+    # Fixation legend item
+    dwg.add(dwg.rect(insert=(legend_x_start + 3*legend_spacing, legend_y), size=(legend_rect_size, legend_rect_size), 
+                     fill=colors['fixation'], stroke='black', stroke_width=1))
+    dwg.add(dwg.text('Fixation (p)', insert=(legend_x_start + 3*legend_spacing + legend_rect_size + 5, legend_y + legend_rect_size - 2), 
+                     font_family='Arial', font_size=12))
 
     # Define timeline parameters
     start_x = 50
@@ -360,20 +391,26 @@ def create_relational_task_diagram(save_to_path: str = None):
         #dwg.add(dwg.text(f"{time}s", insert=(x_pos, timeline_y + text_offset), text_anchor='middle', font_family='Arial', font_size=12))
 
     # Define blocks for a single run based on task description
-    # 3 relational blocks (18s each), 3 matching blocks (18s each), 3 fixation blocks (16s each)
+    # Now each relational and matching block starts with a 2s prompt
     blocks = [
-        {'type': 'relational', 'label': 'Relational Block', 'duration': 18},
-        {'type': 'matching', 'label': 'Matching Block', 'duration': 18},
-        {'type': 'fixation', 'label': 'Fixation', 'duration': 16},
-        {'type': 'relational', 'label': 'Relational Block', 'duration': 18},
-        {'type': 'matching', 'label': 'Matching Block', 'duration': 18},
-        {'type': 'fixation', 'label': 'Fixation', 'duration': 16},
-        {'type': 'relational', 'label': 'Relational Block', 'duration': 18},
-        {'type': 'matching', 'label': 'Matching Block', 'duration': 18},
-        {'type': 'fixation', 'label': 'Fixation', 'duration': 16},
+        {'type': 'prompt', 'label': ' ', 'duration': 2},  # Just use 'R' for relational prompt
+        {'type': 'relational', 'label': 'R Block', 'duration': 16},  # Reduced to 16s
+        {'type': 'prompt', 'label': ' ', 'duration': 2},  # Just use 'M' for matching prompt
+        {'type': 'matching', 'label': 'M Block', 'duration': 16},  # Reduced to 16s
+        {'type': 'fixation', 'label': 'F BLock', 'duration': 16},
+        {'type': 'prompt', 'label': ' ', 'duration': 2},
+        {'type': 'relational', 'label': 'R Block', 'duration': 16},
+        {'type': 'prompt', 'label': ' ', 'duration': 2},
+        {'type': 'matching', 'label': 'M Block', 'duration': 16},
+        {'type': 'fixation', 'label': 'F Block', 'duration': 16},
+        {'type': 'prompt', 'label': ' ', 'duration': 2},
+        {'type': 'relational', 'label': 'R Block', 'duration': 16},
+        {'type': 'prompt', 'label': ' ', 'duration': 2},
+        {'type': 'matching', 'label': 'M Block', 'duration': 16},
+        {'type': 'fixation', 'label': 'F Block', 'duration': 16},
     ]
 
-    # Total duration is 156 seconds per run
+    # Total duration is still 156 seconds per run (9 blocks × 16s + 6 prompts × 2s)
 
     # Draw blocks
     current_time = 0
@@ -390,30 +427,44 @@ def create_relational_task_diagram(save_to_path: str = None):
             stroke_width=1
         ))
         
-        # Add label inside the block
-        dwg.add(dwg.text(
-            block['label'],
-            insert=(x_pos + block_width/2, timeline_y - block_height/2),
-            text_anchor='middle',
-            font_family='Arial',
-            font_size=10,
-            font_weight='bold'
-        ))
+        # Add label inside the block - for prompt, only add a single letter
+        if block['type'] == 'prompt':
+            # For prompts, just add a letter because space is tight
+            dwg.add(dwg.text(
+                block['label'],
+                insert=(x_pos + block_width/2, timeline_y - block_height/2),
+                text_anchor='middle',
+                font_family='Arial',
+                font_size=10,
+                font_weight='bold'
+            ))
+        else:
+            # For other blocks, add the full label
+            dwg.add(dwg.text(
+                block['label'],
+                insert=(x_pos + block_width/2, timeline_y - block_height/2),
+                text_anchor='middle',
+                font_family='Arial',
+                font_size=10,
+                font_weight='bold'
+            ))
         
         # For Relational and Matching blocks, add trial information
         if block['type'] == 'relational':
             # 4 trials per block, 3500ms per trial, 500ms ITI
-            trial_info = "4 trials x 3500ms"
+            trial_info = "Trials/ITI"
             iti_info = "+ ITI"
-        elif block['type'] == 'matching':
-            # 5 trials per block, 2800ms per trial, 400ms ITI
-            trial_info = "5 trials x 2800ms"
-            iti_info = "+ ITI"
-        else:
-            trial_info = ""
-            iti_info = ""
-        
-        if trial_info:
+            
+            # Indicate 4 instances of trials (visual representation)
+            trial_width = block_width / 4
+            for i in range(4):
+                dwg.add(dwg.line(
+                    start=(x_pos + i * trial_width, timeline_y - 20),
+                    end=(x_pos + i * trial_width, timeline_y - 10),
+                    stroke='black', stroke_width=1
+                ))
+            
+            # Add trial information text
             dwg.add(dwg.text(
                 trial_info,
                 insert=(x_pos + block_width/2, timeline_y - block_height/2 + 15),
@@ -421,20 +472,52 @@ def create_relational_task_diagram(save_to_path: str = None):
                 font_family='Arial',
                 font_size=8
             ))
+            #dwg.add(dwg.text(
+            #    iti_info,
+            #    insert=(x_pos + block_width/2, timeline_y - block_height/2 + 30),
+            #    text_anchor='middle',
+            #    font_family='Arial',
+            #    font_size=10
+            #))
+            
+        elif block['type'] == 'matching':
+            # 5 trials per block, 2800ms per trial, 400ms ITI
+            trial_info = "Trial/ITI"
+            iti_info = "+ ITI"
+            
+            # Indicate 5 instances of trials (visual representation)
+            trial_width = block_width / 5
+            for i in range(5):
+                dwg.add(dwg.line(
+                    start=(x_pos + i * trial_width, timeline_y - 20),
+                    end=(x_pos + i * trial_width, timeline_y - 10),
+                    stroke='black', stroke_width=1
+                ))
+            
+            # Add trial information text
             dwg.add(dwg.text(
-                iti_info,
-                insert=(x_pos + block_width/2, timeline_y - block_height/2 + 30),
+                trial_info,
+                insert=(x_pos + block_width/2, timeline_y - block_height/2 + 15),
                 text_anchor='middle',
                 font_family='Arial',
-                font_size=10
+                font_size=8
             ))
+            #dwg.add(dwg.text(
+            #    iti_info,
+            #    insert=(x_pos + block_width/2, timeline_y - block_height/2 + 30),
+            #    text_anchor='middle',
+            #    font_family='Arial',
+            #    font_size=10
+            #))
         
         current_time += block['duration']
 
     # Add description text
     description_text = [
-        "- Each run contains 3 relational blocks, 3 matching blocks, and 3 fixation blocks (16s each)",
-
+        "- Each run contains 3 Relational blocks, 3 Matching blocks, and 3 Fixation blocks",
+        "- Each relational (R) and matching (M) block starts with a ~2s prompt specifying the block type",
+        "- Relational blocks: 4 trials x 3500ms w/ ITI",
+        "- Matching blocks: 5 trials x 2800ms w/ ITI"
     ]
 
     for i, line in enumerate(description_text):
@@ -446,11 +529,6 @@ def create_relational_task_diagram(save_to_path: str = None):
             font_size=12
         ))
 
-
-
-    # Matching condition example
-    matching_x = 600
-    matching_y = 140
     # Save the drawing
     dwg.save()
 
