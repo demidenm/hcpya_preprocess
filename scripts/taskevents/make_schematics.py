@@ -11,13 +11,13 @@ def create_language_task_diagram(save_to_path: str = None):
         save_to_path = Path(save_to_path)
 
     # Create a new SVG drawing
-    dwg = svgwrite.Drawing(save_to_path, size=('800px', '400px'), profile='tiny')
+    dwg = svgwrite.Drawing(save_to_path, size=('950px', '400px'), profile='tiny')  # Increased width to accommodate new blocks
 
     # Add a white background
     dwg.add(dwg.rect(insert=(0, 0), size=('100%', '100%'), fill='white'))
 
     # Add title
-    dwg.add(dwg.text('Language Task: Block Structure', insert=(400, 30), 
+    dwg.add(dwg.text('Language Task: Block Structure', insert=(475, 30), 
                     text_anchor='middle', font_size=20, font_weight='bold', font_family='Arial'))
 
     # Define colors
@@ -25,6 +25,7 @@ def create_language_task_diagram(save_to_path: str = None):
     math_color = '#CD5C5C'   # Indian Red
     response_color = '#66CDAA'  # Medium Aquamarine
     change_color = '#DDA0DD'  # Plum
+    option_color = '#FFD700'  # Gold for options
 
     # Y positions for different task types
     story_y = 100
@@ -34,6 +35,8 @@ def create_language_task_diagram(save_to_path: str = None):
     # Define block widths (time proportions)
     presentation_width = 150
     question_width = 80
+    option_width = 70  # Width for story options
+    or_width = 2      # Width for the "OR" text
     response_width = 60
     change_width = 40
     gap_width = 20
@@ -42,11 +45,12 @@ def create_language_task_diagram(save_to_path: str = None):
     start_x = 50
 
     # Create timeline
-    dwg.add(dwg.line(start=(start_x, timeline_y), end=(start_x + 2*(presentation_width + question_width + response_width + change_width + gap_width), timeline_y), 
+    dwg.add(dwg.line(start=(start_x, timeline_y), 
+                    end=(start_x + 2*(presentation_width + question_width + response_width + change_width + gap_width) + option_width + or_width, timeline_y), 
                     stroke='black', stroke_width=2))
 
     # Add time markers
-    for i in range(5):
+    for i in range(6):  # Increased to 6 time markers
         x_pos = start_x + i * 100
         dwg.add(dwg.line(start=(x_pos, timeline_y-5), end=(x_pos, timeline_y+5), stroke='black', stroke_width=1))
         dwg.add(dwg.text(f'{i*10}s', insert=(x_pos, timeline_y+20), text_anchor='middle', font_size=10, font_family='Arial'))
@@ -70,14 +74,56 @@ def create_language_task_diagram(save_to_path: str = None):
     add_connector(current_x, story_y + 25, timeline_y)
     add_connector(current_x + presentation_width, story_y + 25, timeline_y)
 
-    # Story Question
+    # Story 1 Option
     current_x += presentation_width
-    add_block(current_x, story_y, question_width, 60, story_color, 'Question', '2-alternative')
+    add_block(current_x, story_y, option_width, 60, option_color, 'Story 1', 'Option')
     add_connector(current_x, story_y + 25, timeline_y)
-    add_connector(current_x + question_width, story_y + 25, timeline_y)
+    add_connector(current_x + option_width, story_y + 25, timeline_y)
+
+    # Audio "OR" with speaker icon
+    current_x += option_width
+    
+    # Create speaker/audio icon
+    icon_size = 16
+    icon_x = current_x + or_width/2 - icon_size/2
+    icon_y = story_y - 70
+    
+    # Speaker base
+    dwg.add(dwg.rect(insert=(icon_x, icon_y), 
+                    size=(icon_size/2, icon_size), 
+                    fill='black', 
+                    rx=2, ry=2))
+    
+    # Speaker cone (triangle)
+    speaker_cone = dwg.path(d=f"M{icon_x + icon_size/2},{icon_y} L{icon_x + icon_size},{icon_y - icon_size/4} L{icon_x + icon_size},{icon_y + icon_size + icon_size/4} L{icon_x + icon_size/2},{icon_y + icon_size} Z", 
+                          fill='black')
+    dwg.add(speaker_cone)
+    
+    # Sound waves (arcs)
+    wave1 = dwg.path(d=f"M{icon_x + icon_size + 3},{icon_y + icon_size/2 - icon_size/4} a{icon_size/4},{icon_size/3} 0 0,1 0,{icon_size/2}", 
+                    stroke='black', stroke_width=2, fill='none')
+    dwg.add(wave1)
+    
+    wave2 = dwg.path(d=f"M{icon_x + icon_size + 7},{icon_y + icon_size/2 - icon_size/3} a{icon_size/3},{icon_size/2} 0 0,1 0,{icon_size/1.5}", 
+                    stroke='black', stroke_width=2, fill='none')
+    dwg.add(wave2)
+    
+    # Add the OR text below the icon
+    dwg.add(dwg.text("'Or'", insert=(current_x + or_width/2, story_y - 35), 
+            text_anchor='middle', font_size=14, font_family='Arial', font_weight='bold'))
+    
+    add_connector(current_x, story_y + 25, timeline_y)
+    add_connector(current_x + or_width, story_y + 25, timeline_y)
+    add_connector(current_x + or_width, story_y + 25, timeline_y)
+
+    # Story 2 Option
+    current_x += or_width
+    add_block(current_x, story_y, option_width, 60, option_color, 'Story 2', 'Option')
+    add_connector(current_x, story_y + 25, timeline_y)
+    add_connector(current_x + option_width, story_y + 25, timeline_y)
 
     # Story Response
-    current_x += question_width
+    current_x += option_width
     add_block(current_x, story_y, response_width, 60, response_color, 'Response')
     add_connector(current_x, story_y + 25, timeline_y)
     add_connector(current_x + response_width, story_y + 25, timeline_y)
@@ -89,9 +135,9 @@ def create_language_task_diagram(save_to_path: str = None):
     add_connector(current_x + change_width, story_y + 25, timeline_y)
 
     # Gap
-    current_x += change_width 
+    current_x += change_width + gap_width
 
-    # Math Block
+    # Math Block - Starting at the adjusted position
     # Math Presentation
     add_block(current_x, math_y, presentation_width, 60, math_color, 'Math Presentation', 'arithmetic operations')
     add_connector(current_x, math_y + 25, timeline_y)
@@ -116,11 +162,12 @@ def create_language_task_diagram(save_to_path: str = None):
     add_connector(current_x + change_width, math_y + 25, timeline_y)
 
     # Add legend
-    legend_x = 600
+    legend_x = 750  # Moved further right
     legend_y = 30
     legend_items = [
         ("Story Blocks", story_color),
         ("Math Blocks", math_color),
+        ("Story Options", option_color),
         ("Response Window", response_color),
         ("Change Block", change_color)
     ]
@@ -132,7 +179,7 @@ def create_language_task_diagram(save_to_path: str = None):
 
     # Add experiment notes
     notes = [
-        "• Story: Aesop's fables followed by comprehension question",
+        "• Story: Aesop's fables followed by two alternative options",
         "• Math: Adaptive difficulty arithmetic problems"
     ]
 

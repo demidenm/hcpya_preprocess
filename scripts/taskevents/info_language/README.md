@@ -12,7 +12,7 @@ The [Barch et al. (2013, pg 177-178)](https://www.sciencedirect.com/science/arti
 Each block begins with either a Story or Math trial presentation. After the presentation, a corresponding question is shown for the respective trial type. This is followed by a response/answer window. Typically, a Change block follows each trial block. For Math trials, consecutive Math blocks often occur. See the diagram below.
 
 <div style="text-align: center;">
-  <img src="./language_task.svg" />
+  <img src="./language_task_diagram.svg" />
 </div>
 
 The below distributions are from Run 1 across **all available subjects and trials**.
