@@ -148,7 +148,7 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
 
             # Response period
             # cleaned up after input form Nicholas Bloom (nbloom@wustl.edu) who helped code Language tas.
-            long_format.append({
+            long_format.append(
                 'onset': row['ResponsePeriod.OnsetTime'] - adjust_by_trigger,
                 'duration': (row['ResponsePeriod.FinishTime'] - row['ResponsePeriod.OnsetTime']),
                 'trial_type': 'story_answer',
@@ -1302,8 +1302,8 @@ def gamble_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
                 filler_duration = row['FillerFixation.OnsetToOnsetTime']
             else:
                 quest_duration = row['QuestionMark.OnsetToOnsetTime']
-                filler_onset = None
-                filler_duration = None
+                filler_onset = 0
+                filler_duration = 0
      
             long_format.append({
                 'onset': row['QuestionMark.OnsetTime'] - adjust_by_trigger,
@@ -1333,8 +1333,8 @@ def gamble_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
                 fb_onset = row['Feedback.OnsetTime'] - adjust_by_trigger
                 fb_duration = row['Feedback.OnsetToOnsetTime']
             else:
-                fb_onset = None
-                fb_duration = None
+                fb_onset = 0
+                fb_duration = 0
                 
             long_format.append({
                 'onset': fb_onset,

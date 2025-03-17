@@ -62,13 +62,13 @@ The distribution of response time across trial types
 Second, histogram of response times by stimulus types.
 
 <div style="text-align: center;">
-  <img src="../imgs/task-wm_run-run1_type-histresponsetimetype.png" />
+  <img src="../imgs/task-relational_run-run1_type-histresponsetimetype.png" />
 </div>
 
 Third, distribution of response times by stimulus types and blocks.
 
 <div style="text-align: center;">
-  <img src="../imgs/task-wm_run-run1_type-histresponsetimetypeblock.png" />
+  <img src="../imgs/task-relational_run-run1_type-histresponsetimetypeblock.png" />
 </div>
 
 

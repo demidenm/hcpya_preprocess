@@ -41,7 +41,7 @@ def process_subject(sub_file, task_name, dir_label, run_num, output_name):
         converted_df = wm_eprime_preproc(events_file)
     
     # Export the processed dataframe
-    file_name = f"{output_name}/sub-{subject}_{session}_task-{task_name.lower()}_dir-{dir_label}_{run_num}_events.tsv"
+    file_name = f"{output_name}/sub-{subject}_{session}_task-{task_name.lower()}_dir-{dir_label}_run-{run_num}_events.tsv"
     converted_df.to_csv(file_name, sep="\t", index=False)
     print(f"Processed file saved: {file_name}")
 
@@ -57,8 +57,8 @@ output_dir = args.output
 session = "ses-3T"
 task_names = ['EMOTION', 'MOTOR', 'RELATIONAL', 'SOCIAL', 'WM', 'GAMBLING', 'LANGUAGE']
 runs = {
-    "LR": "run2",
-    "RL": "run1"
+    "LR": 2,
+    "RL": 1
 }
 
 
@@ -66,7 +66,7 @@ runs = {
 for task_name in task_names:
     print(f"Processing task: {task_name}")
     for dir_label, run_num in runs.items():
-        files = sorted(Path(hcp_eprime_folder).rglob(f"*_3T_{task_name}_{run_num}_TAB.txt"))
+        files = sorted(Path(hcp_eprime_folder).rglob(f"*_3T_{task_name}_run{run_num}_TAB.txt"))
         print(f"   Found {len(files)} subject files")
         for sub_file in files:
             # assuming position of sub ID from HCP path -7. Seventh index from file name.

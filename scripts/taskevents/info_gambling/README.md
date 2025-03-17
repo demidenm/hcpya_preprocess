@@ -14,7 +14,7 @@ The task includes Reward, Punishment and Neutral Trials. The tasks starts presen
 See diagram below.
 
 <div style="text-align: center;">
-  <img src="./gamble_task_diagram.svg" />
+  <img src="./gambling_task_diagram.svg" />
 </div>
 
 The below distributions are from Run 1 across **all available subjects and trials**.

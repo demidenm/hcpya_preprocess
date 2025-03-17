@@ -686,7 +686,7 @@ def create_social_task_diagram(save_to_path: str = None):
 
 def create_gamble_task_diagram(save_to_path: str = None):
     if save_to_path is None:
-        save_to_path = Path("./info_gamble") / "gamble_task_diagram.svg"
+        save_to_path = Path("./info_gambling") / "gambling_task_diagram.svg"
     else:
         save_to_path = Path(save_to_path)
 
@@ -1131,7 +1131,7 @@ if __name__ == "__main__":
     # Execute the appropriate function based on task_name
     if task_name == "emotion":
         create_emotion_task_diagram(save_to_path=output_path)
-    elif task_name == "gamble":
+    elif task_name == "gambling":
         create_gamble_task_diagram(save_to_path=output_path)
     elif task_name == "language":
         create_language_task_diagram(save_to_path=output_path)
@@ -1145,5 +1145,5 @@ if __name__ == "__main__":
         create_wm_task_diagram(save_to_path=output_path)
     else:
         print(f"Error: Unknown task name '{task_name}'")
-        print("Available tasks: emotion, gamble, language, motor, relational, social, wm")
+        print("Available tasks: emotion, gambling, language, motor, relational, social, wm")
         parser.print_help()
