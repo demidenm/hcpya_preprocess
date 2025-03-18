@@ -59,6 +59,13 @@ Fourth, histogram of response times by n-back and target type
   <img src="../imgs/task-wm_run-run1_type-histresponsetimestarget.png" />
 </div>
 
+Fifth, histogram of response times by n-back and stimulus type
+
+
+<div style="text-align: center;">
+  <img src="../imgs/task-wm_run-run-1_type-histresponsetimesstimcond.png" />
+</div>
+
 
 ## WM Task
 ### Labels
