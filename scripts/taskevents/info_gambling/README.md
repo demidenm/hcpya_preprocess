@@ -24,7 +24,7 @@ The below distributions are from Run 1 across **all available subjects and trial
 First, the distribution of Question Mark.
 
 <div style="text-align: center;">
-  <img src="../imgs/task-gambling_run-run1_type-qmarkdurs.png" />
+  <img src="../imgs/task-gambling_run-run-1_type-qmarkdurs.png" />
 </div>
 
 Second, the distribution of the Filler
