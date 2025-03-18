@@ -33,7 +33,21 @@ Second, the distribution of the Filler
   <img src="../imgs/task-gambling_run-run1_type-fillerdurs.png" />
 </div>
 
-Third, the distribution of the full gamble block durations.
+
+Third, the distribution of the feedback durations.
+
+<div style="text-align: center;">
+  <img src="../imgs/task-gambling_run-run1_type-feedbackduration.png" />
+</div>
+
+Fourth, the distribution of the ISI durations.
+
+<div style="text-align: center;">
+  <img src="../imgs/task-gambling_run-run1_type-isidura.png" />
+</div>
+
+
+Fifth, the distribution of the full gamble block durations.
 
 <div style="text-align: center;">
   <img src="../imgs/task-gambling_run-run1_type-fullblockdur.png" />

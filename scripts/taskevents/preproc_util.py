@@ -148,7 +148,7 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
 
             # Response period
             # cleaned up after input form Nicholas Bloom (nbloom@wustl.edu) who helped code Language tas.
-            long_format.append(
+            long_format.append({
                 'onset': row['ResponsePeriod.OnsetTime'] - adjust_by_trigger,
                 'duration': (row['ResponsePeriod.FinishTime'] - row['ResponsePeriod.OnsetTime']),
                 'trial_type': 'story_answer',
@@ -1296,14 +1296,14 @@ def gamble_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
         if row['Procedure[Trial]'] == 'GamblingTrialPROC':
             
             # sometimes the first row has 0 for onset / durations, this accounts for it.
-            if row['FillerFixation.OnsetTime'] not in [0, None]:
+            if row['FillerFixation.OnsetTime'] not in [0, None] and row['FillerFixation.OnsetTime'] > row['QuestionMark.OnsetTime']:
                 quest_duration = row['FillerFixation.OnsetTime'] - row['QuestionMark.OnsetTime']
                 filler_onset = row['FillerFixation.OnsetTime'] - adjust_by_trigger
                 filler_duration = row['FillerFixation.OnsetToOnsetTime']
             else:
                 quest_duration = row['QuestionMark.OnsetToOnsetTime']
-                filler_onset = 0
-                filler_duration = 0
+                filler_onset = np.nan
+                filler_duration = np.nan
      
             long_format.append({
                 'onset': row['QuestionMark.OnsetTime'] - adjust_by_trigger,
@@ -1329,12 +1329,12 @@ def gamble_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
             })
 
             # sometimes the first row has 0 for onset / durations, this accounts for it.
-            if row['Feedback.OnsetTime'] not in [0, None]:
+            if not (row['Feedback.OnsetTime'] == 0):
                 fb_onset = row['Feedback.OnsetTime'] - adjust_by_trigger
                 fb_duration = row['Feedback.OnsetToOnsetTime']
             else:
-                fb_onset = 0
-                fb_duration = 0
+                fb_onset = np.nan
+                fb_duration = np.nan
                 
             long_format.append({
                 'onset': fb_onset,
