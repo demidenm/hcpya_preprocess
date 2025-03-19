@@ -29,7 +29,9 @@ dependencies = [
     "pyrelimri",
     "svgwrite",
     "jupyter",
-    "notebook"
+    "notebook",
+    "nbformat",
+    "ipython"
 ]
 
 
