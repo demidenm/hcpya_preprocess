@@ -1,6 +1,6 @@
 # Converting HCP E-Prime Task Timings to BIDS
 
-The scripts here helpl download and convert the openly-available HCP E-Prime data to BIDS-specified events.tsv files. 
+The scripts here help download and convert the openly-available HCP E-Prime data to BIDS-specified events.tsv files.
 
 ## Setting up AWS
 
@@ -10,13 +10,20 @@ Before being able to download the eprime data, you will need to setup your AWS C
 pip install awscli
 ```
 
-After install the AWS Client, run the below to configure your HCP credentials. (Note: I specify the profile here just in case you have different credentials). The configurations step will ask for (1) Access Key and (2) secret key for HCP. To obtain these, you will need to login to your setup [HCP account](https://db.humanconnectome.org/app/template/Login.vm). Once logged in, within the *WU-Minn HCP Data - 1200 Subjects* section, click on **Amazon S3 Access Enabled**. Here, you can create and copy and pase your (1) Access Key ID and (2) Secret Access key. You ID will always be available but the secret key will not, so store the latter as needed. You can always recreate it if you have forgotten yours.
+After installing the AWS Client, run the below to configure your HCP credentials. (Note: Profile specification is recommended if you have different credentials).
+
+The configuration step will ask for:
+
+1. An Access Key for HCP
+2. A Secret Key for HCP
+
+To obtain these, login to your [HCP account](https://db.humanconnectome.org/app/template/Login.vm). Once logged in, within the *WU-Minn HCP Data - 1200 Subjects* section, look for **Amazon S3 Access**. Here, you can create and copy your (1) Access Key ID and (2) Secret Access key. Your ID will always be available but the secret key will not, so store it securely. You can always recreate it if needed.
 
 ```bash
 aws configure --profile hcp
 ```
 
-Once you have the configuration setup, you should double check your profile in your credentials and configation file:
+Once configured, verify your profile in your credentials and configuration files:
 
 ```bash
 # configuration
@@ -28,7 +35,7 @@ nano ~/.aws/config
 nano ~/.aws/credentials
 ```
 
-The `~/.aws/config` file may look like the following. Adding `s3 part` will optimize S3 transfer performance:
+The `~/.aws/config` file may look like the following. Per Ross Blair, adding `s3` part optimizes S3 transfer performance:
 
 ```
 [profile hcp]
@@ -40,7 +47,7 @@ region = us-west-2
 output = json
 ```
 
-The `~/.aws/credentials` file will look like the below (note, these are fake keys)
+The `~/.aws/credentials` file will look like this (note, these are fake keys):
 ```
 [hcp]
 aws_access_key_id = RKIRA324234ASHDF
@@ -49,40 +56,39 @@ aws_secret_access_key = 8E8RXcAxfdadfaA9084taskrEHRm
 
 ## Downloading the HCP E-prime Data
 
-To download the HCP-1200 eprime data, use the `download_eprimehcp.py` script. A number of the input values are set to default (e.g., the bucket (hcp-openaccess) and subdirectory in bucket (HCP_1200)). The rquirements are the profile that aws uses (default: hcp), the output folder where to save the eprime files (default: ./hcp-eprime), and the number of workers to parallelize over (default 6).
+To download the HCP-1200 E-Prime data, use the `download_eprimehcp.py` script. Many input values have defaults (e.g., bucket (hcp-openaccess) and subdirectory (HCP_1200)). Requirements are the AWS profile (default: hcp), output folder (default: ./hcp-eprime), and number of workers (default: 6).
 
 ```bash
 uv run python download_eprimehcp.py --profile hcp --output ./hcp-eprime --workers 6
 ```
 
 This script will:
+- Download E-Prime data files from the HCP S3 bucket
+- Search for TAB.txt files containing "eprime" in the file path for each subject
+- Use parallel downloading for efficient processing across all subjects (1000+), tasks (7) and runs (2)
+- Maintain the original directory structure when saving files locally
 
-- Downloads E-Prime data files from the HCP (Human Connectome Project) S3 bucket
-- Searches for TAB.txt files containing "eprime" in the file path for each subject in the HCP_1200 dataset
-- Uses parallel downloading (with configurable number of worker threads) to efficiently download multiple files simultaneously across all of the subjects (1000+), tasks (7) and runs (2).
-- Maintains the original directory structure when saving files locally
+## Converting HCP E-Prime (.txt) to Events (.csv)
 
-## Script converting HCP E-Prime (.txt) to Events (.csv)
-
-This script processes HC) E-Prime data files and converts them into BIDS-compatible event files. It handles multiple task types (EMOTION, WM, GAMBLING, etc.) and organizes the output by subject, session and task.
+This script processes HCP E-Prime data files and converts them into BIDS-compatible event files. It handles multiple task types and organizes the output by subject, session and task.
 
 ### What the Script Does
 
 The script performs the following operations:
 
 1. Reads E-Prime tab-delimited files containing raw task data
-2. Processes the data based on task type using task-specific preprocessing functions
+2. Processes data based on task type using task-specific preprocessing functions
 3. Transforms wide-format E-Prime data into long-format BIDS-compatible event files
 4. Calculates onset times, durations, and other trial-specific information
-5. Organizes the output in a BIDS-compliant directory structure
-6. Handles both Left-to-Right (LR) and Right-to-Left (RL) acquisition directions (which relate to runs in HCP)
+5. Organizes output in a BIDS-compliant directory structure
+6. Handles both Left-to-Right (LR) and Right-to-Left (RL) acquisition directions
 
-For each task (such as the Working Memory task documented in the example), the preprocessing functions:
+For each task, the preprocessing functions:
 - Label trial blocks based on procedure markers
-- Calculate precise onset times and durations based on the E-Prime timing information (adjusted for trigger times)
+- Calculate precise onset times and durations based on E-Prime timing information
 - Extract trial types, stimulus information and participant responses
-- Convert timing information from milliseconds to seconds (note, response times remains in miliseconds)
-- Format the data according to BIDS specifications
+- Convert timing information from milliseconds to seconds (response times remain in milliseconds)
+- Format data according to BIDS specifications
 
 ### Running the Script
 
@@ -94,7 +100,6 @@ uv run python preprocess_hcp_eprime.py --input /home/user/data/hcp_eprime/HCP_12
 
 - `--input` (required): Path to the folder containing HCP E-Prime files
 - `--output` (required): Path where processed event files will be saved
-
 
 ### Output Structure
 
@@ -118,11 +123,12 @@ The script processes data for these HCP tasks by default:
 - WM (Working Memory)
 - GAMBLING
 - LANGUAGE
-The names are UPPERCASE in the HCP E-PRIME input naming convesion. The task names are coverted to lowercase as part of the final file names.
 
-### Reproducible task-schematic svg files
+The names are UPPERCASE in the HCP E-PRIME input naming convention. The task names are converted to lowercase in the final file names.
 
-Task descriptions and trials structures were summarized to claudi.ai. This code was aggregated to create a reproducible task schematic function. To run for the options:
+### Reproducible Task-Schematic SVG Files
+
+Task descriptions and trial structures were summarized to create reproducible task schematic functions. To run for the options:
 - emotion
 - motor
 - relational
@@ -133,14 +139,12 @@ Task descriptions and trials structures were summarized to claudi.ai. This code 
 
 use the following code:
 ```bash
-uv --project <uv_project_directory> run python make_schematics.py --task_name <task_name>>
-
+uv --project <uv_project_directory> run python make_schematics.py --task_name <task_name>
 ```
 
 ## Context within E-Prime Files
 
 The E-Prime data contains values that help us understand the structure of experimental trials, including:
-
 - Order and sequence of different trial types
 - Trial- and Block-level information
 - Onset times
@@ -149,4 +153,4 @@ The E-Prime data contains values that help us understand the structure of experi
 
 For initial blocks, timing information from E-Prime is included in parentheses to help validate the sequence of events.
 
-These are expanded on within each task folder. 
+These are expanded on within each task folder.

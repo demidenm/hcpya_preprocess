@@ -13,11 +13,6 @@ def compute_vifs(design_matrix):
     return vif_data
 
 
-import nbformat 
-import os
-import re
-from IPython.display import display, Markdown
-
 def generate_tablecontents(notebook_name, auto_number=True):
     """Generate a Table of Contents from markdown headers in the current Jupyter Notebook.
     *Function recommended by claude for table of contents formatting. Iteratively fixed in code
