@@ -15,8 +15,10 @@ def compute_vifs(design_matrix):
 
 def generate_tablecontents(notebook_name, auto_number=True):
     """Generate a Table of Contents from markdown headers in the current Jupyter Notebook.
-    *Function recommended by claude for table of contents formatting. Iteratively fixed in code
-    
+    *******
+    ** Function recommended by claude for table of contents formatting. Iteratively fixed in code
+    *******
+
     Parameters:
         notebook_name (str): Name of the notebook file to process
         auto_number (bool): Whether to automatically number headers (default: True)

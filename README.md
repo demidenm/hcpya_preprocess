@@ -8,7 +8,7 @@ This repository contains the scripts and configurations required for preprocessi
 
 As of November 26, 2024, the pipeline uses fMRIPrep [v24.0.1](https://pypi.org/project/fmriprep/24.0.1/), MRIQC [v23.1.0](https://pypi.org/project/mriqc/23.1.0/) & XCP-D [v0.9.0](https://xcp-d.readthedocs.io/en/0.9.0/)
 
-As of March 13, 2025, a pipleine has been included to convert the e-prime task data to events.tsv files. This provide expanded onset, durations and trial- and block-level details.
+As of March 13, 2025, a pipleine has been included to convert the e-prime task data to events.tsv files. This provide expanded onset, durations and trial- and block-level details. In addition, pilot first-, second- and group-level models have been instantiated for each of the seven HCP tasks.
 
 ## Repository Structure
 
@@ -36,6 +36,11 @@ As of March 13, 2025, a pipleine has been included to convert the e-prime task d
         ├── preproc_util.py         # functions to label blocks and extract task-specific details
         ├── info_*/                 # task details / summaries
         ├── imgs/                   # descriptives of task events
+    ├── taskbold/                   # Scripts for to fit subject- and group-level GLM models for HCP tasks
+        ├── README.md
+        ├── glm_utils               # Functions to prepare behavioral data and fit models 
+        ├── pilot_bold-models.ipynb # Playground for HCP task data prep and fitting models
+
 
 ```
 
@@ -54,13 +59,18 @@ As of March 13, 2025, a pipleine has been included to convert the e-prime task d
 
 ### E-Prime to Events.tsv
 
-This repository contains scripts for downloading and converting Human Connectome Project (HCP) E-Prime task data into BIDS-compatible event files.
+This part of the repository contains scripts for downloading and converting Human Connectome Project (HCP) E-Prime task data into BIDS-compatible event files.
 Key Features
 
 - AWS Setup: Instructions for configuring AWS credentials to access the HCP S3 bucket
 - Automated Downloading: Parallel download of E-Prime data files from HCP-1200 dataset (~1000+ subjects, 7 tasks, 2 runs each)
 - BIDS Conversion: Transforms raw E-Prime task data into standardized BIDS events.tsv files
 - Task Support: Processes data for all major HCP tasks (EMOTION, MOTOR, RELATIONAL, SOCIAL, WM, GAMBLING, LANGUAGE)
+
+### Task BOLD Models
+
+This part of the repository contains scripts for preparing the behavioral data, specifying and fitting the GLM models for task-fMRI analyses.
+
 
 ## Usage
 
