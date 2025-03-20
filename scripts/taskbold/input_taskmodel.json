@@ -1,0 +1,148 @@
+{
+    "social":{
+        "runs": ["1","2"],
+        "fwhm": "5.0",
+        "noise_mod": "ar1",
+        "hrf_type": "spm",
+        "boldtr": ".720",
+        "slice_time_corr": "False",
+        "highpass": "",
+        "detrend": "",
+        "hcp":{
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["movie"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "mentbase": "movie_mental",
+                "randbase": "movie_random",
+                "mentvrand": "movie_mental - movie_random"
+            }
+        },
+        "alt": {
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["movie", "response"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "True",
+            "contrasts":{
+                "mentbase": "movie_mental",
+                "randbase": "movie_random",
+                "mentvrand": "movie_mental - movie_random",
+                "respment": "response_mental",
+                "resprand": "response_mental",
+                "rt": "rt"
+            }
+        }
+    },
+    "wm":{
+
+    },
+    "gambling":{
+        "runs": ["1","2"],
+        "fwhm": "5.0",
+        "noise_mod": "ar1",
+        "hrf_type": "spm",
+        "boldtr": ".720",
+        "slice_time_corr": "False",
+        "highpass": "",
+        "detrend": "",
+        "hcp":{
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["full_gamble"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "punish": "full_gamble_loss",
+                "gain": "full_gamble_reward",
+                "gainvpunish": "full_gamble_reward - full_gamble_loss"
+            }
+        },
+        "alt": {
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["quest_mark", "feedback"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "qhighvlwr": "quest_hihr - quest_lwr",
+                "fbneut": "feedback_neutral",
+                "fbgain": "feedback_reward",
+                "fbloss": "feedback_punishment",
+                "fbgainvneut": "feedback_reward - feedback_neutral",
+                "fbgainvloss": "feedback_reward - feedback_punishment"
+            }
+        }
+    },
+    "motor":{
+        "runs": ["1","2"],
+        "fwhm": "5.0",
+        "noise_mod": "ar1",
+        "hrf_type": "spm",
+        "boldtr": ".720",
+        "slice_time_corr": "False",
+        "highpass": "",
+        "detrend": "",
+        "hcp":{
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": [],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "lh": "lefthand",
+                "rh": "righthand",
+                "rf": "rightfoot",
+                "lf": "leftfoot",
+                "tong": "tongue",
+                "lhvrh": "lefthand - righthand",
+                "lfvrf": "leftfoot - rightfoot",
+                "cue": "cue"
+            }
+        },
+        "alt": {
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": [],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "lh": "lefthand",
+                "rh": "righthand",
+                "rf": "rightfoot",
+                "lf": "leftfoot",
+                "tong": "tongue",
+                "lhvrh": "lefthand - righthand",
+                "lfvrf": "leftfoot - rightfoot",
+                "cue_lh": "cue_lefthand",
+                "cue_rh": "cue_righthand",
+                "cue_rf": "cue_rightfoot",
+                "cue_lf": "cue_leftfoot"
+            }
+        }
+    },
+    "relation": {
+
+    },
+    "emotion": {
+
+    },
+    "language": {
+
+    }
+
+}

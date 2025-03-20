@@ -2,15 +2,122 @@ import nbformat
 import os
 import re
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pathlib import Path
 from IPython.display import display, Markdown
 from statsmodels.stats.outliers_influence import variance_inflation_factor
+from nilearn.plotting import plot_design_matrix
+from nilearn.glm.first_level import make_first_level_design_matrix
+from nilearn.glm import expression_to_contrast_vector
+from matplotlib.gridspec import GridSpec
+
+
+# below est_contrast_vifs code is courtsey of Jeanette Mumford's repo: https://github.com/jmumford/vif_contrasts
+def est_contrast_vifs(desmat, contrasts):
+    """
+    IMPORTANT: This is only valid to use on design matrices where each regressor represents a condition vs baseline
+     or if a parametrically modulated regressor is used the modulator must have more than 2 levels.  If it is a 2 level modulation,
+     split the modulation into two regressors instead.
+
+    Calculates VIF for contrasts based on the ratio of the contrast variance estimate using the
+    true design to the variance estimate where between condition correaltions are set to 0
+    desmat : pandas DataFrame, design matrix
+    contrasts : dictionary of contrasts, key=contrast name,  using the desmat column names to express the contrasts
+    returns: pandas DataFrame with VIFs for each contrast
+    """
+    desmat_copy = desmat.copy()
+    # find location of constant regressor and remove those columns (not needed here)
+    desmat_copy = desmat_copy.loc[
+        :, (desmat_copy.nunique() > 1) | (desmat_copy.isnull().any())
+    ]
+    # Scaling stabilizes the matrix inversion
+    nsamp = desmat_copy.shape[0]
+    desmat_copy = (desmat_copy - desmat_copy.mean()) / (
+        (nsamp - 1) ** 0.5 * desmat_copy.std()
+    )
+    vifs_contrasts = {}
+    for contrast_name, contrast_string in contrasts.items():
+        contrast_cvec = expression_to_contrast_vector(
+            contrast_string, desmat_copy.columns
+        )
+        true_var_contrast = (
+            contrast_cvec
+            @ np.linalg.inv(desmat_copy.transpose() @ desmat_copy)
+            @ contrast_cvec.transpose()
+        )
+        # The folllowing is the "best case" scenario because the between condition regressor correlations are set to 0
+        best_var_contrast = (
+            contrast_cvec
+            @ np.linalg.inv(
+                np.multiply(
+                    desmat_copy.transpose() @ desmat_copy,
+                    np.identity(desmat_copy.shape[1]),
+                )
+            )
+            @ contrast_cvec.transpose()
+        )
+        vifs_contrasts[contrast_name] = true_var_contrast / best_var_contrast
+    return vifs_contrasts
 
 
 def compute_vifs(design_matrix):
+    """
+    design_matrix: Design matrix for estimate VIFs for all regressors in the model
+    """
     vif_data = pd.DataFrame()
     vif_data['Var'] = design_matrix.columns
     vif_data['VIF'] = [variance_inflation_factor(design_matrix.values, i) for i in range(design_matrix.shape[1])]
     return vif_data
+
+
+def plot_design_vifs(designmat, regressor_vifs, contrast_vifs, task_name):
+    """
+    combined figure with design matrix on the left and VIF plots on the right.
+    
+    Parameters:
+        designmat: The design matrix
+        regressor_vifs : DataFrame with VIF values for regressors
+        contrast_vifs : dict or Series VIF values for contrasts
+        task_name : Name of the task for plot titles
+    Returns:
+        multipanel fig
+    """
+    
+    # create fix
+    fig = plt.figure(figsize=(15, 10))
+    gs = GridSpec(2, 2, width_ratios=[1.5, 1], height_ratios=[1, 1])
+    
+    #  design matrix (plot on left)
+    ax1 = fig.add_subplot(gs[:, 0])  # Spans both rows in first column
+    design_ax = plot_design_matrix(designmat, ax=ax1)
+    ax1.set_title(f'Design Matrix: {task_name}', fontsize=14)
+    
+    # regressor VIFs (top right)
+    ax2 = fig.add_subplot(gs[0, 1])
+    filtered_vif = regressor_vifs[regressor_vifs['Var'] != 'constant'] # excluding intercept
+    sns.barplot(x='Var', y='VIF', data=filtered_vif, palette=['#3c73a8'], ax=ax2)
+    ax2.set_ylim(0, 10)
+    ax2.set_xlabel('Regressors')
+    ax2.set_ylabel('VIF')
+    ax2.axhline(y=5, color='r', linestyle='--')
+    ax2.set_title(f'Variance Inflation Factor: Regressors in {task_name}', fontsize=12)
+    ax2.tick_params(axis='x', rotation=90, labelsize=11)
+    
+    # contrast VIFs (bottom right)
+    ax3 = fig.add_subplot(gs[1, 1])
+    contrast_series = pd.Series(contrast_vifs)
+    contrast_series.plot(kind='bar', color=['blue', 'green', 'red'], ax=ax3)
+    ax3.set_ylim(0, 30)
+    ax3.set_xlabel('Contrasts')
+    ax3.set_ylabel('VIF')
+    ax3.axhline(y=5, color='r', linestyle='--')
+    ax3.set_title(f'Variance Inflation Factor across Contrasts', fontsize=12)
+    ax3.tick_params(axis='x', rotation=90, labelsize=11)
+    
+    plt.tight_layout()
+    return fig
 
 
 def generate_tablecontents(notebook_name, auto_number=True):
@@ -22,6 +129,8 @@ def generate_tablecontents(notebook_name, auto_number=True):
     Parameters:
         notebook_name (str): Name of the notebook file to process
         auto_number (bool): Whether to automatically number headers (default: True)
+    Returns:
+        tables of contents for headers in notebook
     """
     toc = ["# Table of Contents\n"]
     
@@ -105,3 +214,117 @@ def generate_tablecontents(notebook_name, auto_number=True):
         
     except Exception as e:
         print(f"Error generating table of contents: {str(e)}")
+
+
+
+def compute_save_contrasts(glm_res, sess_lab, condict, outfold, subjid, task, run):
+    """
+    Using nilearn's compute_constrast on FirstLevelModel.fit object to computed contrasts based on keys / weights in dictionary
+    Weights should be associated column names in design matrix
+    
+    Parameters:
+        glm_res: The first lvl object with fit results
+        sess_lab: session label, including prefix, e.g "ses-01" or "ses-3T"
+        condict: Dictionary of contrast names and their weights
+        outfold: Output directory path
+        subjid: Subject ID (e.g., sub-120444)
+        task: Task name 
+        run: Run number (e.g. 1, 2, 01, 02)
+        
+    Returns:
+        Nothing, saves variance and beta NIFTIs
+    """
+    
+    for con_name, con in condict.items():
+        output_dir = Path(outfold)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        print(f"    Working on contrast {con_name} with weight {con}")
+        try:
+            # Construct file paths
+            beta_name = Path(outfold) / f"sub-{subjid}_{sess_lab}_task-{task}_run-{run}_contrast-{con_name}_stat-beta.nii.gz"
+            var_name = Path(outfold) / f"sub-{subjid}_{sess_lab}_task-{task}_run-{run}_contrast-{con_name}_stat-var.nii.gz"
+            
+            # Compute and save beta (effect size)
+            beta_est = glm_res.compute_contrast(con, output_type="effect_size")
+            beta_est.to_filename(beta_name)
+            
+            # Compute and save variance
+            var_est = glm_res.compute_contrast(con, output_type="effect_variance")
+            var_est.to_filename(var_name)
+            
+            print(f"        Successfully saved contrast {con_name}")
+            
+        except Exception as e:
+            print(f"        Error processing contrast: {e} for subject {subjid}, contrast {con_name}")
+
+
+def create_design_matrix(eventdf, stc: bool, conf_path: str, conflist_filt: list, 
+                         mod_dict: dict, time_rep: float, volumes: int, hrf_type: str = 'spm',
+                         driftmod: str = None, highpass: float = None, trialtype_colname: str = None):
+    """
+    Generates a first-level design matrix for fMRI analysis.
+
+    Parameters:
+        eventdf (pd.DataFrame): Dataframe containing event information.
+        stc (bool): Whether slice time correction was performed during fMRIPrep.
+        conf_path (str): Path to the confounds file (tab-separated).
+        conflist_filt (list): List of column names to filter from confounds.
+        mod_dict (dict): Dictionary containing model parameters (onsets, durations, trial type column names).
+        time_rep (float): Time repetition for data
+        volumes (int): Number of volumes in the fMRI scan.
+        hrf_type (str): HRF model for design matrix (e.g., "glover", "spm").
+        driftmod (str, optional): Drift model parameter (e.g., polynomial, cosine). Default is None (for fMRIPrep).
+        highpass (float, optional): High-pass filter frequency in Hz. Required if `driftmod` is "cosine".
+        trialtype_colname (str): If different from trial_type, specify
+
+    Returns:
+        pd.DataFrame: The generated design matrix.
+    """
+
+    # Ensure required eventdf columns exist
+    if trialtype_colname:
+        trialtype_lab = trialtype_colname
+    else:
+        trialtype_lab = mod_dict['trialtype_colname']
+    
+    required_columns = {trialtype_lab, mod_dict['onset_colname'], mod_dict['duration_colname']}
+    if not required_columns.issubset(eventdf.columns):
+        missing_cols = required_columns - set(eventdf.columns)
+        raise ValueError(f"Missing required columns in eventdf: {missing_cols}")
+
+    # Load confounds data
+    conf_df = pd.read_csv(conf_path, sep='\t')
+
+    # Create design events DataFrame
+    design_events = pd.DataFrame({
+        'trial_type': eventdf[trialtype_lab],
+        'onset': eventdf[mod_dict['onset_colname']], 
+        'duration': eventdf[mod_dict['duration_colname']]
+    })
+
+    # Set frame times
+    frame_times = np.arange(volumes) * time_rep
+
+    # Apply slice time correction if needed
+    if stc:
+        frame_times += time_rep / 2  # Shift onsets by TR/2
+
+    # grab confounds
+    try:
+        confounds_filtered = conf_df.filter(regex=f"^({conflist_filt})").fillna(0)  # Replace NaNs with 0
+    except Exception as e:
+        raise ValueError(f" Error processing confounds: {e}")
+
+    # create design matrix
+    try:
+        design_matrix = make_first_level_design_matrix(
+            frame_times=frame_times, events=design_events,
+            hrf_model=hrf_type, drift_model=driftmod, high_pass=highpass,
+            add_regs=confounds_filtered
+        )
+        print(f"    For variables in confounds: {conflist_filt}, NaNs were replaced with 0")
+    except Exception as e:
+        raise RuntimeError(f"   Error creating design matrix: {e}")
+
+    return design_matrix
