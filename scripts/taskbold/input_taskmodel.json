@@ -159,7 +159,7 @@
             "onset_colname": "onset",
             "duration_colname": "duration",
             "trialtype_colname": "trial_type",
-            "trialtype_filter": ["present_story", "question_story", "story_opt1", 
+            "trialtype_filter": ["present_story", "question_story", "story_opt1", "story_opt2",
             "present_math", "question_math", "math_answer"],
             "prep_needed": "True",
             "nusiance_regressors": "cosine|trans|rot",
@@ -170,7 +170,8 @@
                 "presentmath": "question_math",
                 "presentstory": "present_story",
                 "mathanswer": "math_answer",
-                "storyanswer": "story_opt1",
+                "storyanswer1": "story_opt1",
+                "storyanswer2": "story_opt2",
                 "rt": "rt"
             }
         }

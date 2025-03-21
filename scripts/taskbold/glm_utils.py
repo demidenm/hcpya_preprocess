@@ -12,6 +12,7 @@ from nilearn.plotting import plot_design_matrix
 from nilearn.glm.first_level import make_first_level_design_matrix
 from nilearn.glm import expression_to_contrast_vector
 from matplotlib.gridspec import GridSpec
+from nilearn.plotting.matrix_plotting import pad_contrast_matrix
 
 
 # below est_contrast_vifs code is courtsey of Jeanette Mumford's repo: https://github.com/jmumford/vif_contrasts
@@ -319,3 +320,63 @@ def create_design_matrix(eventdf, stc: bool, conf_path: str, conflist_filt: list
         raise RuntimeError(f"   Error creating design matrix: {e}")
 
     return design_matrix
+
+
+def visualize_contrastweights(design_matrix, config_contrasts, nusiance_exclude):
+    """
+    Heatmap of contrast weights
+    
+    Parameters:
+    design_matrix (pd.DataFrame):  The design matrix containing regressors for the model
+    config_contrasts (dict): Configuration dictionary with 'contrasts' items and keys
+    nusiance_exclude (list): List of nuisance regressors to exclude
+        
+    Returns:
+    --------
+    fig: The figure object containing the heatmap
+    contrast_weights: Dictionary mapping contrast IDs to their weight vectors
+    weights_df: DataFrame containing all contrast weights
+    """
+    all_weights = []
+    contrast_names = []
+    contrast_weights = {}
+    
+    # exclude nuisance regressors from design colnames
+    subset_cols_design = design_matrix.columns[~design_matrix.columns.str.contains(nusiance_exclude, regex=True)]
+    column_names = subset_cols_design.tolist()
+    
+    # iterate over contrats and save to lists
+    for contrast_id, contrast_def in config_contrasts.items():
+        weights = pad_contrast_matrix(contrast_def, design_matrix[subset_cols_design])
+        contrast_weights[contrast_id] = weights
+        all_weights.append(weights)
+        contrast_names.append(contrast_id)
+        
+    # convert to df
+    weights_df = pd.DataFrame(
+        all_weights, 
+        index=contrast_names,
+        columns=column_names
+    )
+
+    min_width = 12
+    min_height = 6
+    computed_height = len(contrast_names) * 0.8
+    fig_height = max(computed_height, min_height)
+
+    fig, ax = plt.subplots(figsize=(min_width, fig_height))
+    sns.heatmap(weights_df, cmap="RdBu_r", center=0, annot=True, fmt=".1f",      
+        linewidths=.5, cbar_kws={"label": "Contrast Weight"}, ax=ax, vmin=-1, vmax=1  
+
+    )
+    
+    # Customize the plot
+    ax.set_title("Contrast Weights", fontsize=12)
+    ax.set_xlabel("Regressor Names", fontsize=10)
+    ax.set_ylabel("Contrast Name", fontsize=10)
+    
+    plt.xticks(rotation=90, ha="right")
+    plt.yticks(rotation=45, ha="right")
+    plt.tight_layout()
+    
+    return fig, contrast_weights, weights_df
