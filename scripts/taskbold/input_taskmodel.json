@@ -94,7 +94,7 @@
             "onset_colname": "onset",
             "duration_colname": "duration",
             "trialtype_colname": "trial_type",
-            "trialtype_filter": [],
+            "trialtype_filter": ["cue","leftfoot","rightfoot","lefthand","righthand","tongue"],
             "prep_needed": "True",
             "nusiance_regressors": "cosine|trans|rot",
             "model_rt": "False",
@@ -113,7 +113,8 @@
             "onset_colname": "onset",
             "duration_colname": "duration",
             "trialtype_colname": "trial_type",
-            "trialtype_filter": [],
+            "trialtype_filter": ["cue_leftfoot","cue_rightfoot","cue_lefthand","cue_righthand","cue_tongue",
+            "leftfoot","rightfoot","lefthand","righthand","tongue"],
             "prep_needed": "True",
             "nusiance_regressors": "cosine|trans|rot",
             "model_rt": "False",
@@ -170,7 +171,7 @@
                 "presentmath": "question_math",
                 "presentstory": "present_story",
                 "mathanswer": "math_answer",
-                "storyanswer1": "story_opt1",
+                "storyanswer1": "story_opt1", 
                 "storyanswer2": "story_opt2",
                 "rt": "rt"
             }
