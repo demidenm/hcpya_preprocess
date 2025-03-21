@@ -40,9 +40,6 @@
             }
         }
     },
-    "wm":{
-
-    },
     "gambling":{
         "runs": ["1","2"],
         "fwhm": "5.0",
@@ -128,21 +125,192 @@
                 "tong": "tongue",
                 "lhvrh": "lefthand - righthand",
                 "lfvrf": "leftfoot - rightfoot",
-                "cue_lh": "cue_lefthand",
-                "cue_rh": "cue_righthand",
-                "cue_rf": "cue_rightfoot",
-                "cue_lf": "cue_leftfoot"
+                "cuelh": "cue_lefthand",
+                "cuerh": "cue_righthand",
+                "cuerf": "cue_rightfoot",
+                "cuelf": "cue_leftfoot"
             }
         }
     },
-    "relation": {
-
+    "language": {
+        "runs": ["1","2"],
+        "fwhm": "5.0",
+        "noise_mod": "ar1",
+        "hrf_type": "spm",
+        "boldtr": ".720",
+        "slice_time_corr": "False",
+        "highpass": "",
+        "detrend": "",
+        "hcp":{
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["full_story", "full_math"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "story": "full_story",
+                "math": "full_math",
+                "storyvmath": "full_story - full_math"
+            }
+        },
+        "alt": {
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["present_story", "question_story", "story_opt1", 
+            "present_math", "question_math", "math_answer"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "presstoryvmath": "present_story - present_math",
+                "queststoryvmath": "question_story - question_math",
+                "presentmath": "question_math",
+                "presentstory": "present_story",
+                "mathanswer": "math_answer",
+                "storyanswer": "story_opt1",
+                "rt": "rt"
+            }
+        }
+    },
+    "relational": {
+        "runs": ["1","2"],
+        "fwhm": "5.0",
+        "noise_mod": "ar1",
+        "hrf_type": "spm",
+        "boldtr": ".720",
+        "slice_time_corr": "False",
+        "highpass": "",
+        "detrend": "",
+        "hcp":{
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["relation_block", "control_block"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "relation": "relation_block",
+                "match": "control_block",
+                "relationvmatch": "relation_block - control_block"
+            }
+        },
+        "alt": {
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["relation_prompt", "relation_block", 
+            "control_prompt", "control_block","rt"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "relation": "relation_block",
+                "match": "control_block",
+                "relationvmatch": "relation_block - control_block",
+                "prmprelation": "relation_prompt",
+                "prmpmatch": "control_prompt",
+                "prmprelationvmatch": "relation_prompt - control_prompt",
+                "rt": "rt"
+            }
+        }
     },
     "emotion": {
-
+        "runs": ["1","2"],
+        "fwhm": "5.0",
+        "noise_mod": "ar1",
+        "hrf_type": "spm",
+        "boldtr": ".720",
+        "slice_time_corr": "False",
+        "highpass": "",
+        "detrend": "",
+        "hcp":{
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["shape_block", "face_block"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "shape": "shape_block",
+                "face": "face_block",
+                "facevblock": "shape_block - face_block"
+            }
+        },
+        "alt": {
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["cue_shape", "shape_block", "cue_face","face_block"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "shape": "shape_block",
+                "face": "face_block",
+                "facevblock": "shape_block - face_block",
+                "cuefacevblock": "cue_face - cue_shape"
+            }
+        }
     },
-    "language": {
-
+    "wm":{
+        "runs": ["1","2"],
+        "fwhm": "5.0",
+        "noise_mod": "ar1",
+        "hrf_type": "spm",
+        "boldtr": ".720",
+        "slice_time_corr": "False",
+        "highpass": "",
+        "detrend": "",
+        "hcp": {
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["2back_full", "0back_full"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts": {
+                "body": "`2back_full_body`",
+                "face": "`2back_full_face`",
+                "tools": "`2back_full_tools`",
+                "place": "`2back_full_place`",
+                "bodyvface": "`2back_full_body` - `2back_full_face`",
+                "toolsvplace": "`2back_full_tools` - `2back_full_place`",
+                "body2backv0back": "`2back_full_body` - `0back_full_body`",
+                "face2backv0back": "`2back_full_face` - `0back_full_face`",
+                "toolsbody2backv0back": "`2back_full_tools` - `0back_full_tools`",
+                "placebody2backv0back": "`2back_full_place` - `0back_full_place`"
+            }
+        },
+        "alt": {
+            "onset_colname": "onset",
+            "duration_colname": "duration",
+            "trialtype_colname": "trial_type",
+            "trialtype_filter": ["cue_2back", "cue_0back", "2back_full", "0back_full", "rt"],
+            "prep_needed": "True",
+            "nusiance_regressors": "cosine|trans|rot",
+            "model_rt": "False",
+            "contrasts":{
+                "cue0back": "cue_0back",
+                "cue2back": "cue_2back",
+                "cue2backv0back": "cue_2back",
+                "body": "`2back_full_body`",
+                "face": "`2back_full_face`",
+                "tools": "`2back_full_tools`",
+                "place": "`2back_full_place`",
+                "bodyvface": "`2back_full_body` - `2back_full_face`",
+                "toolsvplace": "`2back_full_tools` - `2back_full_place`",
+                "body2backv0back": "`2back_full_body` - `0back_full_body`",
+                "face2backv0back": "`2back_full_face` - `0back_full_face`",
+                "toolsbody2backv0back": "`2back_full_tools` - `0back_full_tools`",
+                "placebody2backv0back": "`2back_full_place` - `0back_full_place`",
+                "rt": "rt"
+            }
+        }
     }
-
 }

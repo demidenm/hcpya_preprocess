@@ -62,15 +62,6 @@ def est_contrast_vifs(desmat, contrasts):
     return vifs_contrasts
 
 
-def compute_vifs(design_matrix):
-    """
-    design_matrix: Design matrix for estimate VIFs for all regressors in the model
-    """
-    vif_data = pd.DataFrame()
-    vif_data['Var'] = design_matrix.columns
-    vif_data['VIF'] = [variance_inflation_factor(design_matrix.values, i) for i in range(design_matrix.shape[1])]
-    return vif_data
-
 
 def plot_design_vifs(designmat, regressor_vifs, contrast_vifs, task_name):
     """
@@ -87,18 +78,18 @@ def plot_design_vifs(designmat, regressor_vifs, contrast_vifs, task_name):
     
     # create fix
     fig = plt.figure(figsize=(15, 10))
-    gs = GridSpec(2, 2, width_ratios=[1.5, 1], height_ratios=[1, 1])
+    grids = GridSpec(2, 2, width_ratios=[1.5, 1], height_ratios=[1, 1])
     
     #  design matrix (plot on left)
-    ax1 = fig.add_subplot(gs[:, 0])  # Spans both rows in first column
+    ax1 = fig.add_subplot(grids[:, 0])  # Spans both rows in first column
     design_ax = plot_design_matrix(designmat, ax=ax1)
     ax1.set_title(f'Design Matrix: {task_name}', fontsize=14)
     
     # regressor VIFs (top right)
-    ax2 = fig.add_subplot(gs[0, 1])
-    filtered_vif = regressor_vifs[regressor_vifs['Var'] != 'constant'] # excluding intercept
-    sns.barplot(x='Var', y='VIF', data=filtered_vif, palette=['#3c73a8'], ax=ax2)
-    ax2.set_ylim(0, 10)
+    ax2 = fig.add_subplot(grids[0, 1])
+    contrast_series = pd.Series(regressor_vifs)
+    contrast_series.plot(kind='bar', color=['#3c73a8'], ax=ax2)
+    ax2.set_ylim(0, 20)
     ax2.set_xlabel('Regressors')
     ax2.set_ylabel('VIF')
     ax2.axhline(y=5, color='r', linestyle='--')
@@ -106,10 +97,10 @@ def plot_design_vifs(designmat, regressor_vifs, contrast_vifs, task_name):
     ax2.tick_params(axis='x', rotation=90, labelsize=11)
     
     # contrast VIFs (bottom right)
-    ax3 = fig.add_subplot(gs[1, 1])
+    ax3 = fig.add_subplot(grids[1, 1])
     contrast_series = pd.Series(contrast_vifs)
-    contrast_series.plot(kind='bar', color=['blue', 'green', 'red'], ax=ax3)
-    ax3.set_ylim(0, 30)
+    contrast_series.plot(kind='bar', color=['#3c73a8'], ax=ax3)
+    ax3.set_ylim(0, 20)
     ax3.set_xlabel('Contrasts')
     ax3.set_ylabel('VIF')
     ax3.axhline(y=5, color='r', linestyle='--')

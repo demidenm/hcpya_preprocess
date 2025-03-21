@@ -60,7 +60,11 @@ def add_reactiontime_regressor(eventsdf, trial_type_col='trial_type', resp_trial
     else:
         new_trial_name = trial_type_col
 
-    rt_reg_rows = eventsdf[eventsdf[trial_type_col] == resp_trialtype].copy()
+    if isinstance(resp_trialtype, str):
+        resp_trialtype = [resp_trialtype]
+
+
+    rt_reg_rows = eventsdf[eventsdf[trial_type_col].isin(resp_trialtype)].copy()
     rt_reg_rows[new_trial_name] = rtreg_name
     rt_reg_rows[duration_colname] = rt_reg_rows[response_colname] / 1000  # Convert ms to seconds
     rt_reg_rows = rt_reg_rows[[onset_colname, duration_colname, new_trial_name]]
@@ -181,21 +185,15 @@ def prep_social_events(eventsdf: pd.DataFrame,  trialtype_colname: str = 'trial_
     
     Parameters
     ----------
-    eventsdf : pd.DataFrame
-        DataFrame containing event data with columns for trial types and social context
-    trialtype_colname : str, default='trial_type'
-        Column name containing the trial type information
-    incl_trialtypes : list, optional
-        List of trial types to include; if None, all types are included
-    modtype : str, default="hcp"
-        Modality type, either "hcp" or "alt" for alternative processing
-    new_trialcol_name : str, default='new_trialtype'
-        Name for the new column containing processed trial types
-        
+    eventsdf : DataFrame containing event data with columns for trial types and social context
+    trialtype_colname (str): Column name containing the trial type information, default='trial_type'
+    incl_trialtypes (list): List of trial types to include; if None, all types are included, optional
+    modtype (str):  Modality type, either "hcp" or "alt" for alternative processing
+    new_trialcol_name (str): Name for the new column containing processed trial types default='new_trialtype'
+         
     Returns
     -------
-    pd.DataFrame
-        Processed copy of the events dataframe with combined trial type information
+    Processed copy of the events dataframe with combined trial type information
     """
     if modtype not in ['hcp', 'alt']:
         raise ValueError(f"Incorrect model provided: {modtype}. Should be 'hcp' or 'alt'")
@@ -217,8 +215,210 @@ def prep_social_events(eventsdf: pd.DataFrame,  trialtype_colname: str = 'trial_
     return eventdf_cpy
 
 
-#def prep_wm_events(eventsdf: pd.DataFrame, trialtype_colname: str = 'trial_type', incl_trialtypes: list = None, modtype:str="hcp"):
-#def prep_lang_events(eventsdf: pd.DataFrame,trialtype_colname: str = 'trial_type', incl_trialtypes: list = None, modtype:str="hcp"):
-#def prep_relation_events(eventsdf: pd.DataFrame,trialtype_colname: str = 'trial_type', incl_trialtypes: list = None, modtype:str="hcp"):
-#def prep_emotion_events(eventsdf: pd.DataFrame,trialtype_colname: str = 'trial_type', incl_trialtypes: list = None, modtype:str="hcp"):
+def prep_language_events(eventsdf: pd.DataFrame,  trialtype_colname: str = 'trial_type',
+                       incl_trialtypes: list = None, modtype: str = "hcp", new_trialcol_name: str = 'new_trialtype'):
+    """
+    Prepare language task events dataframe by combining trial type with social context information.
+    
+    This function processes social task events, combines column information to create new trial
+    designations, and handles additional processing for alternative modality types.
+    
+    Parameters
+    ----------
+    eventsdf : DataFrame containing event data with columns for trial types and social context
+    trialtype_colname (str): Column name containing the trial type information, default='trial_type'
+    incl_trialtypes (list): List of trial types to include; if None, all types are included, optional
+    modtype (str):  Modality type, either "hcp" or "alt" for alternative processing
+    new_trialcol_name (str): Name for the new column containing processed trial types default='new_trialtype'
+         
+    Returns
+    -------
+    Processed copy of the events dataframe with combined trial type information
+    """
+    if modtype not in ['hcp', 'alt']:
+        raise ValueError(f"Incorrect model provided: {modtype}. Should be 'hcp' or 'alt'")
+    
+    eventdf_cpy = eventsdf.copy()
+    # filter by trial types
+    if len(incl_trialtypes) > 0:
+        eventdf_cpy = eventdf_cpy[eventdf_cpy[trialtype_colname].isin(incl_trialtypes)].copy()
+    
 
+    # processing for alt model
+    if modtype == 'alt':
+        # reaction time regressor rows
+        eventdf_cpy = add_reactiontime_regressor(eventsdf=eventdf_cpy, trial_type_col='trial_type', resp_trialtype=['story_opt1', 'math_answer'], 
+        response_colname='response_time', rtreg_name='rt')
+
+    return eventdf_cpy
+
+def prep_relation_events(eventsdf: pd.DataFrame,  trialtype_colname: str = 'trial_type',
+                       incl_trialtypes: list = None, modtype: str = "hcp", new_trialcol_name: str = 'new_trialtype'):
+    """
+    Prepare relational task events dataframe by combining trial type with social context information.
+    
+    This function processes social task events, combines column information to create new trial
+    designations, and handles additional processing for alternative modality types.
+    
+    Parameters
+    ----------
+    eventsdf : DataFrame containing event data with columns for trial types and social context
+    trialtype_colname (str): Column name containing the trial type information, default='trial_type'
+    incl_trialtypes (list): List of trial types to include; if None, all types are included, optional
+    modtype (str):  Modality type, either "hcp" or "alt" for alternative processing
+    new_trialcol_name (str): Name for the new column containing processed trial types default='new_trialtype'
+         
+    Returns
+    -------
+    Processed copy of the events dataframe with combined trial type information
+    """
+    if modtype not in ['hcp', 'alt']:
+        raise ValueError(f"Incorrect model provided: {modtype}. Should be 'hcp' or 'alt'")
+    
+    
+    
+    # filter by trial types
+    if modtype == 'hcp':
+        if len(incl_trialtypes) > 0:
+            eventdf_cpy = eventsdf[eventsdf[trialtype_colname].isin(incl_trialtypes)].copy()
+    
+
+    elif modtype == 'alt':
+        if len(incl_trialtypes) > 0:
+            # reaction time regressor rows
+            eventsdf_rt = add_reactiontime_regressor(eventsdf=eventsdf, trial_type_col=trialtype_colname, resp_trialtype=['relation_stim', 'control_stim'], 
+            response_colname='response_time', rtreg_name='rt')
+
+            eventdf_cpy = eventsdf_rt[eventsdf_rt[trialtype_colname].isin(incl_trialtypes)].copy()
+
+    return eventdf_cpy
+
+
+def prep_emotion_events(eventsdf: pd.DataFrame,  trialtype_colname: str = 'trial_type',
+                       incl_trialtypes: list = None, modtype: str = "hcp", new_trialcol_name: str = 'new_trialtype'):
+    """
+    Prepare emotion task events dataframe by combining trial type with social context information.
+    
+    This function processes social task events, combines column information to create new trial
+    designations, and handles additional processing for alternative modality types.
+    
+    Parameters
+    ----------
+    eventsdf : DataFrame containing event data with columns for trial types and social context
+    trialtype_colname (str): Column name containing the trial type information, default='trial_type'
+    incl_trialtypes (list): List of trial types to include; if None, all types are included, optional
+    modtype (str):  Modality type, either "hcp" or "alt" for alternative processing
+    new_trialcol_name (str): Name for the new column containing processed trial types default='new_trialtype'
+         
+    Returns
+    -------
+    Processed copy of the events dataframe with combined trial type information
+    """
+    if modtype not in ['hcp', 'alt']:
+        raise ValueError(f"Incorrect model provided: {modtype}. Should be 'hcp' or 'alt'")
+    
+    
+    
+    # filter by trial types
+    if modtype == 'hcp':
+        if len(incl_trialtypes) > 0:
+
+            eventdf_cpy = eventsdf.copy() 
+            # specify the blocks to start from cue
+            for block_type in eventdf_cpy['block_type'].unique():
+                # For each block type (Shape_Block1, Face_Block1, etc.)
+                block_rows = eventdf_cpy[eventdf_cpy['block_type'] == block_type]
+                
+                cue_row = block_rows[block_rows['trial_type'].str.startswith('cue_')].iloc[0]
+                block_row = block_rows[block_rows['trial_type'].str.endswith('_block')].iloc[0]
+                
+                # Get the indices
+                block_idx = block_row.name
+                
+                # Set the block onset to match the cue onset
+                eventdf_cpy.at[block_idx, 'onset'] = cue_row['onset']
+                
+                # Set the block duration to sum of cue and block durations
+                eventdf_cpy.at[block_idx, 'duration'] = cue_row['duration'] + block_row['duration']
+
+            eventdf_cpy = eventdf_cpy[eventdf_cpy[trialtype_colname].isin(incl_trialtypes)].copy()
+
+    elif modtype == 'alt':
+        if len(incl_trialtypes) > 0:
+            eventdf_cpy = eventsdf[eventsdf[trialtype_colname].isin(incl_trialtypes)].copy()
+
+    return eventdf_cpy
+
+import pandas as pd
+
+def prep_wm_events(eventsdf: pd.DataFrame, trialtype_colname: str = "trial_type",incl_trialtypes: list = None, 
+    modtype: str = "hcp", new_trialcol_name: str = "new_trialtype"):
+    """
+    Prepare working memory task events dataframe by combining trial type with social context information.
+    
+    Parameters:
+    eventsdf: DataFrame containing event data with columns for trial types and social context.
+    trialtype_colname (str):  Column name containing the trial type information (default: 'trial_type').
+    incl_trialtypes (list):  List of trial types to include; if None, all types are included, 
+    modtype (str): Modality type, either 'hcp' or 'alt' for alternative processing (default: 'hcp').
+    new_trialcol_name (str) : Name for the new column containing processed trial types (default: 'new_trialtype').
+        
+    Returns:
+    Processed copy of the events dataframe with combined trial type information.
+    """
+    if modtype not in ["hcp", "alt"]:
+        raise ValueError(f"Incorrect model provided: {modtype}. Should be 'hcp' or 'alt'")
+    
+    
+    eventdf_cpy = eventsdf.copy()
+    
+    if modtype == "hcp":
+        if incl_trialtypes:
+            for block_type in eventdf_cpy["block_type"].unique():
+                if "Back_Block" not in block_type:
+                    continue
+                
+                block_rows = eventdf_cpy[eventdf_cpy["block_type"] == block_type]
+                back_type = block_type.split("_")[0]  # Extract "2Back" from "2Back_Block1"
+                
+                cue_pattern = f"cue_{back_type[0]}"
+                full_pattern = f"{back_type[0]}back_full"
+                
+                cue_rows = block_rows[block_rows[trialtype_colname].str.startswith(cue_pattern)]
+                full_rows = block_rows[block_rows[trialtype_colname] == full_pattern]
+                
+                if not cue_rows.empty:
+                    cue_row = cue_rows.iloc[0]
+                    for _, full_row in full_rows.iterrows():
+                        full_idx = full_row.name
+                        eventdf_cpy.at[full_idx, "onset"] = cue_row["onset"]
+                        eventdf_cpy.at[full_idx, "duration"] = cue_row["duration"] + full_row["duration"]
+            
+            eventdf_cpy = eventdf_cpy[eventdf_cpy[trialtype_colname].isin(incl_trialtypes)].copy()
+            eventdf_cpy[new_trialcol_name] = eventdf_cpy.apply(
+                lambda row: f"{row[trialtype_colname]}_{row['stimulus_type'].lower()}"
+                if pd.notna(row["stimulus_type"]) else row[trialtype_colname], axis=1
+            )
+    
+    elif modtype == "alt":
+        if incl_trialtypes:
+        
+            # Add reaction time regressor rows
+            eventdf_rt = add_reactiontime_regressor(
+                eventsdf=eventsdf, 
+                trial_type_col=trialtype_colname, 
+                resp_trialtype=[
+                    "2back_nonlure", "2back_target", "2back_lure", 
+                    "0back_nonlure", "0back_target", "0back_lure"
+                ], 
+                response_colname="response_time", 
+                rtreg_name="rt"
+            )
+            
+            eventdf_cpy = eventdf_rt[eventdf_rt[trialtype_colname].isin(incl_trialtypes)].copy()
+            eventdf_cpy[new_trialcol_name] = eventdf_cpy.apply(
+                lambda row: f"{row[trialtype_colname]}_{row['stimulus_type'].lower()}"
+                if pd.notna(row["stimulus_type"]) else row[trialtype_colname], axis=1
+            )
+    
+    return eventdf_cpy
