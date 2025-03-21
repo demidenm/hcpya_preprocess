@@ -10,7 +10,7 @@ from IPython.display import display, Markdown
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 from nilearn.plotting import plot_design_matrix
 from nilearn.glm.first_level import make_first_level_design_matrix
-from nilearn.glm import expression_to_contrast_vector
+from nilearn.glm import expression_to_contrast_vector, compute_fixed_effects
 from matplotlib.gridspec import GridSpec
 from nilearn.plotting.matrix_plotting import pad_contrast_matrix
 
@@ -236,7 +236,8 @@ def compute_save_contrasts(glm_res, sess_lab, condict, outfold, subjid, task, ru
             # Construct file paths
             beta_name = Path(outfold) / f"sub-{subjid}_{sess_lab}_task-{task}_run-{run}_contrast-{con_name}_stat-beta.nii.gz"
             var_name = Path(outfold) / f"sub-{subjid}_{sess_lab}_task-{task}_run-{run}_contrast-{con_name}_stat-var.nii.gz"
-            
+            z_name = Path(outfold) / f"sub-{subjid}_{sess_lab}_task-{task}_run-{run}_contrast-{con_name}_stat-zscore.nii.gz"
+
             # Compute and save beta (effect size)
             beta_est = glm_res.compute_contrast(con, output_type="effect_size")
             beta_est.to_filename(beta_name)
@@ -244,11 +245,70 @@ def compute_save_contrasts(glm_res, sess_lab, condict, outfold, subjid, task, ru
             # Compute and save variance
             var_est = glm_res.compute_contrast(con, output_type="effect_variance")
             var_est.to_filename(var_name)
+
+            # Compute and save z-score
+            z_est = glm_res.compute_contrast(con, output_type="z_score")
+            z_est.to_filename(z_name)
             
             print(f"        Successfully saved contrast {con_name}")
             
         except Exception as e:
-            print(f"        Error processing contrast: {e} for subject {subjid}, contrast {con_name}")
+            print(f"        First Level Error {e} for subject {subjid} and contrast {con_name}")
+
+
+def compute_fixedeff(subjid: str, sess_lab: str, task: str, condict: dict, inpfold: str, outfold: str, prec_weight: bool = True, brainmask=None):
+    """
+    Using nilearn's compute_fixed_effects on FirstLevelModel output effect / variance files to compute fixed effect images based
+    on list of contrasts.
+
+    Parameters:
+        subjid (str): Subject ID (e.g., sub-120444)
+        sess_lab (str): Session label, including prefix, e.g., "ses-01" or "ses-3T"
+        task (str): Task name
+        condict (dict): Dictionary of contrast names and their weights
+        inpfold (str): Folder path for location of first-level output beta/variance files
+        outfold (str): Output directory to save fixed effect images
+        prec_weight (bool): If to use precision-weighted averaging, default=True
+        brainmask (str or None): Path to brain mask to use, default=None
+
+    Returns:
+        None: Saves stat, variance, and z-stat NIFTIs.
+    """
+
+    output_dir = Path(outfold)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    for con_name in condict.keys():
+        print(f"    Working on contrast: {con_name}")
+
+        try:
+            # Get matching files
+            betafiles = sorted(Path(inpfold).glob(f"sub-{subjid}_{sess_lab}_task-{task}_run-*_contrast-{con_name}_stat-beta.nii.gz"))
+            varfiles = sorted(Path(inpfold).glob(f"sub-{subjid}_{sess_lab}_task-{task}_run-*_contrast-{con_name}_stat-var.nii.gz"))
+
+            # Ensure matched files exist
+            if len(betafiles) != len(varfiles):  
+                raise ValueError(f"Mismatch: {len(betafiles)} beta files vs. {len(varfiles)} variance files.")
+
+            if len(betafiles) < 2:
+                raise ValueError("Found fewer than two files, nothing to average over.")
+
+            # Compute fixed effects
+            _, fixvar, fixeff, fixzscore = compute_fixed_effects(
+                contrast_imgs=betafiles, variance_imgs=varfiles, 
+                mask=brainmask, precision_weighted=prec_weight, dofs=None, return_z_score=True
+            )
+
+            # Save outputs
+            for stat, suffix in zip([fixeff, fixvar, fixzscore], ["fixeff", "fixvar", "fixzscore"]):
+                filename = output_dir / f"sub-{subjid}_{sess_lab}_task-{task}_contrast-{con_name}_stat-{suffix}.nii.gz"
+                stat.to_filename(filename)
+
+
+            print(f"        Successfully saved files for contrast: {con_name}")
+
+        except Exception as e:
+            print(f"        Fixed Effect Error: {e} for subject {subjid}, contrast {con_name}")
 
 
 def create_design_matrix(eventdf, stc: bool, conf_path: str, conflist_filt: list, 
