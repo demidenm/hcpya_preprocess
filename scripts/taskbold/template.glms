@@ -1,0 +1,19 @@
+#!/bin/bash
+rundir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+configpath="${rundir}/../input_taskmodel.json"
+sub_id=SUBJECTID
+model=MODTYPE
+working_dir=SCRATCHDIR
+glm_outdir=OUT
+ses_id=SESID
+data_dir=SCRATCHDIR
+uv_proj=UVPROJ
+# completed time / date
+compdate=$(date)
+
+uv --project ${uv_proj} run ${rundir}/../run_subjectmodels.py \
+	--subject ${sub_id} \
+	--analysisout "${glm_outdir}/${model}" \
+	--workdir ${working_dir} \
+	--model ${model} \
+	--config ${configpath}

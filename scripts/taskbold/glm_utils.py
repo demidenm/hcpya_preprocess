@@ -234,9 +234,9 @@ def compute_save_contrasts(glm_res, sess_lab, condict, outfold, subjid, task, ru
         print(f"    Working on contrast {con_name} with weight {con}")
         try:
             # Construct file paths
-            beta_name = Path(outfold) / f"sub-{subjid}_{sess_lab}_task-{task}_run-{run}_contrast-{con_name}_stat-beta.nii.gz"
-            var_name = Path(outfold) / f"sub-{subjid}_{sess_lab}_task-{task}_run-{run}_contrast-{con_name}_stat-var.nii.gz"
-            z_name = Path(outfold) / f"sub-{subjid}_{sess_lab}_task-{task}_run-{run}_contrast-{con_name}_stat-zscore.nii.gz"
+            beta_name = Path(outfold) / f"{subjid}_{sess_lab}_task-{task}_run-{run}_contrast-{con_name}_stat-beta.nii.gz"
+            var_name = Path(outfold) / f"{subjid}_{sess_lab}_task-{task}_run-{run}_contrast-{con_name}_stat-var.nii.gz"
+            z_name = Path(outfold) / f"{subjid}_{sess_lab}_task-{task}_run-{run}_contrast-{con_name}_stat-zscore.nii.gz"
 
             # Compute and save beta (effect size)
             beta_est = glm_res.compute_contrast(con, output_type="effect_size")
@@ -283,8 +283,8 @@ def compute_fixedeff(subjid: str, sess_lab: str, task: str, condict: dict, inpfo
 
         try:
             # Get matching files
-            betafiles = sorted(Path(inpfold).glob(f"sub-{subjid}_{sess_lab}_task-{task}_run-*_contrast-{con_name}_stat-beta.nii.gz"))
-            varfiles = sorted(Path(inpfold).glob(f"sub-{subjid}_{sess_lab}_task-{task}_run-*_contrast-{con_name}_stat-var.nii.gz"))
+            betafiles = sorted(Path(inpfold).glob(f"{subjid}_{sess_lab}_task-{task}_run-*_contrast-{con_name}_stat-beta.nii.gz"))
+            varfiles = sorted(Path(inpfold).glob(f"{subjid}_{sess_lab}_task-{task}_run-*_contrast-{con_name}_stat-var.nii.gz"))
 
             # Ensure matched files exist
             if len(betafiles) != len(varfiles):  
@@ -301,7 +301,7 @@ def compute_fixedeff(subjid: str, sess_lab: str, task: str, condict: dict, inpfo
 
             # Save outputs
             for stat, suffix in zip([fixeff, fixvar, fixzscore], ["fixeff", "fixvar", "fixzscore"]):
-                filename = output_dir / f"sub-{subjid}_{sess_lab}_task-{task}_contrast-{con_name}_stat-{suffix}.nii.gz"
+                filename = output_dir / f"{subjid}_{sess_lab}_task-{task}_contrast-{con_name}_stat-{suffix}.nii.gz"
                 stat.to_filename(filename)
 
 

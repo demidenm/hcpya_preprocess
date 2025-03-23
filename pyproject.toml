@@ -31,7 +31,8 @@ dependencies = [
     "jupyter",
     "notebook",
     "nbformat",
-    "ipython"
+    "ipython",
+    "pybids"
 ]
 
 
