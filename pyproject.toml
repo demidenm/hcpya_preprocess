@@ -32,7 +32,8 @@ dependencies = [
     "notebook",
     "nbformat",
     "ipython",
-    "pybids"
+    "pybids",
+    "pyrelimri"
 ]
 
 

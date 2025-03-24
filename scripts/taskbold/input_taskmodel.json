@@ -15,7 +15,7 @@
             "trialtype_colname": "trial_type",
             "trialtype_filter": ["movie"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "mentbase": "movie_mental",
@@ -29,7 +29,7 @@
             "trialtype_colname": "trial_type",
             "trialtype_filter": ["movie", "response"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "True",
             "contrasts":{
                 "mentbase": "movie_mental",
@@ -57,7 +57,7 @@
             "trialtype_colname": "trial_type",
             "trialtype_filter": ["full_gamble"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "punish": "full_gamble_loss",
@@ -71,7 +71,7 @@
             "trialtype_colname": "trial_type",
             "trialtype_filter": ["quest_mark", "feedback"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "qhighvlwr": "quest_hihr - quest_lwr",
@@ -99,7 +99,7 @@
             "trialtype_colname": "trial_type",
             "trialtype_filter": ["cue","leftfoot","rightfoot","lefthand","righthand","tongue"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "lh": "lefthand",
@@ -119,7 +119,7 @@
             "trialtype_filter": ["cue_leftfoot","cue_rightfoot","cue_lefthand","cue_righthand","cue_tongue",
             "leftfoot","rightfoot","lefthand","righthand","tongue"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "lh": "lefthand",
@@ -152,7 +152,7 @@
             "trialtype_colname": "trial_type",
             "trialtype_filter": ["full_story", "full_math"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "story": "full_story",
@@ -167,7 +167,7 @@
             "trialtype_filter": ["present_story", "question_story", "story_opt1", "story_opt2",
             "present_math", "question_math", "math_answer"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "presstoryvmath": "present_story - present_math",
@@ -197,7 +197,7 @@
             "trialtype_colname": "trial_type",
             "trialtype_filter": ["relation_block", "control_block"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "relation": "relation_block",
@@ -212,7 +212,7 @@
             "trialtype_filter": ["relation_prompt", "relation_block", 
             "control_prompt", "control_block","rt"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "relation": "relation_block",
@@ -241,12 +241,12 @@
             "trialtype_colname": "trial_type",
             "trialtype_filter": ["shape_block", "face_block"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "shape": "shape_block",
                 "face": "face_block",
-                "facevblock": "shape_block - face_block"
+                "shapevface": "shape_block - face_block"
             }
         },
         "alt": {
@@ -255,13 +255,13 @@
             "trialtype_colname": "trial_type",
             "trialtype_filter": ["cue_shape", "shape_block", "cue_face","face_block"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "shape": "shape_block",
                 "face": "face_block",
-                "facevblock": "shape_block - face_block",
-                "cuefacevblock": "cue_face - cue_shape"
+                "shapevface": "shape_block - face_block",
+                "cueshapevface": "cue_shape - cue_face"
             }
         }
     },
@@ -281,15 +281,15 @@
             "trialtype_colname": "trial_type",
             "trialtype_filter": ["2back_full", "0back_full"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts": {
-                "body": "`2back_full_body`",
-                "face": "`2back_full_face`",
-                "tools": "`2back_full_tools`",
-                "place": "`2back_full_place`",
-                "bodyvface": "`2back_full_body` - `2back_full_face`",
-                "toolsvplace": "`2back_full_tools` - `2back_full_place`",
+                "body": "0.5 * `2back_full_body` + 0.5 * `0back_full_body`",
+                "face": "0.5 * `2back_full_face` + 0.5 * `0back_full_body`",
+                "tools": "0.5 * `2back_full_tools` + 0.5 * `0back_full_body`",
+                "place": "0.5 * `2back_full_place` + 0.5 * `0back_full_body`",
+                "bodyvface": "0.5 * `2back_full_body` + 0.5 * `0back_full_body` - 0.5 * `2back_full_face` - 0.5 * `0back_full_face`",
+                "toolsvplace": "0.5 * `2back_full_tools` + 0.5 * `0back_full_tools` - 0.5 * `2back_full_place` - 0.5 * `0back_full_place`",
                 "body2backv0back": "`2back_full_body` - `0back_full_body`",
                 "face2backv0back": "`2back_full_face` - `0back_full_face`",
                 "toolsbody2backv0back": "`2back_full_tools` - `0back_full_tools`",
@@ -302,18 +302,18 @@
             "trialtype_colname": "trial_type",
             "trialtype_filter": ["cue_2back", "cue_0back", "2back_full", "0back_full", "rt"],
             "prep_needed": "True",
-            "nusiance_regressors": "cosine|trans|rot",
+            "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
-            "contrasts":{
+            "contrasts": {
                 "cue0back": "cue_0back",
                 "cue2back": "cue_2back",
-                "cue2backv0back": "cue_2back",
-                "body": "`2back_full_body`",
-                "face": "`2back_full_face`",
-                "tools": "`2back_full_tools`",
-                "place": "`2back_full_place`",
-                "bodyvface": "`2back_full_body` - `2back_full_face`",
-                "toolsvplace": "`2back_full_tools` - `2back_full_place`",
+                "cue2backv0back": "cue_2back - cue_0back",
+                "body": "0.5 * `2back_full_body` + 0.5 * `0back_full_body`",
+                "face": "0.5 * `2back_full_face` + 0.5 * `0back_full_body`",
+                "tools": "0.5 * `2back_full_tools` + 0.5 * `0back_full_body`",
+                "place": "0.5 * `2back_full_place` + 0.5 * `0back_full_body`",
+                "bodyvface": "0.5 * `2back_full_body` + 0.5 * `0back_full_body` - 0.5 * `2back_full_face` - 0.5 * `0back_full_face`",
+                "toolsvplace": "0.5 * `2back_full_tools` + 0.5 * `0back_full_tools` - 0.5 * `2back_full_place` - 0.5 * `0back_full_place`",
                 "body2backv0back": "`2back_full_body` - `0back_full_body`",
                 "face2backv0back": "`2back_full_face` - `0back_full_face`",
                 "toolsbody2backv0back": "`2back_full_tools` - `0back_full_tools`",

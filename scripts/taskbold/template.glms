@@ -8,6 +8,8 @@ glm_outdir=OUT
 ses_id=SESID
 data_dir=SCRATCHDIR
 uv_proj=UVPROJ
+log_file=${rundir}/..
+
 # completed time / date
 compdate=$(date)
 
@@ -16,4 +18,5 @@ uv --project ${uv_proj} run ${rundir}/../run_subjectmodels.py \
 	--analysisout "${glm_outdir}/${model}" \
 	--workdir ${working_dir} \
 	--model ${model} \
-	--config ${configpath}
+	--config ${configpath} \
+	--logfile ${log_file} 

@@ -1,3 +1,4 @@
+import subprocess
 import nbformat 
 import os
 import re
@@ -8,10 +9,14 @@ import seaborn as sns
 from pathlib import Path
 from IPython.display import display, Markdown
 from statsmodels.stats.outliers_influence import variance_inflation_factor
+from nilearn.glm.first_level import FirstLevelModel
+from nilearn.glm.second_level import SecondLevelModel
 from nilearn.plotting import plot_design_matrix
 from nilearn.glm.first_level import make_first_level_design_matrix
 from nilearn.glm import expression_to_contrast_vector, compute_fixed_effects
+from nilearn.image import load_img
 from matplotlib.gridspec import GridSpec
+from bids.layout import parse_file_entities
 from nilearn.plotting.matrix_plotting import pad_contrast_matrix
 
 
@@ -208,6 +213,77 @@ def generate_tablecontents(notebook_name, auto_number=True):
         print(f"Error generating table of contents: {str(e)}")
 
 
+def get_numvolumes(nifti_path_4d):
+    """
+    Alternative method to get number of volumes using Nilearn.
+    
+    Parameters:
+    nifti_path(str) : Path to the fMRI NIfTI (.nii.gz) file
+    
+    Returns:
+    Number of volumes in the fMRI data using nilearn image + shape
+    """
+    try:
+        # Load 4D image
+        img = load_img(nifti_path_4d)
+        
+        # Get number of volumes
+        return img.shape[3] if len(img.shape) == 4 else None
+    
+    except Exception as e:
+        print(f"Nilearn error reading file {nifti_path_4d}: {e}")
+        return None
+
+
+def run_firstlvl_computecons(subjid, boldpath, designmatrix, sesid, boldtr, taskname, runnum, firstlvl_out,
+                             brain_mask, contrastlist, fwhm, ar_mod, detrend, highpass):
+    """
+    Fits a first-level fMRI [Nilearn] model and computes contrasts.
+    
+    Parameters:
+        subjid (str): Subject identifier.
+        boldpath (str): Path to the BOLD fMRI data.
+        designmatrix (DataFrame): Design matrix for GLM.
+        sesid (str): Session label.
+        contrastlist (list): List of contrasts to iterate over.
+        firstlvl_out (str): Output folder for first-level results.
+        taskname (str): Task name.
+        runnum (str): Run identifier.
+        brain_mask (str): Path to brain mask in MNI space.
+        boldtr (float): TR for BOLD data.
+        fwhm (float): Smoothing kernel full-width at half maximum.
+        ar_mod (str): Noise model specification.
+        detrend (str): Drift model specification.
+        highpass (float): High-pass filter cutoff.
+    
+    Returns:
+        FirstLevelModel: GLM results from FirstLevelModel.fit().
+    """
+    fmri_glm = FirstLevelModel(
+        subject_label=subjid,
+        mask_img=brain_mask,
+        t_r=boldtr,
+        smoothing_fwhm=fwhm,
+        standardize=False,
+        noise_model=ar_mod,
+        drift_model=detrend,
+        high_pass=highpass
+    )
+    
+    run_fmri_glm = fmri_glm.fit(boldpath, design_matrices=designmatrix)
+
+    compute_save_contrasts(
+        glm_res=run_fmri_glm, 
+        sess_lab=sesid, 
+        condict=contrastlist, 
+        outfold=firstlvl_out, 
+        subjid=subjid, 
+        task=taskname, 
+        run=runnum
+    )
+    
+    return run_fmri_glm
+
 
 def compute_save_contrasts(glm_res, sess_lab, condict, outfold, subjid, task, run):
     """
@@ -256,7 +332,7 @@ def compute_save_contrasts(glm_res, sess_lab, condict, outfold, subjid, task, ru
             print(f"        First Level Error {e} for subject {subjid} and contrast {con_name}")
 
 
-def compute_fixedeff(subjid: str, sess_lab: str, task: str, condict: dict, inpfold: str, outfold: str, prec_weight: bool = True, brainmask=None):
+def compute_fixedeff(subjid: str, sess_lab: str, task: str, condict: dict, inpfold: str, outfold: str, prec_weight: bool = False, brainmask=None):
     """
     Using nilearn's compute_fixed_effects on FirstLevelModel output effect / variance files to compute fixed effect images based
     on list of contrasts.
@@ -268,7 +344,7 @@ def compute_fixedeff(subjid: str, sess_lab: str, task: str, condict: dict, inpfo
         condict (dict): Dictionary of contrast names and their weights
         inpfold (str): Folder path for location of first-level output beta/variance files
         outfold (str): Output directory to save fixed effect images
-        prec_weight (bool): If to use precision-weighted averaging, default=True
+        prec_weight (bool): If to use precision-weighted averaging, default=False
         brainmask (str or None): Path to brain mask to use, default=None
 
     Returns:
@@ -294,13 +370,13 @@ def compute_fixedeff(subjid: str, sess_lab: str, task: str, condict: dict, inpfo
                 raise ValueError("Found fewer than two files, nothing to average over.")
 
             # Compute fixed effects
-            _, fixvar, fixeff, fixzscore = compute_fixed_effects(
+            fixmap, fixvar, _, fixzscore = compute_fixed_effects(
                 contrast_imgs=betafiles, variance_imgs=varfiles, 
                 mask=brainmask, precision_weighted=prec_weight, dofs=None, return_z_score=True
             )
 
             # Save outputs
-            for stat, suffix in zip([fixeff, fixvar, fixzscore], ["fixeff", "fixvar", "fixzscore"]):
+            for stat, suffix in zip([fixmap, fixvar, fixzscore], ["fixeff", "fixvar", "fixzscore"]):
                 filename = output_dir / f"{subjid}_{sess_lab}_task-{task}_contrast-{con_name}_stat-{suffix}.nii.gz"
                 stat.to_filename(filename)
 
@@ -313,7 +389,7 @@ def compute_fixedeff(subjid: str, sess_lab: str, task: str, condict: dict, inpfo
 
 def create_design_matrix(eventdf, stc: bool, conf_path: str, conflist_filt: list, 
                          mod_dict: dict, time_rep: float, volumes: int, hrf_type: str = 'spm',
-                         driftmod: str = None, highpass: float = None, trialtype_colname: str = None):
+                         driftmod: str = None, highpass: float = None, trialtype_colname: str = None, duration_nan='replace'):
     """
     Generates a first-level design matrix for fMRI analysis.
 
@@ -329,6 +405,7 @@ def create_design_matrix(eventdf, stc: bool, conf_path: str, conflist_filt: list
         driftmod (str, optional): Drift model parameter (e.g., polynomial, cosine). Default is None (for fMRIPrep).
         highpass (float, optional): High-pass filter frequency in Hz. Required if `driftmod` is "cosine".
         trialtype_colname (str): If different from trial_type, specify
+        duration_nan (str): whether to 'drop' or 'replace' with 0 duration 'NaN' columns, default replace
 
     Returns:
         pd.DataFrame: The generated design matrix.
@@ -354,6 +431,15 @@ def create_design_matrix(eventdf, stc: bool, conf_path: str, conflist_filt: list
         'onset': eventdf[mod_dict['onset_colname']], 
         'duration': eventdf[mod_dict['duration_colname']]
     })
+
+    if design_events["duration"].isna().any():
+        print(f"Warning: Found {design_events.isna().sum()} NaN values in duration column")
+        if duration_nan == "replace":
+            design_events["duration"].fillna(0, inplace=True)
+        elif duration_nan == "drop":
+            design_events = design_events.dropna(subset=['onset'])
+        else:
+            raise ValueError(duration_nan, "is not of drop or replace")
 
     # Set frame times
     frame_times = np.arange(volumes) * time_rep
@@ -382,14 +468,14 @@ def create_design_matrix(eventdf, stc: bool, conf_path: str, conflist_filt: list
     return design_matrix
 
 
-def visualize_contrastweights(design_matrix, config_contrasts, nusiance_exclude):
+def visualize_contrastweights(design_matrix, config_contrasts, var_exclude):
     """
     Heatmap of contrast weights
     
     Parameters:
     design_matrix (pd.DataFrame):  The design matrix containing regressors for the model
     config_contrasts (dict): Configuration dictionary with 'contrasts' items and keys
-    nusiance_exclude (list): List of nuisance regressors to exclude
+    var_exclude (list): List of nuisance regressors to exclude
         
     Returns:
     --------
@@ -402,7 +488,7 @@ def visualize_contrastweights(design_matrix, config_contrasts, nusiance_exclude)
     contrast_weights = {}
     
     # exclude nuisance regressors from design colnames
-    subset_cols_design = design_matrix.columns[~design_matrix.columns.str.contains(nusiance_exclude, regex=True)]
+    subset_cols_design = design_matrix.columns[~design_matrix.columns.str.contains(var_exclude, regex=True)]
     column_names = subset_cols_design.tolist()
     
     # iterate over contrats and save to lists
@@ -430,7 +516,7 @@ def visualize_contrastweights(design_matrix, config_contrasts, nusiance_exclude)
 
     )
     
-    # Customize the plot
+    # customize details
     ax.set_title("Contrast Weights", fontsize=12)
     ax.set_xlabel("Regressor Names", fontsize=10)
     ax.set_ylabel("Contrast Name", fontsize=10)
@@ -440,3 +526,116 @@ def visualize_contrastweights(design_matrix, config_contrasts, nusiance_exclude)
     plt.tight_layout()
     
     return fig, contrast_weights, weights_df
+
+
+def group_onesample(fixedeffect_paths: list, session: str, task_type: str,
+                    contrast_type: str, group_outdir: str,
+                    mask: str = None, save_zstat: bool = True):
+    """
+    Computes a group (second-level) model by fitting an intercept to the length of maps.
+    Saves computed statistics to disk.
+    """    
+    group_outdir = Path(group_outdir)  
+    group_outdir.mkdir(parents=True, exist_ok=True)
+    print("Directory ensured:", group_outdir)
+    
+    fixedeffect_paths = [str(path) for path in fixedeffect_paths]
+    n_maps = len(fixedeffect_paths)
+    design_matrix = pd.DataFrame([1] * n_maps, columns=['int'])
+
+
+    # Fit second-level model
+    sec_lvl_model = SecondLevelModel(mask_img=mask, smoothing_fwhm=None, minimize_memory=False)
+    sec_lvl_model = sec_lvl_model.fit(second_level_input=fixedeffect_paths, design_matrix=design_matrix)
+
+    tstat_map = sec_lvl_model.compute_contrast(
+        second_level_contrast='int',
+        second_level_stat_type='t',
+        output_type='stat'
+    )
+
+    tstat_out = group_outdir / f"subs-{n_maps}_{session}_task-{task_type}_contrast-{contrast_type}_stat-tstat.nii.gz"
+    tstat_map.to_filename(tstat_out)
+
+    if save_zstat:
+        zstat_map = sec_lvl_model.compute_contrast(
+        second_level_contrast='int',
+        second_level_stat_type='t',
+        output_type='z_score'
+        )
+        zstat_out = group_outdir / f"subs-{n_maps}_{session}_task-{task_type}_contrast-{contrast_type}_stat-zstat.nii.gz"
+        zstat_map.to_filename(zstat_out)
+
+
+def get_files(bash_command):
+    command_out = subprocess.run(bash_command, shell=True, capture_output=True, text=True)
+    files = [line.split()[-1] for line in command_out.stdout.strip().split("\n") if line]
+    
+    return files
+    
+def sync_matching_runs(subject_id, sesid, taskname, events_path, sync_destination):
+    """
+    Syncs the matching fMRIPrep bold, confounds, mask, and event files for a given task and subject.
+
+    Parameters:
+        subject_id (int): Subject ID
+        sesid (str): Session full string (e.g., ses-3T)
+        taskname (str): Task name (e.g., motor)
+        events_path (str): Path to local event files
+        sync_destination (str): Destination to copy matching files to for analyses
+
+    Returns:
+        Runs found (list) or 'None' (str)
+    """
+
+    # Get fMRIPrep bold and mask files from S3
+
+    fmriprep_boldlist = f"s3cmd ls --recursive s3://hcp-youth/derivatives/fmriprep_v24_0_1/{sesid}/{subject_id}/{sesid}/func/ | grep 'task-{taskname}_dir.*_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'"
+    bold_files = get_files(fmriprep_boldlist)
+    fmriprep_masklist = f"s3cmd ls --recursive s3://hcp-youth/derivatives/fmriprep_v24_0_1/{sesid}/{subject_id}/{sesid}/func/ | grep 'task-{taskname}_dir.*_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'"
+    mask_files = get_files(fmriprep_masklist)
+    confounds_list = f"s3cmd ls --recursive s3://hcp-youth/derivatives/fmriprep_v24_0_1/{sesid}/{subject_id}/{sesid}/func/ | grep 'task-{taskname}_dir.*_desc-confounds_timeseries.tsv'"
+    confounds_files = get_files(confounds_list)
+
+    # Get events list
+    events_list = f"ls {events_path}/{subject_id}/{sesid}/func/ | grep 'task-{taskname}.*_events.tsv'"
+    event_files = get_files(events_list)
+
+    # Match task and run consistency
+    matched_runs = {}
+    for bold_file in bold_files:
+        bold_metadata = parse_file_entities(bold_file)
+        bold_task = bold_metadata.get("task")
+        bold_run = bold_metadata.get("run")
+
+        # Find the corresponding confounds and mask files
+        confound_file = next((cf for cf in confounds_files if f"run-{bold_run}" in cf), None)
+        mask_file = next((mf for mf in mask_files if f"run-{bold_run}" in mf), None)
+
+        for event_file in event_files:
+            event_metadata = parse_file_entities(event_file)
+            event_task = event_metadata.get("task")
+            event_run = event_metadata.get("run")
+
+            if bold_task == event_task and bold_run == event_run and confound_file and mask_file:
+                matched_runs[bold_run] = (bold_file, mask_file, confound_file, event_file)
+
+    # Sync only matching runs
+    if not matched_runs:
+        return [], None, None
+
+    sync_commands = []
+    for run, (bold_file, mask_file, confound_file, event_file) in matched_runs.items():
+        bold_sync_cmd = f"s3cmd get {bold_file} {sync_destination}/ --continue"
+        mask_sync_cmd = f"s3cmd get {mask_file} {sync_destination}/ --continue"
+        confound_sync_cmd = f"s3cmd get {confound_file} {sync_destination}/ --continue"
+        event_sync_cmd = f"cp {events_path}/{subject_id}/{sesid}/func/{event_file} {sync_destination}/"
+
+        subprocess.run(bold_sync_cmd, shell=True)
+        subprocess.run(mask_sync_cmd, shell=True)
+        subprocess.run(confound_sync_cmd, shell=True)
+        subprocess.run(event_sync_cmd, shell=True)
+
+        sync_commands.append((bold_sync_cmd, mask_sync_cmd, confound_sync_cmd, event_sync_cmd))
+
+    return list(matched_runs.keys()), bold_task, event_task

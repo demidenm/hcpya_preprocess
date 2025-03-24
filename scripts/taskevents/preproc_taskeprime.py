@@ -41,7 +41,9 @@ def process_subject(sub_file, task_name, dir_label, run_num, output_name):
         converted_df = wm_eprime_preproc(events_file)
     
     # Export the processed dataframe
-    file_name = f"{output_name}/sub-{subject}_{session}_task-{task_name.lower()}_dir-{dir_label}_run-{run_num}_events.tsv"
+    # WM is the only output type that is uppercase in preprocessed data. Keeping it consistemnt
+    tasklabel = task_name.upper() if task_name == "WM" else task_name.lower()
+    file_name = f"{output_name}/sub-{subject}_{session}_task-{tasklabel}_dir-{dir_label}_run-{run_num}_events.tsv"
     converted_df.to_csv(file_name, sep="\t", index=False)
     print(f"Processed file saved: {file_name}")
 
