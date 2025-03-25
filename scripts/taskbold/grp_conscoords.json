@@ -1,0 +1,37 @@
+{
+    "motor": {
+        "coord": [8, -16, -20],
+        "hcp": {"con": ["lh", "cue"]},
+        "alt": {"con": ["lh", "cuelh"]}
+    },
+    "gambling": {
+        "coord": [-14, 6, 0],
+        "hcp": {"con": ["gain", "gainvpunish"]},
+        "alt": {"con": ["fbgain", "qhighvlwr", "fbgainvloss"]}
+    },
+    "language": {
+        "coord": [-52, -2, -8],
+        "hcp": {"con": ["storyvmath"]},
+        "alt": {"con": ["presstoryvmath", "queststoryvmath", "rt"]}
+    },
+    "social": {
+        "coord": [50, -56, 18],
+        "hcp": {"con": ["mentbase"]},
+        "alt": {"con": ["mentbase", "respment", "rt"]}
+    },
+    "WM": {
+        "coord": [-42, -52, -20],
+        "hcp": {"con": ["face"]},
+        "alt": {"con": ["face", "cue2backv0back", "rt"]}
+    },
+    "emotion": {
+        "coord": [-20, -6, -16],
+        "hcp": {"con": ["shapevface"]},
+        "alt": {"con": ["shapevface", "cueshapevface"]}
+    },
+    "relational": {
+        "coord": [40, 40, 16],
+        "hcp": {"con": ["relation"]},
+        "alt": {"con": ["relation", "prmprelation", "rt"]}
+    }
+}

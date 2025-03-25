@@ -75,6 +75,7 @@
             "model_rt": "False",
             "contrasts":{
                 "qhighvlwr": "quest_hihr - quest_lwr",
+                "question": ".5 * quest_hihr + .5 * quest_lwr",
                 "fbneut": "feedback_neutral",
                 "fbgain": "feedback_reward",
                 "fbloss": "feedback_punishment",
@@ -265,7 +266,7 @@
             }
         }
     },
-    "wm":{
+    "WM":{
         "runs": ["1","2"],
         "fwhm": "5.0",
         "noise_mod": "ar1",

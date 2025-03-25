@@ -330,6 +330,7 @@ def compute_save_contrasts(glm_res, sess_lab, condict, outfold, subjid, task, ru
             
         except Exception as e:
             print(f"        First Level Error {e} for subject {subjid} and contrast {con_name}")
+            continue
 
 
 def compute_fixedeff(subjid: str, sess_lab: str, task: str, condict: dict, inpfold: str, outfold: str, prec_weight: bool = False, brainmask=None):
@@ -385,6 +386,7 @@ def compute_fixedeff(subjid: str, sess_lab: str, task: str, condict: dict, inpfo
 
         except Exception as e:
             print(f"        Fixed Effect Error: {e} for subject {subjid}, contrast {con_name}")
+            continue
 
 
 def create_design_matrix(eventdf, stc: bool, conf_path: str, conflist_filt: list, 
@@ -639,3 +641,37 @@ def sync_matching_runs(subject_id, sesid, taskname, events_path, sync_destinatio
         sync_commands.append((bold_sync_cmd, mask_sync_cmd, confound_sync_cmd, event_sync_cmd))
 
     return list(matched_runs.keys()), bold_task, event_task
+
+
+def gen_vifdf(designmat, modconfig):
+    """
+    Create a Pandas DataFrame with VIF values for contrasts and regressors.
+
+    Parameters
+    designmat: The design matrix used in the analysis.
+    modconfig (dict): A dictionary containing model configuration, including:
+        - 'nuisance_regressors': A regex pattern to filter out nuisance regressors.
+           - 'contrasts': A dictionary of contrast definitions.
+
+    Returns
+    Returns contrasts & regressors vif dict & DataFrame of combined VIFs w/ columns ['type', 'name', 'value'].
+    """
+    # Filter columns by removing nuisance regressors & create dictionary that excludes constant
+    filtered_columns = designmat.columns[~designmat.columns.str.contains(modconfig['nuisance_regressors'], regex=True)]
+    regressor_dict = {item: item for item in filtered_columns if item != "constant"}
+
+    # est VIFs for contrasts and regressors
+    con_vifs = est_contrast_vifs(desmat=designmat, contrasts=modconfig['contrasts'])
+    reg_vifs = est_contrast_vifs(desmat=designmat, contrasts=regressor_dict)
+
+    # convert to do
+    df_con = pd.DataFrame(list(con_vifs.items()), columns=["name", "value"])
+    df_con["type"] = "contrast"
+    df_reg = pd.DataFrame(list(reg_vifs.items()), columns=["name", "value"])
+    df_reg["type"] = "regressor"
+
+    # combine & rename cols
+    df = pd.concat([df_con, df_reg], ignore_index=True)
+    df = df[["type", "name", "value"]]
+
+    return con_vifs, reg_vifs, df

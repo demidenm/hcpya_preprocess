@@ -8,7 +8,7 @@ from pathlib import Path
 from datetime import date
 from glm_utils import (est_contrast_vifs, generate_tablecontents, create_design_matrix, 
 compute_save_contrasts, plot_design_vifs, visualize_contrastweights, compute_fixedeff, get_numvolumes, run_firstlvl_computecons, 
-get_files, sync_matching_runs)
+get_files, sync_matching_runs, gen_vif_combdf)
 from prep_eventsdata import (comb_names, prep_gamble_events, prep_motor_events, 
 prep_social_events, prep_language_events, prep_relation_events, prep_emotion_events, prep_wm_events)
 from pyrelimri.similarity import image_similarity
@@ -40,6 +40,7 @@ brain_mni_mask = "/home/feczk001/mdemiden/slurm_ABCD_s3/hcpya_preprocess/scripts
 task_list = ['motor','gambling','language','social','WM','emotion', 'relational']
 ses = "ses-3T"
 logfile_name = f"{ses}_modelsran.csv"
+
 firstlvl = f"{output_folder}/firstlvl/{subj_id}"
 fixedeff = f"{output_folder}/fixedeff/{subj_id}"
 os.makedirs(firstlvl, exist_ok=True)
@@ -143,21 +144,21 @@ for task in task_list:
                 hrf_type=config['hrf_type'], driftmod=detrend, 
                 highpass=highpass, duration_nan='replace'
             )
-        # VIFs ESTIMATE WITH ALL TASK REGRESSORS
-        filtered_columns = design_matrix.columns[~design_matrix.columns.str.contains(mod_config['nuisance_regressors'], regex=True)]
-        reg_dict = {item: item for item in filtered_columns if item != "constant"}
-        con_vifs = est_contrast_vifs(desmat=design_matrix, contrasts=mod_config['contrasts'])
-        reg_vifs = est_contrast_vifs(desmat=design_matrix, contrasts=reg_dict)
-        # create / save figures
-        fig = plot_design_vifs(designmat=design_matrix, regressor_vifs=reg_vifs, contrast_vifs=con_vifs, task_name=task)
-        save_desvifs = f"{firstlvl}/figures/{task}_design_vifs.png"
-        fig.savefig(save_desvifs, dpi=300, bbox_inches='tight')
-        plt.close()
 
-        fig, _, _ = visualize_contrastweights(design_matrix=design_matrix, config_contrasts=mod_config['contrasts'], var_exclude=mod_config['nuisance_regressors'])
-        save_con = f"{firstlvl}/figures/{task}_contrasts.png"
-        fig.savefig(save_con, dpi=300, bbox_inches='tight')
-        plt.close()
+        # VIFs estimate with ALL task regressors
+        try:
+            contrast_vifs, regress_vifs, vif_df = gen_vifdf(designmat=design_matrix, modconfig=mod_config)
+            vif_dif_path = f"{firstlvl}/figures/{task}_vif-estimates.tsv"
+            vif_df.to_csv(vif_dif_path, sep="\t")
+
+            # create / save figures
+            fig = plot_design_vifs(designmat=design_matrix, regressor_vifs=regress_vifs, contrast_vifs=contrast_vifs, task_name=task)
+            save_desvifs = f"{firstlvl}/figures/{task}_design_vifs.png"
+            fig.savefig(save_desvifs, dpi=300, bbox_inches='tight')
+            plt.close()
+        except Exception as e:
+            raise RuntimeError(f"   Error estimating VIFs: {e}")
+            continue
 
         # check brain mask errors w/ dice coeff 
         mask_fullpath = next(Path(working_folder).glob(f"{subj_id}_{ses}_task-{bold_taskname}_dir-*_run-{run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz"))
