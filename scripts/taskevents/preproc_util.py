@@ -211,7 +211,56 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
             })
 
             
-        
+        # Dummy 'Math' trials
+        elif 'DummyProc' in row['Procedure[Block]']:
+            # Present math file
+            long_format.append({
+                'onset': row['PresentMathFile.OnsetTime'] - adjust_by_trigger,
+                'duration': (row['PresentMathFile.FinishTime'] - row['PresentMathFile.OnsetTime']),
+                'trial_type': 'dpresent_math',
+                'block': row['Block_Label']
+            })
+            
+            # Full math period (including response)
+            long_format.append({
+                'onset': row['PresentMathFile.OnsetTime'] - adjust_by_trigger,
+                'duration': (row['ResponsePeriod.FinishTime'] - row['PresentMathFile.OnsetTime']),
+                'trial_type': 'dfull_math',
+                'block': row['Block_Label']
+            })
+            
+            long_format.append({
+                'onset': row['PresentMathFile.OnsetTime'] - adjust_by_trigger,
+                'duration': (row['PresentMathOptions.OnsetTime'] - row['PresentMathFile.OnsetTime']),
+                'trial_type': 'dmath_to_question',
+                'block': row['Block_Label']       
+            })
+            
+            # Math options presentation
+            long_format.append({
+                'onset': row['PresentMathOptions.OnsetTime'] - adjust_by_trigger,
+                'duration': (row['PresentMathOptions.FinishTime'] - row['PresentMathOptions.OnsetTime']),
+                'trial_type': 'dquestion_math',
+                'block': row['Block_Label'],
+                'math_lvl': row.get('CurrentMathLevel[Trial]', np.nan)
+            })
+            
+            # Math response period
+            # modified per Nick
+            long_format.append({
+                'onset': row['ResponsePeriod.OnsetTime'] - adjust_by_trigger,
+                'duration': (row['ResponsePeriod.FinishTime'] - row['ResponsePeriod.OnsetTime']),
+                'trial_type': 'dmath_answer',
+                'block': row['Block_Label'],
+                'response_time': row.get('FilteredTrialStats.RTFromFirstOption', np.nan), # not ResponsePeriod.RT, responses may occur earlier than period
+                'filtered_rttime': row.get('FilteredTrialStats.RTTIME',np.nan),
+                'accuracy': row.get('ResponsePeriod.ACC', np.nan),
+                'response': row.get('ResponsePeriod.RESP', np.nan),
+                'math_lvl': row.get('CurrentMathLevel[Trial]', np.nan),
+                'overall_acc': row.get('OverallAcc[Trial]', np.nan)
+            })
+
+
         # Block Changes (if present)
         elif 'Change' in row['Procedure[Block]']:
             long_format.append({
@@ -1328,17 +1377,12 @@ def gamble_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
                 'block': row['Block_Label']
             })
 
-            # sometimes the first row has 0 for onset / durations, this accounts for it.
-            if not (row['Feedback.OnsetTime'] == 0):
-                fb_onset = row['Feedback.OnsetTime'] - adjust_by_trigger
-                fb_duration = row['Feedback.OnsetToOnsetTime']
-            else:
-                fb_onset = np.nan
-                fb_duration = np.nan
-                
-            long_format.append({
-                'onset': fb_onset,
-                'duration': fb_duration,
+            # during No response, row has 0 for onset / durations, adjust to mark "too slow".
+            # not, even though "Too Slow" should occur for wrong answers (button 4), still contains feedback onset/duration in eprime
+            if row['QuestionMark.RESP'] in [3, 2, 4]:
+                long_format.append({
+                'onset':  row['Feedback.OnsetTime'] - adjust_by_trigger,
+                'duration': row['Feedback.OnsetToOnsetTime'],
                 'trial_type': 'feedback',
                 'reward_type': row['TrialType'],
                 'response_time': np.nan,
@@ -1346,7 +1390,21 @@ def gamble_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
                 'response': np.nan,
                 'feedback_type': row['FeedbackNumber'],
                 'block': row['Block_Label']
-            })
+                })
+
+            elif pd.isna(row['QuestionMark.RESP']):
+                long_format.append({
+                'onset': row['TooSlowFeedback.OnsetTime'] - adjust_by_trigger,
+                'duration': row['TooSlowFeedback.OnsetToOnsetTime'],
+                'trial_type': 'tooslow',
+                'reward_type': row['TrialType'],
+                'response_time': np.nan,
+                'accuracy': np.nan,
+                'response': np.nan,
+                'feedback_type': np.nan,
+                'block': row['Block_Label']
+                })
+            
             
             next_row_index = index + 1
             if next_row_index < len(df_relab) and df_relab.loc[next_row_index, 'Procedure[Trial]'] == 'GamblingTrialPROC':
