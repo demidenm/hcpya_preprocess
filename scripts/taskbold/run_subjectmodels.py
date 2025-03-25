@@ -8,7 +8,7 @@ from pathlib import Path
 from datetime import date
 from glm_utils import (est_contrast_vifs, generate_tablecontents, create_design_matrix, 
 compute_save_contrasts, plot_design_vifs, visualize_contrastweights, compute_fixedeff, get_numvolumes, run_firstlvl_computecons, 
-get_files, sync_matching_runs, gen_vif_combdf)
+get_files, sync_matching_runs, gen_vifdf)
 from prep_eventsdata import (comb_names, prep_gamble_events, prep_motor_events, 
 prep_social_events, prep_language_events, prep_relation_events, prep_emotion_events, prep_wm_events)
 from pyrelimri.similarity import image_similarity
@@ -43,14 +43,18 @@ logfile_name = f"{ses}_modelsran.csv"
 
 firstlvl = f"{output_folder}/firstlvl/{subj_id}"
 fixedeff = f"{output_folder}/fixedeff/{subj_id}"
+vifs_sub = f"{output_folder}/vifs/{subj_id}"
 os.makedirs(firstlvl, exist_ok=True)
 os.makedirs(fixedeff, exist_ok=True)
+os.makedirs(vifs_sub, exist_ok=True)
 os.makedirs(f"{firstlvl}/figures", exist_ok=True)
 
 # task, model specs
 with open(studydetails_path, 'r') as file:
     study_details = json.load(file)
 
+# saving complete vif df
+all_vif_dfs = []
 
 for task in task_list:    
     print(f"Starting task: {task}")
@@ -148,8 +152,10 @@ for task in task_list:
         # VIFs estimate with ALL task regressors
         try:
             contrast_vifs, regress_vifs, vif_df = gen_vifdf(designmat=design_matrix, modconfig=mod_config)
-            vif_dif_path = f"{firstlvl}/figures/{task}_vif-estimates.tsv"
-            vif_df.to_csv(vif_dif_path, sep="\t")
+            vif_df['task'] = task
+            vif_df['run'] = run
+            
+            all_vif_dfs.append(vif_df) 
 
             # create / save figures
             fig = plot_design_vifs(designmat=design_matrix, regressor_vifs=regress_vifs, contrast_vifs=contrast_vifs, task_name=task)
@@ -202,3 +208,8 @@ for task in task_list:
     log_file_path = os.path.join(outlog, logfile_name)
     log_entry = f"{date.today()},{user},{subj_id},{modtype},{task},{run},{dice_coeff},{firstlvl_ran},{fixedeff_ran}\n"
     os.system(f'echo "{log_entry.strip()}" >> {log_file_path}')
+
+# save vif df
+final_vif_df = pd.concat(all_vif_dfs, ignore_index=True)
+vif_dif_path = f"{vifs_sub}/all-tasks_vif-estimates.tsv"
+final_vif_df.to_csv(vif_dif_path, sep="\t")
