@@ -83,7 +83,7 @@ def create_language_task_diagram(save_to_path: str = None):
 
     # Story 1 Option
     current_x += about_width
-    add_block(current_x, story_y, option_width, 60, option_color, 'Story 1', 'Option')
+    add_block(current_x, story_y, option_width, 60, response_color, 'Story 1', 'Option')
     add_connector(current_x, story_y + 25, timeline_y)
     add_connector(current_x + option_width, story_y + 25, timeline_y)
 
@@ -101,7 +101,7 @@ def create_language_task_diagram(save_to_path: str = None):
 
     # Story 2 Option
     current_x += or_width
-    add_block(current_x, story_y, option_width, 60, option_color, 'Story 2', 'Option')
+    add_block(current_x, story_y, option_width, 60, response_color, 'Story 2', 'Option')
     add_connector(current_x, story_y + 25, timeline_y)
     add_connector(current_x + option_width, story_y + 25, timeline_y)
 
@@ -128,7 +128,7 @@ def create_language_task_diagram(save_to_path: str = None):
 
     # Math Question
     current_x += presentation_width
-    add_block(current_x, math_y, question_width, 60, math_color, 'Question', '2-alternative')
+    add_block(current_x, math_y, question_width, 60, response_color, 'Question', '2-alternative')
     add_connector(current_x, math_y + 25, timeline_y)
     add_connector(current_x + question_width, math_y + 25, timeline_y)
 
