@@ -24,29 +24,34 @@ The below distributions are from Run 1 across **all available subjects and trial
 First, the distribution of Duration times for Story and Math Presentations.
 
 <div style="text-align: center;">
-  <img src="../imgs/task-language_run-run1_type-presentationduration.png" />
+  <img src="../imgs/task-language_run-1_type-presentationduration.png" />
 </div>
 
 Second, full block durations for Story and Math.
 
 <div style="text-align: center;">
-  <img src="../imgs/task-language_run-run1_type-fullblockdurations.png" />
+  <img src="../imgs/task-language_run-1_type-fullblockdurations.png" />
 </div>
 
 Third, the distribution of durations from onset of Story/Math to beginning of Answer.
 <div style="text-align: center;">
-  <img src="../imgs/task-language_run-run1_type-answerdurations.png" />
+  <img src="../imgs/task-language_run-1_type-answerdurations.png" />
 </div>
 
-Fourth, the distribution of presentation to question durations for Story and Math.
-
+Fourth, the distribution of durations full answer windows.
 <div style="text-align: center;">
-  <img src="../imgs/task-language_run-run1_type-cuetoquestionduration.png" />
+  <img src="../imgs/task-language_run-1_type-answerdurationsfull.png" />
 </div>
 
-Fifth, the distribution of durations for the change block.
+Fifth, the distribution of presentation to question durations for Story and Math.
+
 <div style="text-align: center;">
-  <img src="../imgs/task-language_run-run1_type-cuetoquestionduration.png" />
+  <img src="../imgs/task-language_run-1_type-cuetoquestionduration.png" />
+</div>
+
+Sixth, the distribution of durations for the change block.
+<div style="text-align: center;">
+  <img src="../imgs/task-language_run-1_type-changeblockdurations.png" />
 </div>
 
 ### Distribution of Response Times
@@ -54,13 +59,13 @@ Fifth, the distribution of durations for the change block.
 First, the distirbutions of response times across trial type.
 
 <div style="text-align: center;">
-  <img src="../imgs/task-language_run-run1_type-responsetimesdist.png" />
+  <img src="../imgs/task-language_run-1_type-responsetimesdist.png" />
 </div>
 
 Second, the distirbutions of response times math difficulty.
 
 <div style="text-align: center;">
-  <img src="../imgs/task-language_run-run1_type-responsetimesmathdiff.png" />
+  <img src="../imgs/task-language_run-1_type-responsetimesmathdiff.png" />
 </div>
 
 Third, the accuracy across math difficulties
@@ -68,7 +73,7 @@ Third, the accuracy across math difficulties
 Fisrt, the distirbutions of response times across trial type.
 
 <div style="text-align: center;">
-  <img src="../imgs/task-language_run-run1_type-mathdiffaccuracy.png" />
+  <img src="../imgs/task-language_run-1_type-mathdiffaccuracy.png" />
 </div>
 
 

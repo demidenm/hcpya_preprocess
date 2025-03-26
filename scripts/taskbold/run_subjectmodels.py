@@ -37,7 +37,7 @@ outlog = args.logfile
 user = os.getenv("USER", "unknown")
 eventsdir = "/home/feczk001/mdemiden/data/hcp_events"
 brain_mni_mask = "/home/feczk001/mdemiden/slurm_ABCD_s3/hcpya_preprocess/scripts/taskbold/masks/MNI152NLin2009cAsym_res-02_desc-brain_mask.nii.gz"
-task_list = ['motor','gambling','language','social','WM','emotion', 'relational']
+task_list = ['language']#['motor','gambling','language','social','WM','emotion', 'relational']
 ses = "ses-3T"
 logfile_name = f"{ses}_modelsran.csv"
 

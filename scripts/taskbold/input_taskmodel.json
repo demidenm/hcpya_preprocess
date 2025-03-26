@@ -36,7 +36,7 @@
                 "randbase": "movie_random",
                 "mentvrand": "movie_mental - movie_random",
                 "respment": "response_mental",
-                "resprand": "response_mental",
+                "resprand": "response_random",
                 "rt": "rt"
             }
         }
@@ -69,7 +69,7 @@
             "onset_colname": "onset",
             "duration_colname": "duration",
             "trialtype_colname": "trial_type",
-            "trialtype_filter": ["quest_mark", "feedback"],
+            "trialtype_filter": ["quest_mark", "feedback","tooslow"],
             "prep_needed": "True",
             "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
@@ -165,19 +165,18 @@
             "onset_colname": "onset",
             "duration_colname": "duration",
             "trialtype_colname": "trial_type",
-            "trialtype_filter": ["present_story", "question_story", "story_opt1", "story_opt2",
-            "present_math", "question_math", "math_answer"],
+            "trialtype_filter": ["present_story", "question_story", "story_answerfull",
+            "present_math", "math_answerfull", "dpresent_math","dmath_answerfull"],
             "prep_needed": "True",
             "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
-                "presstoryvmath": "present_story - present_math",
-                "queststoryvmath": "question_story - question_math",
-                "presentmath": "question_math",
+                "presentmath": "present_math",
                 "presentstory": "present_story",
-                "mathanswer": "math_answer",
-                "storyanswer1": "story_opt1", 
-                "storyanswer2": "story_opt2",
+                "presentstoryvmath": "present_story - present_math",
+                "answermath": "math_answerfull",
+                "answerstory": "story_answerfull", 
+                "answerstoryvmath": "story_answerfull - math_answerfull",
                 "rt": "rt"
             }
         }

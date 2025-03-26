@@ -247,7 +247,8 @@ def prep_language_events(eventsdf: pd.DataFrame,  trialtype_colname: str = 'tria
     # processing for alt model
     if modtype == 'alt':
         # reaction time regressor rows
-        eventdf_cpy = add_reactiontime_regressor(eventsdf=eventdf_cpy, trial_type_col='trial_type', resp_trialtype=['story_opt1', 'math_answer'], 
+        eventdf_cpy = add_reactiontime_regressor(eventsdf=eventdf_cpy, trial_type_col='trial_type', resp_trialtype=['story_answerfull', 
+        'math_answerfull','dmath_answerfull'], 
         response_colname='response_time', rtreg_name='rt')
 
     return eventdf_cpy

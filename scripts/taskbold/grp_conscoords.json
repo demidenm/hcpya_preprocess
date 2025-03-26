@@ -12,7 +12,7 @@
     "language": {
         "coord": [-52, -2, -8],
         "hcp": {"con": ["storyvmath"]},
-        "alt": {"con": ["presstoryvmath", "queststoryvmath", "rt"]}
+        "alt": {"con": ["presentstoryvmath", "answerstoryvmath", "rt"]}
     },
     "social": {
         "coord": [50, -56, 18],

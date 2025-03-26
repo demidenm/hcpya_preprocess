@@ -148,6 +148,20 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
 
             # Response period
             # cleaned up after input form Nicholas Bloom (nbloom@wustl.edu) who helped code Language tas.
+            # full story and response period specific
+            long_format.append({
+                'onset': row['PresentStoryOption1.OnsetTime'] - adjust_by_trigger,
+                'duration': (row['ResponsePeriod.FinishTime'] - row['PresentStoryOption1.OnsetTime']),
+                'trial_type': 'story_answerfull',
+                'block': row['Block_Label'],
+                'response_time': row.get('FilteredTrialStats.RTFromFirstOption', np.nan), # not ResponsePeriod.RT, responses may occur earlier than period
+                'filtered_rttime': row.get('FilteredTrialStats.RTTIME',np.nan),
+                'accuracy': row.get('FilteredTrialStats.ACC', np.nan), # not ResposnePeriod.ACC as may iincorrectly label inacc
+                'response': row.get('FilteredTrialStats.RESP', np.nan), # not ResponsePeriod.RESP as may iincorrectly label inacc
+                'math_lvl': np.nan,
+                'overall_acc': row.get('OverallAcc[Trial]', np.nan)
+            })
+            
             long_format.append({
                 'onset': row['ResponsePeriod.OnsetTime'] - adjust_by_trigger,
                 'duration': (row['ResponsePeriod.FinishTime'] - row['ResponsePeriod.OnsetTime']),
@@ -210,6 +224,20 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
                 'overall_acc': row.get('OverallAcc[Trial]', np.nan)
             })
 
+            # modified per Nick
+            long_format.append({
+                'onset': row['PresentMathOptions.OnsetTime'] - adjust_by_trigger,
+                'duration': (row['ResponsePeriod.FinishTime'] - row['PresentMathOptions.OnsetTime']),
+                'trial_type': 'math_answerfull',
+                'block': row['Block_Label'],
+                'response_time': row.get('FilteredTrialStats.RTFromFirstOption', np.nan), # not ResponsePeriod.RT, responses may occur earlier than period
+                'filtered_rttime': row.get('FilteredTrialStats.RTTIME',np.nan),
+                'accuracy': row.get('ResponsePeriod.ACC', np.nan),
+                'response': row.get('ResponsePeriod.RESP', np.nan),
+                'math_lvl': row.get('CurrentMathLevel[Trial]', np.nan),
+                'overall_acc': row.get('OverallAcc[Trial]', np.nan)
+            })
+
             
         # Dummy 'Math' trials
         elif 'DummyProc' in row['Procedure[Block]']:
@@ -259,7 +287,18 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
                 'math_lvl': row.get('CurrentMathLevel[Trial]', np.nan),
                 'overall_acc': row.get('OverallAcc[Trial]', np.nan)
             })
-
+            long_format.append({
+                'onset': row['PresentMathOptions.OnsetTime'] - adjust_by_trigger,
+                'duration': (row['ResponsePeriod.FinishTime'] - row['PresentMathOptions.OnsetTime']),
+                'trial_type': 'dmath_answerfull',
+                'block': row['Block_Label'],
+                'response_time': row.get('FilteredTrialStats.RTFromFirstOption', np.nan), # not ResponsePeriod.RT, responses may occur earlier than period
+                'filtered_rttime': row.get('FilteredTrialStats.RTTIME',np.nan),
+                'accuracy': row.get('ResponsePeriod.ACC', np.nan),
+                'response': row.get('ResponsePeriod.RESP', np.nan),
+                'math_lvl': row.get('CurrentMathLevel[Trial]', np.nan),
+                'overall_acc': row.get('OverallAcc[Trial]', np.nan)
+            })
 
         # Block Changes (if present)
         elif 'Change' in row['Procedure[Block]']:
