@@ -588,7 +588,7 @@ def group_onesample(fixedeffect_paths: list, session: str, task_type: str,
 
     if save_cohensd:
         cohensd_out = tstat_out.replace('tstat', 'cohensd')
-        cohensd_map nifti_tstat_to_cohensd(tstat_map=tstat_out,sample_n=n_maps)
+        cohensd_map = nifti_tstat_to_cohensd(tstat_map=tstat_out,sample_n=n_maps)
         cohensd_map.to_filename(cohensd_out)
 
     if save_zscore:
