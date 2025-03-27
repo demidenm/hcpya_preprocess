@@ -266,7 +266,8 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
         elif 'Change' in row['Procedure[Block]']:
             long_format.append({
                 'onset': row['PresentBlockChange.OnsetTime'] - adjust_by_trigger,
-                'duration': (row['PresentBlockChange.FinishTime'] - row['PresentBlockChange.OnsetTime']),
+                # change block also includes a 500ms wait time
+                'duration': (row['Wait500.FinishTime[Block]'] - row['PresentBlockChange.OnsetTime']),
                 'trial_type': 'change',
                 'block': row['Block_Label'],
                 'response_time': np.nan,

@@ -22,7 +22,7 @@ parser.add_argument('--model', type=str, help='model type in config task file, e
 parser.add_argument('--config', type=str, help='path to configuration file with task / model details')
 parser.add_argument('--analysisout', type=str, help='Output folder for analyses')
 parser.add_argument('--workdir', type=str, help='Working directory for copy and holidng events/bold files, default /tmp/', default='/tmp/')
-parser.add_argument('--logfile', type=str, help='path where to print out preprocessing details, default current dir', default='./' )
+parser.add_argument('--logfile', type=str, help='path where to print out analysis details, default current dir', default='./' )
 args = parser.parse_args()
 
 # Configuration from command line args
@@ -55,6 +55,7 @@ with open(studydetails_path, 'r') as file:
 
 # saving complete vif df
 all_vif_dfs = []
+match_tasks = 0
 
 for task in task_list:    
     print(f"Starting task: {task}")
@@ -68,6 +69,9 @@ for task in task_list:
         log_entry = f"{date.today()},{user},{subj_id},{modtype},{task},NA,NA,NA,NA\n"
         os.system(f'echo "{log_entry.strip()}" >> {log_file_path}')
         continue
+    
+    # for each matching task
+    match_tasks += 1
 
     for run in runs:
         config = study_details[task]
@@ -189,7 +193,7 @@ for task in task_list:
                 highpass=highpass
             )            
             firstlvl_ran = 1
-            print("First Level Model successfully ran")
+            print(f"{subj_id}: First Level successfully ran for {task} run-{run}")
         else:
             firstlvl_ran = 0
             print(f"Error in brain coverage: {subj_id} for {bold_taskname} run-{run} Brain Mask ~ MNI Overlap: {dice_coeff}.")
@@ -198,18 +202,22 @@ for task in task_list:
         compute_fixedeff(subjid=subj_id, task=task, sess_lab=ses, condict=mod_config["contrasts"], 
                  inpfold=firstlvl, outfold=fixedeff,prec_weight=False)
         fixedeff_ran = 1
-        print("Fixed Effects successfully ran")
+        print(f"{subj_id}: Fixed Effect successfully ran for {task}")
     else:
         fixedeff_ran = 0
-        print(f"{subj_id} for {task} contains <2 runs (e.g runs: {len(runs)})")
+        print(f"{subj_id}: {task} contains <2 runs (e.g runs: {len(runs)}). Skipping Fixed Effects.")
 
 
     # log and append
     log_file_path = os.path.join(outlog, logfile_name)
     log_entry = f"{date.today()},{user},{subj_id},{modtype},{task},{run},{dice_coeff},{firstlvl_ran},{fixedeff_ran}\n"
     os.system(f'echo "{log_entry.strip()}" >> {log_file_path}')
+    print()
+    print(f"Saved to log: Date, USER, Subject, ModelType, TaskName, Run, DiceEst, FirstLvlStatus, FixedEffStatus")
+    print()
 
-# save vif df
-final_vif_df = pd.concat(all_vif_dfs, ignore_index=True)
-vif_dif_path = f"{vifs_sub}/all-tasks_vif-estimates.tsv"
-final_vif_df.to_csv(vif_dif_path, sep="\t")
+# save vif df if at least 1 task match runs found & isn't empty
+if match_tasks > 0 and all_vif_dfs:
+    final_vif_df = pd.concat(all_vif_dfs, ignore_index=True)
+    vif_dif_path = f"{vifs_sub}/all-tasks_vif-estimates.tsv"
+    final_vif_df.to_csv(vif_dif_path, sep="\t")

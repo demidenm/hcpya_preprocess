@@ -14,7 +14,7 @@ from nilearn.glm.second_level import SecondLevelModel
 from nilearn.plotting import plot_design_matrix
 from nilearn.glm.first_level import make_first_level_design_matrix
 from nilearn.glm import expression_to_contrast_vector, compute_fixed_effects
-from nilearn.image import load_img
+from nilearn.image import load_img, new_img_like
 from matplotlib.gridspec import GridSpec
 from bids.layout import parse_file_entities
 from nilearn.plotting.matrix_plotting import pad_contrast_matrix
@@ -45,26 +45,30 @@ def est_contrast_vifs(desmat, contrasts):
     )
     vifs_contrasts = {}
     for contrast_name, contrast_string in contrasts.items():
-        contrast_cvec = expression_to_contrast_vector(
-            contrast_string, desmat_copy.columns
-        )
-        true_var_contrast = (
-            contrast_cvec
-            @ np.linalg.inv(desmat_copy.transpose() @ desmat_copy)
-            @ contrast_cvec.transpose()
-        )
-        # The folllowing is the "best case" scenario because the between condition regressor correlations are set to 0
-        best_var_contrast = (
-            contrast_cvec
-            @ np.linalg.inv(
-                np.multiply(
-                    desmat_copy.transpose() @ desmat_copy,
-                    np.identity(desmat_copy.shape[1]),
-                )
+        try:
+            contrast_cvec = expression_to_contrast_vector(
+                contrast_string, desmat_copy.columns
             )
-            @ contrast_cvec.transpose()
-        )
-        vifs_contrasts[contrast_name] = true_var_contrast / best_var_contrast
+            true_var_contrast = (
+                contrast_cvec
+                @ np.linalg.inv(desmat_copy.transpose() @ desmat_copy)
+                @ contrast_cvec.transpose()
+            )
+            # The folllowing is the "best case" scenario because the between condition regressor correlations are set to 0
+            best_var_contrast = (
+                contrast_cvec
+                @ np.linalg.inv(
+                    np.multiply(
+                        desmat_copy.transpose() @ desmat_copy,
+                        np.identity(desmat_copy.shape[1]),
+                    )
+                )
+                @ contrast_cvec.transpose()
+            )
+            vifs_contrasts[contrast_name] = true_var_contrast / best_var_contrast
+        except Exception as e:
+            print(f"Error computing VIF for regressor '{contrast_name}': {e}")
+
     return vifs_contrasts
 
 
@@ -530,9 +534,32 @@ def visualize_contrastweights(design_matrix, config_contrasts, var_exclude):
     return fig, contrast_weights, weights_df
 
 
+def nifti_tstat_to_cohensd(tstat_path:str, sample_n: int):
+    """
+    Function converts NIfTI t-statistic image to Cohen's d.
+
+    Parameters:
+    tstat_path (str): Path to NIfTI image containing t-statistic nifti volume.
+    sample_n (int): Sample size make up t-stat for calculating Cohen's d
+    
+    Returns:
+    NIfTI image containing Cohen's d.
+    """
+    
+    t_img = nib.load(tstat_path)
+    # Get data array from the t-statistics image
+    t_data = t_img.get_fdata()
+    # Calculate Cohen's d using the t_stat / sqrt(n) formula
+    d_data = t_data / np.sqrt(sample_n)
+    # Create a NIfTI image containing Cohen's d, with the same properties as the input image
+    cohensd_img = new_img_like(t_img, d_data)
+
+    return cohensd_img
+
+
 def group_onesample(fixedeffect_paths: list, session: str, task_type: str,
                     contrast_type: str, group_outdir: str,
-                    mask: str = None, save_zstat: bool = True):
+                    mask: str = None, save_zscore: bool = True, save_cohensd: bool = True):
     """
     Computes a group (second-level) model by fitting an intercept to the length of maps.
     Saves computed statistics to disk.
@@ -559,13 +586,18 @@ def group_onesample(fixedeffect_paths: list, session: str, task_type: str,
     tstat_out = group_outdir / f"subs-{n_maps}_{session}_task-{task_type}_contrast-{contrast_type}_stat-tstat.nii.gz"
     tstat_map.to_filename(tstat_out)
 
-    if save_zstat:
+    if save_cohensd:
+        cohensd_out = tstat_out.replace('tstat', 'cohensd')
+        cohensd_map nifti_tstat_to_cohensd(tstat_map=tstat_out,sample_n=n_maps)
+        cohensd_map.to_filename(cohensd_out)
+
+    if save_zscore:
         zstat_map = sec_lvl_model.compute_contrast(
         second_level_contrast='int',
         second_level_stat_type='t',
         output_type='z_score'
         )
-        zstat_out = group_outdir / f"subs-{n_maps}_{session}_task-{task_type}_contrast-{contrast_type}_stat-zstat.nii.gz"
+        zstat_out = group_outdir / f"subs-{n_maps}_{session}_task-{task_type}_contrast-{contrast_type}_stat-zscore.nii.gz"
         zstat_map.to_filename(zstat_out)
 
 
@@ -574,6 +606,7 @@ def get_files(bash_command):
     files = [line.split()[-1] for line in command_out.stdout.strip().split("\n") if line]
     
     return files
+
     
 def sync_matching_runs(subject_id, sesid, taskname, events_path, sync_destination):
     """
@@ -660,6 +693,16 @@ def gen_vifdf(designmat, modconfig):
     filtered_columns = designmat.columns[~designmat.columns.str.contains(modconfig['nuisance_regressors'], regex=True)]
     regressor_dict = {item: item for item in filtered_columns if item != "constant"}
 
+    # Function to filter out non-existent regressors
+    def filter_existing_regressors(contrast_dict):
+        return {
+            k: v for k, v in contrast_dict.items() 
+            if all(col in designmat.columns for col in v.split('-') if col.strip())
+        }
+
+    # Filter contrasts to include only those with existing regressors
+    filtered_contrasts = filter_existing_regressors(modconfig['contrasts'])
+    
     # est VIFs for contrasts and regressors
     con_vifs = est_contrast_vifs(desmat=designmat, contrasts=modconfig['contrasts'])
     reg_vifs = est_contrast_vifs(desmat=designmat, contrasts=regressor_dict)

@@ -34,13 +34,15 @@ def create_language_task_diagram(save_to_path: str = None):
     timeline_y = 320
 
     # Define block widths (time proportions)
-    presentation_width = 150
+    presentation_width_story = 150
+    presentation_width_math = 100
+
     question_width = 80
     option_width = 70  # Width for story options
     or_width = 2      # Width for the "OR" text
-    response_width = 60
+    response_width = 70
     about_width = 60  # New width for 'That Was About' block
-    change_width = 50
+    change_width = 30
     gap_width = 0
 
     # Starting x position
@@ -48,7 +50,7 @@ def create_language_task_diagram(save_to_path: str = None):
 
     # Create timeline
     dwg.add(dwg.line(start=(start_x, timeline_y), 
-                    end=(start_x + 2*(presentation_width + question_width + response_width + about_width + change_width + gap_width) + option_width + or_width, timeline_y), 
+                    end=(start_x + presentation_width_story +  presentation_width_math + 2*(question_width + response_width + about_width + change_width + gap_width) + option_width + or_width, timeline_y), 
                     stroke='black', stroke_width=2))
 
     # Add time markers
@@ -71,12 +73,12 @@ def create_language_task_diagram(save_to_path: str = None):
     current_x = start_x
 
     # Story Presentation
-    add_block(current_x, story_y, presentation_width, 60, story_color, 'Story Presentation', '5-9 sentences')
+    add_block(current_x, story_y, presentation_width_story, 60, story_color, 'Present Story', '5-9 sentences')
     add_connector(current_x, story_y + 25, timeline_y)
-    add_connector(current_x + presentation_width, story_y + 25, timeline_y)
+    add_connector(current_x + presentation_width_story, story_y + 25, timeline_y)
 
     # "That Was About" Block (New Block)
-    current_x += presentation_width
+    current_x += presentation_width_story + 4 # adding brief gap for "500ms wait, which on avg is ~400ms"
     add_block(current_x, story_y, about_width, 60, about_color, 'About')
     add_connector(current_x, story_y + 25, timeline_y)
     add_connector(current_x + about_width, story_y + 25, timeline_y)
@@ -113,7 +115,7 @@ def create_language_task_diagram(save_to_path: str = None):
 
     # Change Block
     current_x += response_width
-    add_block(current_x, story_y, change_width, 60, change_color, 'Change')
+    add_block(current_x, story_y, change_width, 60, change_color, '')
     add_connector(current_x, story_y + 25, timeline_y)
     add_connector(current_x + change_width, story_y + 25, timeline_y)
 
@@ -122,13 +124,13 @@ def create_language_task_diagram(save_to_path: str = None):
 
     # Math Block - Starting at the adjusted position
     # Math Presentation
-    add_block(current_x, math_y, presentation_width, 60, math_color, 'Math Presentation', 'arithmetic operations')
+    add_block(current_x, math_y, presentation_width_math, 60, math_color, 'Present Math', 'math operations')
     add_connector(current_x, math_y + 25, timeline_y)
-    add_connector(current_x + presentation_width, math_y + 25, timeline_y)
+    add_connector(current_x + presentation_width_math, math_y + 25, timeline_y)
 
     # Math Question
-    current_x += presentation_width
-    add_block(current_x, math_y, question_width, 60, response_color, 'Question', '2-alternative')
+    current_x += presentation_width_math
+    add_block(current_x, math_y, question_width, 60, response_color, 'Question', '2-options')
     add_connector(current_x, math_y + 25, timeline_y)
     add_connector(current_x + question_width, math_y + 25, timeline_y)
 
@@ -140,7 +142,7 @@ def create_language_task_diagram(save_to_path: str = None):
 
     # Change Block
     current_x += response_width
-    add_block(current_x, math_y, change_width, 60, change_color, 'Change')
+    add_block(current_x, math_y, change_width, 60, change_color, '')
     add_connector(current_x, math_y + 25, timeline_y)
     add_connector(current_x + change_width, math_y + 25, timeline_y)
 
@@ -148,9 +150,9 @@ def create_language_task_diagram(save_to_path: str = None):
     legend_x = 750  # Moved further right
     legend_y = 30
     legend_items = [
-        ("Story Blocks", story_color),
-        ("Math Blocks", math_color),
-        ("Story Options", option_color),
+        ("Present Story", story_color),
+        ("Present Math", math_color),
+        #("Story Options", option_color),
         ("Response Window", response_color),
         ('"That Was About"', about_color),
         ("Change Block", change_color)
