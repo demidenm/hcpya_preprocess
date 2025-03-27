@@ -11,7 +11,25 @@ The [Barch et al. (2013, pg 177-178)](https://www.sciencedirect.com/science/arti
 
 
 ## Basic Trial Structure
-Each block begins with either a Story or Math trial presentation. After the presentation, a corresponding question is shown for the respective trial type. This is followed by a response/answer window. Typically, a Change block follows each trial block. For Math trials, consecutive Math blocks often occur. See the diagram below.
+Each block begins with the presentation of a Story or Math audio file (.wav).
+
+Story Presentation. After the Story presentation participant experience:
+- A ~500ms waiting period, then
+- "That was about?"
+- Option 1 is presented, followed by "or", then Option 2 presentation (.wav).
+- The response window follows.
+
+Participants can respond during Option 1, "or", Option 2 or the response window.
+
+Math Presentation. After the math presentation, participants experience:
+- A "Question" window appears
+- Followed by the response window.
+
+Participants can respond during both the question and response windows.
+
+After each consecutive trial block, a change block occurs.
+
+See the diagram below.
 
 <div style="text-align: center;">
   <img src="./language_task_diagram.svg" />

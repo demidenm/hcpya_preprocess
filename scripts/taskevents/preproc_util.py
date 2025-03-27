@@ -89,6 +89,28 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
 
             # Story to question transition period
             long_format.append({
+                'onset': row['Wait500.OnsetTime[Trial]'] - adjust_by_trigger,
+                'duration': (row['Wait500.FinishTime[Trial]'] - row['Wait500.OnsetTime[Trial]']),
+                'trial_type': 'story_wait',
+                'block': row['Block_Label'],
+                'response_time': np.nan,
+                'accuracy': np.nan,
+                'response': np.nan            
+            })
+
+            # Story to end of question period
+            long_format.append({
+                'onset': row['PresentStoryFile.OnsetTime'] - adjust_by_trigger,
+                'duration': (row['ThatWasAbout.FinishTime'] - row['PresentStoryFile.OnsetTime']),
+                'trial_type': 'present_storyquest',
+                'block': row['Block_Label'],
+                'response_time': np.nan,
+                'accuracy': np.nan,
+                'response': np.nan            
+            })
+
+            # Story to question transition period
+            long_format.append({
                 'onset': row['PresentStoryFile.OnsetTime'] - adjust_by_trigger,
                 'duration': (row['ThatWasAbout.OnsetTime'] - row['PresentStoryFile.OnsetTime']),
                 'trial_type': 'story_to_question',
@@ -175,8 +197,8 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
                 'overall_acc': row.get('OverallAcc[Trial]', np.nan)
             })
             
-        # Math trials
-        elif 'Math' in row['Procedure[Block]']:
+        # Math trials (treat dummy proc the same)
+        elif 'Math' in row['Procedure[Block]'] or 'DummyProc' in row['Procedure[Block]']:
             # Present math file
             long_format.append({
                 'onset': row['PresentMathFile.OnsetTime'] - adjust_by_trigger,
@@ -239,67 +261,7 @@ def language_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
             })
 
             
-        # Dummy 'Math' trials
-        elif 'DummyProc' in row['Procedure[Block]']:
-            # Present math file
-            long_format.append({
-                'onset': row['PresentMathFile.OnsetTime'] - adjust_by_trigger,
-                'duration': (row['PresentMathFile.FinishTime'] - row['PresentMathFile.OnsetTime']),
-                'trial_type': 'dpresent_math',
-                'block': row['Block_Label']
-            })
-            
-            # Full math period (including response)
-            long_format.append({
-                'onset': row['PresentMathFile.OnsetTime'] - adjust_by_trigger,
-                'duration': (row['ResponsePeriod.FinishTime'] - row['PresentMathFile.OnsetTime']),
-                'trial_type': 'dfull_math',
-                'block': row['Block_Label']
-            })
-            
-            long_format.append({
-                'onset': row['PresentMathFile.OnsetTime'] - adjust_by_trigger,
-                'duration': (row['PresentMathOptions.OnsetTime'] - row['PresentMathFile.OnsetTime']),
-                'trial_type': 'dmath_to_question',
-                'block': row['Block_Label']       
-            })
-            
-            # Math options presentation
-            long_format.append({
-                'onset': row['PresentMathOptions.OnsetTime'] - adjust_by_trigger,
-                'duration': (row['PresentMathOptions.FinishTime'] - row['PresentMathOptions.OnsetTime']),
-                'trial_type': 'dquestion_math',
-                'block': row['Block_Label'],
-                'math_lvl': row.get('CurrentMathLevel[Trial]', np.nan)
-            })
-            
-            # Math response period
-            # modified per Nick
-            long_format.append({
-                'onset': row['ResponsePeriod.OnsetTime'] - adjust_by_trigger,
-                'duration': (row['ResponsePeriod.FinishTime'] - row['ResponsePeriod.OnsetTime']),
-                'trial_type': 'dmath_answer',
-                'block': row['Block_Label'],
-                'response_time': row.get('FilteredTrialStats.RTFromFirstOption', np.nan), # not ResponsePeriod.RT, responses may occur earlier than period
-                'filtered_rttime': row.get('FilteredTrialStats.RTTIME',np.nan),
-                'accuracy': row.get('ResponsePeriod.ACC', np.nan),
-                'response': row.get('ResponsePeriod.RESP', np.nan),
-                'math_lvl': row.get('CurrentMathLevel[Trial]', np.nan),
-                'overall_acc': row.get('OverallAcc[Trial]', np.nan)
-            })
-            long_format.append({
-                'onset': row['PresentMathOptions.OnsetTime'] - adjust_by_trigger,
-                'duration': (row['ResponsePeriod.FinishTime'] - row['PresentMathOptions.OnsetTime']),
-                'trial_type': 'dmath_answerfull',
-                'block': row['Block_Label'],
-                'response_time': row.get('FilteredTrialStats.RTFromFirstOption', np.nan), # not ResponsePeriod.RT, responses may occur earlier than period
-                'filtered_rttime': row.get('FilteredTrialStats.RTTIME',np.nan),
-                'accuracy': row.get('ResponsePeriod.ACC', np.nan),
-                'response': row.get('ResponsePeriod.RESP', np.nan),
-                'math_lvl': row.get('CurrentMathLevel[Trial]', np.nan),
-                'overall_acc': row.get('OverallAcc[Trial]', np.nan)
-            })
-
+        
         # Block Changes (if present)
         elif 'Change' in row['Procedure[Block]']:
             long_format.append({

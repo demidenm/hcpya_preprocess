@@ -8,7 +8,15 @@ The [Barch et al. (2013, pg 178-179)](https://www.sciencedirect.com/science/arti
 
 ## Basic Trial Structure
 
-The task includes "Face and "Shape" blocks. The tasks starts with the the presentation of whether a Shape or Face block (avg durations 2.9 [min/max, 2.9/3.1]). After the Cue, the stimuli appear. After the stimulus, there is a brief fixation before the consecutive stimulus. stimuli are consecutive after the fixation before the change in block, whereby a new Cue starts. See diagram below.
+The task includes *Face* and *Shape* blocks.
+
+Task Flow:
+- The task starts with the presentation of whether it is a *Shape* or *Face* block.
+- After the cue, the *stimuli* appear.
+- After each stimulus, there is a brief *fixation* before the next consecutive stimulus.
+- Stimuli continue consecutively after the fixation until there is a change in block, at which point a new *cue* prompt starts.
+
+*See the diagram below for reference.*
 
 <div style="text-align: center;">
   <img src="./emotion_task_diagram.svg" />

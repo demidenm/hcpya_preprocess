@@ -9,7 +9,12 @@ The [Barch et al. (2013, pg 178)](https://www.sciencedirect.com/science/article/
 
 ## Basic Trial Structure
 
-The task Social and Non-Social Interaction movie presentations. After the movie presentation, there is a response window where a participant responds the type of interaction they observed. Following the response window, there is a fixation window before the next movie starts. See diagram below. 
+The task involves *Social* and *Non-Social Interaction* movie presentations (.avi).
+
+Task Flow:
+- After the movie presentation, a *response window* appears where the participant responds to the type of interaction they observed. 
+- Response options Social, Not Sure, Random (i.e. No Interaction)
+- Following the response window, a *fixation window* occurs before the next movie starts.
 
 <div style="text-align: center;">
   <img src="./social_task_diagram.svg" />

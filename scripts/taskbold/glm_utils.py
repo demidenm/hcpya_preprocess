@@ -513,7 +513,7 @@ def visualize_contrastweights(design_matrix, config_contrasts, var_exclude):
     fig_height = max(computed_height, min_height)
 
     fig, ax = plt.subplots(figsize=(min_width, fig_height))
-    sns.heatmap(weights_df, cmap="RdBu_r", center=0, annot=True, fmt=".1f",      
+    sns.heatmap(weights_df, cmap="RdBu_r", center=0, annot=True, fmt=".2f",      
         linewidths=.5, cbar_kws={"label": "Contrast Weight"}, ax=ax, vmin=-1, vmax=1  
 
     )

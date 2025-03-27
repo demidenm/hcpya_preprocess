@@ -9,7 +9,23 @@ The [Barch et al. (2013, pg 178)](https://www.sciencedirect.com/science/article/
 
 ## Basic Trial Structure
 
-The WM task starts with a cue indicating the N-back condition (0-back or 2-back). Following the cue block prompt, the stimuli begin for the N-back block. Each block consists of consecutive stimuli, including non-lure, target, and lure trials. After these consecutive stimuli, the next block begins. After approximately two consecutive blocks, a fixation block occurs before the next N-back block. See diagram below.
+The *WM task* starts with a cue indicating the *N-back condition* (0-back or 2-back).
+
+Task Flow:
+- After the cue block prompt, the *stimuli* for the N-back block begin.  The [4] Stimuli Blocks are:
+  - Body
+  - Face
+  - Tools
+  - Places
+- Each block consists of consecutive stimuli, including [3] trial types:
+  - non-lure 
+  - target
+  - lure  
+- After the consecutive stimuli, the next block begins.
+
+*Fixation Blocks*. After approximately two consecutive blocks, a fixation block occurs before the next N-back block.
+
+See the diagram below for reference.
 
 <div style="text-align: center;">
   <img src="./workmemory_task_diagram.svg" />

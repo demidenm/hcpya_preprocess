@@ -10,7 +10,16 @@ The [Barch et al. (2013, pg 177-178)](https://www.sciencedirect.com/science/arti
 
 ## Basic Trial Structure
 
-The task includes five cue types: Left Hand, Right Hand, Left Foot, Right Foot, and Tongue movement. After the cue presentation indicating the movement block, a 12-second movement period follows. Fixation blocks are intermittently placed between cue-movement block interactions. See the diagram below.
+The task includes five **cue types**:  
+- Left Hand
+- Right Hand  
+- Left Foot  
+- Right Foot  
+- Tongue movement
+
+*Cue Presentation*. Each movement block begins with a cue indicating the type of movement.
+*Movement Period*. A 12-second movement period follows the cue presentation, during which the participant performs the indicated movement.
+*Fixation Blocks*. Placed intermittently between cue-movement blocks.
 
 <div style="text-align: center;">
   <img src="./motor_task_diagram.svg" />

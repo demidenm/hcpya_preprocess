@@ -10,7 +10,11 @@ The [Barch et al. (2013, pg 178)](https://www.sciencedirect.com/science/article/
 
 ## Basic Trial Structure
 
-The Relational task begins with a prompt indicating whether it is a Relational or Control condition. Following the prompt, stimulus trials begin and continue consecutively until the next prompt. A fixation block occurs approximately every two blocks. See the diagram below.
+The Relational task begins with a prompt indicating whether it is a Relational or Control (i.e. matching) condition.  
+
+Task Flow:
+- After the prompt, *stimulus trials* begin and continue consecutively until the next prompt.  
+- A *fixation block* occurs approximately every two blocks.
 
 <div style="text-align: center;">
   <img src="./relational_task_diagram.svg" />

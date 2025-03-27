@@ -35,8 +35,7 @@
                 "mentbase": "movie_mental",
                 "randbase": "movie_random",
                 "mentvrand": "movie_mental - movie_random",
-                "respment": "response_mental",
-                "resprand": "response_random",
+                "respmentvrand": "response_mental - response_random",
                 "rt": "rt"
             }
         }
@@ -75,7 +74,6 @@
             "model_rt": "False",
             "contrasts":{
                 "qhighvlwr": "quest_hihr - quest_lwr",
-                "question": ".5 * quest_hihr + .5 * quest_lwr",
                 "fbneut": "feedback_neutral",
                 "fbgain": "feedback_reward",
                 "fbloss": "feedback_punishment",
@@ -165,15 +163,15 @@
             "onset_colname": "onset",
             "duration_colname": "duration",
             "trialtype_colname": "trial_type",
-            "trialtype_filter": ["present_story", "question_story", "story_answerfull",
-            "present_math", "math_answerfull", "dpresent_math","dmath_answerfull"],
+            "trialtype_filter": ["present_storyquest", "story_answerfull",
+            "present_math", "math_answerfull"],
             "prep_needed": "True",
             "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts":{
                 "presentmath": "present_math",
-                "presentstory": "present_story",
-                "presentstoryvmath": "present_story - present_math",
+                "presentstory": "present_storyquest",
+                "presentstoryvmath": "present_storyquest - present_math",
                 "answermath": "math_answerfull",
                 "answerstory": "story_answerfull", 
                 "answerstoryvmath": "story_answerfull - math_answerfull",
@@ -284,16 +282,17 @@
             "nuisance_regressors": "cosine|trans|rot",
             "model_rt": "False",
             "contrasts": {
-                "body": "0.5 * `2back_full_body` + 0.5 * `0back_full_body`",
-                "face": "0.5 * `2back_full_face` + 0.5 * `0back_full_body`",
-                "tools": "0.5 * `2back_full_tools` + 0.5 * `0back_full_body`",
-                "place": "0.5 * `2back_full_place` + 0.5 * `0back_full_body`",
+                "facevplace": "0.5 * `2back_full_face` + 0.5 * `0back_full_face` - 0.5 * `2back_full_place` - 0.5 * `0back_full_place`",
                 "bodyvface": "0.5 * `2back_full_body` + 0.5 * `0back_full_body` - 0.5 * `2back_full_face` - 0.5 * `0back_full_face`",
+                "bodyvplace": "0.5 * `2back_full_body` + 0.5 * `0back_full_body` - 0.5 * `2back_full_place` - 0.5 * `0back_full_place`",
                 "toolsvplace": "0.5 * `2back_full_tools` + 0.5 * `0back_full_tools` - 0.5 * `2back_full_place` - 0.5 * `0back_full_place`",
                 "body2backv0back": "`2back_full_body` - `0back_full_body`",
                 "face2backv0back": "`2back_full_face` - `0back_full_face`",
                 "toolsbody2backv0back": "`2back_full_tools` - `0back_full_tools`",
-                "placebody2backv0back": "`2back_full_place` - `0back_full_place`"
+                "placebody2backv0back": "`2back_full_place` - `0back_full_place`",
+                "2back": "0.25 * `2back_full_body` + 0.25 * `2back_full_face` + 0.25 * `2back_full_tools` +0.25 * `2back_full_place`",
+                "0back": "0.25 * `0back_full_body` + 0.25 * `0back_full_face` + 0.25 * `0back_full_tools` +0.25 * `0back_full_place`",
+                "2backv0back": "0.25 * `2back_full_body` + 0.25 * `2back_full_face` + 0.25 * `2back_full_tools` + 0.25 * `2back_full_place` - 0.25 * `0back_full_body` - 0.25 * `0back_full_face` - 0.25 * `0back_full_tools` - 0.25 * `0back_full_place`"
             }
         },
         "alt": {
@@ -308,16 +307,17 @@
                 "cue0back": "cue_0back",
                 "cue2back": "cue_2back",
                 "cue2backv0back": "cue_2back - cue_0back",
-                "body": "0.5 * `2back_full_body` + 0.5 * `0back_full_body`",
-                "face": "0.5 * `2back_full_face` + 0.5 * `0back_full_body`",
-                "tools": "0.5 * `2back_full_tools` + 0.5 * `0back_full_body`",
-                "place": "0.5 * `2back_full_place` + 0.5 * `0back_full_body`",
+                "facevplace": "0.5 * `2back_full_face` + 0.5 * `0back_full_face` - 0.5 * `2back_full_place` - 0.5 * `0back_full_place`",
                 "bodyvface": "0.5 * `2back_full_body` + 0.5 * `0back_full_body` - 0.5 * `2back_full_face` - 0.5 * `0back_full_face`",
+                "bodyvplace": "0.5 * `2back_full_body` + 0.5 * `0back_full_body` - 0.5 * `2back_full_place` - 0.5 * `0back_full_place`",
                 "toolsvplace": "0.5 * `2back_full_tools` + 0.5 * `0back_full_tools` - 0.5 * `2back_full_place` - 0.5 * `0back_full_place`",
                 "body2backv0back": "`2back_full_body` - `0back_full_body`",
                 "face2backv0back": "`2back_full_face` - `0back_full_face`",
                 "toolsbody2backv0back": "`2back_full_tools` - `0back_full_tools`",
                 "placebody2backv0back": "`2back_full_place` - `0back_full_place`",
+                "2back": "0.25 * `2back_full_body` + 0.25 * `2back_full_face` + 0.25 * `2back_full_tools` +0.25 * `2back_full_place`",
+                "0back": "0.25 * `0back_full_body` + 0.25 * `0back_full_face` + 0.25 * `0back_full_tools` +0.25 * `0back_full_place`",
+                "2backv0back": "0.25 * `2back_full_body` + 0.25 * `2back_full_face` + 0.25 * `2back_full_tools` + 0.25 * `2back_full_place` - 0.25 * `0back_full_body` - 0.25 * `0back_full_face` - 0.25 * `0back_full_tools` - 0.25 * `0back_full_place`",
                 "rt": "rt"
             }
         }

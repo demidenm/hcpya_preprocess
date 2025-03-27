@@ -9,7 +9,24 @@ The [Barch et al. (2013, pg 177)](https://www.sciencedirect.com/science/article/
 
 ## Basic Trial Structure
 
-The task includes Reward, Punishment and Neutral Trials. The tasks starts presentation of a "?". During this window, the participant decides whether the number if above or below "5". If they response quickly, there is a filler window, otherwise it proceeds to the feedback. During feedback, there participant whether they won (green up arrow), low (red down arrow) or nothing was at stake. Before the next trial, there is a 1sec fixation. For each gamble block, there are consecutive trial, between which there is a fiften second fixation block.
+The task consists of Reward, Punishment, and Neutral trials. Each trial begins with a "?" prompt, during which participants must decide if a number is above or below 5. However, the task is rigged, meaning their decision does not impact the outcome.
+
+*Responses*. If the participant presses above or below, they receive the trial’s assigned reward type (gain, loss, or neutral).
+- If they press an incorrect button (e.g., "4"), they receive no reward.
+- If they fail to respond, they receive a "Too slow" message.
+
+*Timing & Fixation*.
+- If they respond quickly, a filler fixation appears.
+- If they respond slower than 1500ms, the task moves directly to the feedback phase.
+
+*Feedback Phase*. The participant sees whether they:
+- Won → Green up arrow
+- Lost → Red down arrow
+- Neutral outcome → Double grey arrow
+
+*Between Trials*. A 1-second fixation occurs before the next trial.
+
+Every gamble block consists of multiple consecutive trials, separated by a 15-second fixation block.
 
 See diagram below.
 

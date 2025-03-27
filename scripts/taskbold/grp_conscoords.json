@@ -17,12 +17,12 @@
     "social": {
         "coord": [50, -56, 18],
         "hcp": {"con": ["mentbase"]},
-        "alt": {"con": ["mentbase", "respment", "rt"]}
+        "alt": {"con": ["mentbase", "respmentvrand", "rt"]}
     },
     "WM": {
         "coord": [-42, -52, -20],
-        "hcp": {"con": ["face"]},
-        "alt": {"con": ["face", "cue2backv0back", "rt"]}
+        "hcp": {"con": ["face2backv0back"]},
+        "alt": {"con": ["face2backv0back", "cue2backv0back", "rt"]}
     },
     "emotion": {
         "coord": [-20, -6, -16],
