@@ -8,7 +8,7 @@ from pathlib import Path
 from datetime import date
 from glm_utils import (est_contrast_vifs, generate_tablecontents, create_design_matrix, 
 compute_save_contrasts, plot_design_vifs, visualize_contrastweights, compute_fixedeff, get_numvolumes, run_firstlvl_computecons, 
-get_files, sync_matching_runs, gen_vifdf)
+get_files, sync_matching_runs, gen_vifdf, extract_timeseries_atlas, binarize_nifti)
 from prep_eventsdata import (comb_names, prep_gamble_events, prep_motor_events, 
 prep_social_events, prep_language_events, prep_relation_events, prep_emotion_events, prep_wm_events)
 from pyrelimri.similarity import image_similarity
@@ -117,10 +117,9 @@ for task in task_list:
             events_dat = prep_relation_events(**common_params, new_trialcol_name='new_trialtype')
 
         # conf files
-        conf_fullpath = f"{subj_id}_{ses}_task-{bold_taskname}_dir-*_run-{run}_desc-confounds_timeseries.tsv"
-        conf_path = next(Path(working_folder).glob(conf_fullpath), None)
+        conf_path = next(Path(working_folder).glob(f"{subj_id}_{ses}_task-{bold_taskname}_dir-*_run-{run}_desc-confounds_timeseries.tsv"), None)
 
-       # Locate BOLD file
+        # Locate BOLD file
         bold_path = next(Path(working_folder).glob(f"{subj_id}_{ses}_task-{bold_taskname}_dir-*_run-{run}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz"), None)
         if bold_path is None:
             print(f"Error: BOLD file not found for {subj_id} {task} run-{run}")
@@ -194,6 +193,31 @@ for task in task_list:
             )            
             firstlvl_ran = 1
             print(f"{subj_id}: First Level successfully ran for {task} run-{run}")
+
+            # run and save timeseries matrix
+            anat_gmmask = next(Path(working_folder).glob(f"*_space-MNI152NLin2009cAsym_res-2_label-GM_probseg.nii.gz"), None)
+            if anat_gmmask:
+                bin_gm = binarize_nifti(nifti_path=anat_gmmask, img_thresh=0.01)
+                for atlas_type in ['schaefer', 'difumo']:
+                    if atlas_type == 'schaefer':
+                        roi_dim = 1000
+                    elif atlas_type == 'difumo':
+                        roi_dim = 1024
+                    try:
+                        timeseries_dat, _ = extract_timeseries_atlas(
+                            resid_nifti=firstglm_res.residuals[0], 
+                            atlas_name=atlas_type, 
+                            n_dimensions=roi_dim, 
+                            mask_img=bin_gm
+                        )
+                        timeseries_pd = pd.DataFrame(timeseries_dat)
+                        timeseries_pd.to_csv(
+                            Path(firstlvl) / f"{subj_id}_{ses}_task-{task}_run-{run}_atlas-{atlas_type}_rois-{roi_dim}_timeseries.tsv",
+                            sep='\t' 
+                        )
+                    except Exception as e:
+                        print(f"Error running {atlas_type}: {e}")
+
         else:
             firstlvl_ran = 0
             print(f"Error in brain coverage: {subj_id} for {bold_taskname} run-{run} Brain Mask ~ MNI Overlap: {dice_coeff}.")

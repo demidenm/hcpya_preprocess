@@ -14,10 +14,12 @@ from nilearn.glm.second_level import SecondLevelModel
 from nilearn.plotting import plot_design_matrix
 from nilearn.glm.first_level import make_first_level_design_matrix
 from nilearn.glm import expression_to_contrast_vector, compute_fixed_effects
-from nilearn.image import load_img, new_img_like
+from nilearn.image import load_img, new_img_like, math_img
 from matplotlib.gridspec import GridSpec
 from bids.layout import parse_file_entities
 from nilearn.plotting.matrix_plotting import pad_contrast_matrix
+from nilearn.datasets import fetch_atlas_difumo, fetch_atlas_schaefer_2018
+from nilearn.maskers import NiftiLabelsMasker, NiftiMapsMasker
 
 
 # below est_contrast_vifs code is courtsey of Jeanette Mumford's repo: https://github.com/jmumford/vif_contrasts
@@ -269,12 +271,17 @@ def run_firstlvl_computecons(subjid, boldpath, designmatrix, sesid, boldtr, task
         t_r=boldtr,
         smoothing_fwhm=fwhm,
         standardize=False,
+        minimize_memory=False, # set to return residuals and r-square
         noise_model=ar_mod,
         drift_model=detrend,
         high_pass=highpass
     )
     
     run_fmri_glm = fmri_glm.fit(boldpath, design_matrices=designmatrix)
+    rsqrd_img = run_fmri_glm.r_square[0]
+    if rsqrd_img:
+        r2_imgpath = Path(firstlvl_out) / f"{subjid}_{sesid}_task-{taskname}_run-{runnum}_stat-rsquared.nii.gz"
+        rsqrd_img.to_filename(r2_imgpath)
 
     compute_save_contrasts(
         glm_res=run_fmri_glm, 
@@ -632,6 +639,18 @@ def sync_matching_runs(subject_id, sesid, taskname, events_path, sync_destinatio
     confounds_list = f"s3cmd ls --recursive s3://hcp-youth/derivatives/fmriprep_v24_0_1/{sesid}/{subject_id}/{sesid}/func/ | grep 'task-{taskname}_dir.*_desc-confounds_timeseries.tsv'"
     confounds_files = get_files(confounds_list)
 
+    # get anat file for gm mask in residual roi matrix
+    fmriprep_anatlist = f"s3cmd ls --recursive s3://hcp-youth/derivatives/fmriprep_v24_0_1/{sesid}/{subject_id}/{sesid}/anat/ | grep '_space-MNI152NLin2009cAsym_res-2_label-GM_probseg.nii.gz'"
+    anat_files = get_files(fmriprep_anatlist)
+
+    if anat_files:
+        anat_file = anat_files[0]
+        anat_sync_cmd = f"s3cmd get {anat_file} {sync_destination}/ --continue"
+        subprocess.run(anat_sync_cmd, shell=True)
+        print(f"Downloaded: {anat_file}")
+    else:
+        print("No anatomical file found.")
+
     # Get events list
     events_list = f"ls {events_path}/{subject_id}/{sesid}/func/ | grep 'task-{taskname}.*_events.tsv'"
     event_files = get_files(events_list)
@@ -718,3 +737,82 @@ def gen_vifdf(designmat, modconfig):
     df = df[["type", "name", "value"]]
 
     return con_vifs, reg_vifs, df
+
+
+def extract_timeseries_atlas(resid_nifti, atlas_name="schaefer", n_dimensions=1000,mask_img=None):
+    """
+    Extract timeseries from residuals using either Schaefer or DiFuMo atlas
+    
+    Parameters:
+    resid_nifti: Nifti image of the residuals from FirstLevelModel
+    atlas_name (str): Either "schaefer" or "difumo", default shaefer
+    n_dimensions (int): Number of regions for Schaefer (100 to 1000, intervals 100) or DiFuMo (64, 128, 256, 512, 1024)
+    mask_img: image to mask the timeseries
+        
+    Returns:
+    --------
+    timeseries : ndarray
+        Extracted timeseries data
+    atlas : object
+        The atlas object
+    """
+    # Fetch the appropriate atlas
+    if atlas_name.lower() == "schaefer":
+        atlas = fetch_atlas_schaefer_2018(n_rois=n_dimensions, data_dir= '/tmp/', verbose= 0)
+    elif atlas_name.lower() == "difumo":
+        atlas = fetch_atlas_difumo(dimension=n_dimensions, data_dir= '/tmp/', verbose= 0)
+    else:
+        raise ValueError(f"Unknown atlas: {atlas_name}. Use 'schaefer' or 'difumo'.")
+    
+    # Determine atlas dimension
+    try:
+        atlas_dim = len(atlas.maps.shape)
+    except AttributeError:
+        atlas_dim = len(load_img(atlas.maps).shape)
+    
+    # Create and fit the appropriate masker
+    if atlas_dim == 3:
+        # Schaefer is a label atlas (3D)
+        masker = NiftiLabelsMasker(
+            labels_img=atlas.maps,
+            standardize=False,
+            mask_img=mask_img,  # mask the maps
+            resampling_target='labels',
+            verbose=0
+        )
+    elif atlas_dim == 4:
+        # DiFuMo is a probabilistic atlas (4D)
+        masker = NiftiMapsMasker(
+            maps_img=atlas.maps,
+            allow_overlap=True,
+            mask_img=mask_img,  # mask the maps
+            standardize=False,
+            resampling_target='data',
+            verbose=0
+        )
+    else:
+        raise ValueError("Atlas maps isn't 3D or 4D, so incompatible with Nifti[Labels/Maps]Masker().")
+    
+    # Extract timeseries
+    timeseries = masker.fit_transform(resid_nifti)
+    
+    return timeseries, atlas
+
+
+def binarize_nifti(nifti_path, img_thresh=0.01):
+    """
+    Load and binarize a 3D nifti at a specific threshold
+    
+    Parameters:
+    nifti_path (str): Path to the NIfTI image.
+    img_thresh (float): Threshold for binarization (default=0.01).
+    
+
+    Returns:
+    binarized_img: Binarized NIfTI image.
+    """
+    # load & binarize
+    img = load_img(nifti_path)
+    binarized_img = math_img(f'img > {img_thresh}', img=img)
+
+    return binarized_img
