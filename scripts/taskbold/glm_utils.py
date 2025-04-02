@@ -805,7 +805,7 @@ def binarize_nifti(nifti_path, img_thresh=0.01):
     
     Parameters:
     nifti_path (str): Path to the NIfTI image.
-    img_thresh (float): Threshold for binarization (default=0.01).
+    img_thresh (float): Threshold for binarization, default = 0.01.
     
 
     Returns:
@@ -816,3 +816,22 @@ def binarize_nifti(nifti_path, img_thresh=0.01):
     binarized_img = math_img(f'img > {img_thresh}', img=img)
 
     return binarized_img
+
+
+def calc_boldvar(boldpath:str):
+    """
+    Loads a 4D BOLD fMRI NIfTI, computes voxel-wise variance across time dimension. returns voxelwise var est
+    
+    Parameters:
+    bold_path (str): Path to the 4D BOLD image.
+
+    Returns:
+    variance_img (Nifti1Image): voxel-wise variance image.
+    """
+    bold_img = load_img(boldpath)
+    bold_data = bold_img.get_fdata()
+    bold_variance = np.var(bold_data, axis=-1, ddof=0)
+    # create new img with same affine as original
+    variance_img = new_img_like(bold_img, bold_variance)
+    
+    return variance_img

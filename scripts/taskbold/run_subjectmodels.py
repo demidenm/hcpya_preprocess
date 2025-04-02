@@ -8,10 +8,11 @@ from pathlib import Path
 from datetime import date
 from glm_utils import (est_contrast_vifs, generate_tablecontents, create_design_matrix, 
 compute_save_contrasts, plot_design_vifs, visualize_contrastweights, compute_fixedeff, get_numvolumes, run_firstlvl_computecons, 
-get_files, sync_matching_runs, gen_vifdf, extract_timeseries_atlas, binarize_nifti)
+get_files, sync_matching_runs, gen_vifdf, extract_timeseries_atlas, binarize_nifti, calc_boldvar)
 from prep_eventsdata import (comb_names, prep_gamble_events, prep_motor_events, 
 prep_social_events, prep_language_events, prep_relation_events, prep_emotion_events, prep_wm_events)
 from pyrelimri.similarity import image_similarity
+from nilearn.image import math_img
 plt.switch_backend('Agg') # turn off back end display to create plots
 
 
@@ -191,13 +192,19 @@ for task in task_list:
                 detrend=detrend, 
                 highpass=highpass
             )            
+
             firstlvl_ran = 1
             print(f"{subj_id}: First Level successfully ran for {task} run-{run}")
 
             # run and save timeseries matrix
-            anat_gmmask = next(Path(working_folder).glob(f"*_space-MNI152NLin2009cAsym_res-2_label-GM_probseg.nii.gz"), None)
+            anat_gmmask = next(Path(working_folder).glob(f"*_space-MNI152NLin2009cAsym_res-2_label-GM_probseg.nii.gz"), None)            
             if anat_gmmask:
-                bin_gm = binarize_nifti(nifti_path=anat_gmmask, img_thresh=0.01)
+                # compute mask based on non-zero from variance and anat GM prob thresholded/binned maps
+                bold_var = calc_boldvar(boldpath=bold_path)
+                var_binned = binarize_nifti(nifti_path=bold_var, img_thresh=0)
+                gm_binned = binarize_nifti(nifti_path=anat_gmmask, img_thresh=0.01)
+                vargm_mask = math_img('img1 * img2', img1=var_binned, img2=gm_binned)
+
                 for atlas_type in ['schaefer', 'difumo']:
                     if atlas_type == 'schaefer':
                         roi_dim = 1000
@@ -208,15 +215,17 @@ for task in task_list:
                             resid_nifti=firstglm_res.residuals[0], 
                             atlas_name=atlas_type, 
                             n_dimensions=roi_dim, 
-                            mask_img=bin_gm
+                            mask_img=vargm_mask
                         )
                         timeseries_pd = pd.DataFrame(timeseries_dat)
                         timeseries_pd.to_csv(
                             Path(firstlvl) / f"{subj_id}_{ses}_task-{task}_run-{run}_atlas-{atlas_type}_rois-{roi_dim}_timeseries.tsv",
                             sep='\t' 
                         )
+                        timeseries_extracted = 1
                     except Exception as e:
                         print(f"Error running {atlas_type}: {e}")
+                        timeseries_extracted = 0
 
         else:
             firstlvl_ran = 0
@@ -234,10 +243,10 @@ for task in task_list:
 
     # log and append
     log_file_path = os.path.join(outlog, logfile_name)
-    log_entry = f"{date.today()},{user},{subj_id},{modtype},{task},{run},{dice_coeff},{firstlvl_ran},{fixedeff_ran}\n"
+    log_entry = f"{date.today()},{user},{subj_id},{modtype},{task},{run},{dice_coeff},{firstlvl_ran},{fixedeff_ran},{timeseries_extracted}\n"
     os.system(f'echo "{log_entry.strip()}" >> {log_file_path}')
     print()
-    print(f"Saved to log: Date, USER, Subject, ModelType, TaskName, Run, DiceEst, FirstLvlStatus, FixedEffStatus")
+    print(f"Saved to log: Date, USER, Subject, ModelType, TaskName, Run, DiceEst, FirstLvlStatus, FixedEffStatus, Timeseries_extracted")
     print()
 
 # save vif df if at least 1 task match runs found & isn't empty
