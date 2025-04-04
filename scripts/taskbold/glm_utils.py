@@ -835,3 +835,39 @@ def calc_boldvar(boldpath:str):
     variance_img = new_img_like(bold_img, bold_variance)
     
     return variance_img
+
+
+def calc_niftis_meanstd(path_imgs):
+    """
+    Calculate the mean & standard deviation across a list of non-empty NIfTI images.
+
+    Parameters:
+    - path_imgs: List of paths to NIfTI images.
+
+    Returns:
+    Tuple of NIfTI Images: (mean, std)
+    """
+    assert len(path_imgs) > 0, "Error: The list of image paths is empty."
+
+    valid_images = []
+    for img_path in path_imgs:
+        try:
+            img = load_img(img_path)
+            data = img.get_fdata()
+            if data.size > 0 and not np.all(data == 0):
+                valid_images.append(data)
+        except Exception as e:
+            print(f"Skipping {img_path}: {e}")
+
+    assert len(valid_images) > 1, "Error: At least two non-empty, valid images are required for mean and std calculation."
+
+    img_data_array = np.array(valid_images)
+    reference_img = load_img(path_imgs[0])  # still use first image for reference
+
+    mean_imgs = np.mean(img_data_array, axis=0)
+    std_imgs = np.std(img_data_array, axis=0, ddof=1)
+
+    mean_nifti = new_img_like(reference_img, mean_imgs)
+    std_nifti = new_img_like(reference_img, std_imgs)
+
+    return mean_nifti, std_nifti

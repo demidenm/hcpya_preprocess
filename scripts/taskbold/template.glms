@@ -7,16 +7,49 @@ working_dir=SCRATCHDIR
 glm_outdir=OUT
 ses_id=SESID
 data_dir=SCRATCHDIR
+data_bucket="s3://hcp-youth/derivatives/task_glms"
 uv_proj=UVPROJ
 log_file=${rundir}/..
 
 # completed time / date
 compdate=$(date)
 
-uv --project ${uv_proj} run ${rundir}/../run_subjectmodels.py \
-	--subject ${sub_id} \
-	--analysisout "${glm_outdir}/${model}" \
-	--workdir ${working_dir} \
-	--model ${model} \
-	--config ${configpath} \
-	--logfile ${log_file} 
+uv --project "${uv_proj}" run "${rundir}/../run_subjectmodels.py" \
+    --subject "${sub_id}" \
+    --analysisout "${glm_outdir}/${model}" \
+    --workdir "${working_dir}" \
+    --model "${model}" \
+    --config "${configpath}" \
+    --logfile "${log_file}"
+
+if [ $? -ne 0 ]; then
+    echo "FATAL: uv run failed for subject ${sub_id}." >&2
+    exit 1
+else
+    echo "Models ran successfully for ${sub_id}."
+fi
+
+s3_folder="${data_bucket}/${ses_id}"
+
+for section in firstlvl fixedeff vifs; do
+    local_path="${glm_outdir}/${model}/${section}/${sub_id}/"
+    remote_path="${s3_folder}/${section}/${sub_id}/"
+	echo "Uploading ${section} for ${sub_id} to S3"
+    s3cmd sync -F --recursive -v "${local_path}" "${remote_path}"
+done
+
+for section in firstlvl fixedeff vifs; do
+    local_path="${glm_outdir}/${model}/${section}/${sub_id}/"
+    remote_path="${s3_folder}/${section}/${sub_id}/"
+
+    if ! s3cmd ls "${remote_path}" | grep -q "${sub_id}/"; then
+        echo "[$compdate] Uploading ${section} for ${sub_id} to S3"
+        s3cmd sync -F --recursive -v "${local_path}" "${remote_path}"
+    else
+        echo "[$compdate] ${section} for ${sub_id} already exists on S3. Skipping."
+    fi
+done
+
+echo "Files uploaded successfully"
+
+

@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #SBATCH -J hcp_glms
-#SBATCH --array=0-1999 # max  2033
+#SBATCH --array=0-50 #50-2033
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=6

@@ -34,8 +34,8 @@ check_template="${run_folder}/template.glms"
 # config file
 config_file=${run_folder}/../config.json
 uv_proj_path=$(jq -r '.uv_proj.proj_dir' "$config_file")
-scratchdir=/tmp
-outdir=/scratch.global/${USER}/hcp_glms
+scratchdir="/tmp"
+outdir=/tmp/${USER}/hcp_glms
 email="${USER}@umn.edu"
 group=`groups|cut -d" " -f1`
 
