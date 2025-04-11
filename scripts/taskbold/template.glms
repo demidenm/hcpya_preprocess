@@ -29,18 +29,18 @@ else
     echo "Models ran successfully for ${sub_id}."
 fi
 
-s3_folder="${data_bucket}/${ses_id}"
+s3_folder="${data_bucket}/ses-${ses_id}"
 
 for section in firstlvl fixedeff vifs; do
     local_path="${glm_outdir}/${model}/${section}/${sub_id}/"
-    remote_path="${s3_folder}/${section}/${sub_id}/"
+    remote_path="${s3_folder}/${model}/${section}/${sub_id}/"
 	echo "Uploading ${section} for ${sub_id} to S3"
     s3cmd sync -F --recursive -v "${local_path}" "${remote_path}"
 done
 
 for section in firstlvl fixedeff vifs; do
     local_path="${glm_outdir}/${model}/${section}/${sub_id}/"
-    remote_path="${s3_folder}/${section}/${sub_id}/"
+    remote_path="${s3_folder}/${model}/${section}/${sub_id}/"
 
     if ! s3cmd ls "${remote_path}" | grep -q "${sub_id}/"; then
         echo "[$compdate] Uploading ${section} for ${sub_id} to S3"

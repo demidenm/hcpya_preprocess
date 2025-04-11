@@ -1,6 +1,6 @@
 # Converting HCP E-Prime Task Timings to BIDS
 
-The scripts here help download and convert the openly-available HCP E-Prime data to BIDS-specified events.tsv files.
+The scripts here help download and convert the openly-available HCP E-Prime data to BIDS-specified events.tsv files. Each associated task sub-folder contains an `task-<taskname>_events.json` covering what each value represents in computed events files.
 
 ## Setting up AWS
 

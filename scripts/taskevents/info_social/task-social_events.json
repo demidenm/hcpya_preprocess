@@ -1,0 +1,50 @@
+{
+    "onset": {
+      "LongName": "Onset Time",
+      "Description": "Onset time of event in seconds"
+    },
+    "duration": {
+      "LongName": "Duration",
+      "Description": "Duration time of event in seconds"
+    },
+    "trial_type": {
+      "LongName": "Trial Type",
+      "Description": "Type of task-related event occurring",
+      "Levels": {
+        "movie": "Movie clip shown to participant (social content)",
+        "response": "Response period for participant to answer about the video",
+        "fixation": "Fixation period between social blocks",
+        "social_full": "Full duration of a social trial from video to end of response window"
+      }
+  },
+  "social_type": {
+    "LongName": "Social Condition Type",
+    "Description": "Type of social cognitive content featured in the video",
+    "Levels": {
+      "Mental": "Mentalizing condition (inferring others' thoughts, feelings, intentions)",
+      "Random": "Non-social control condition with random content"
+    }
+  },
+  "response_time": {
+    "LongName": "Response Time",
+    "Description": "Time taken by participant to respond, in milliseconds",
+    "Units": "ms"
+  },
+  "accuracy": {
+    "LongName": "Response Accuracy",
+    "Description": "Participant’s response accuracy for the trial (1.0 = correct, 0.0 = incorrect)",
+    "Levels": {
+      "0.0": "Correct",
+      "1.0": "Incorrect"
+    }
+  },
+  "response": {
+    "LongName": "Button press",
+    "Description": "Button response provided by the participant (button press or selection)",
+    "Levels": {
+      "2.0": "Social",
+      "3.0": "Not sure",
+      "4.0": "Random"
+    }
+  }
+}

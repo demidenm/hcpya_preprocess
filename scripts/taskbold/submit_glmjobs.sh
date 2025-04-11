@@ -1,12 +1,12 @@
 #!/bin/bash -l
 #SBATCH -J hcp_glms
-#SBATCH --array=0-50 #50-2033
+#SBATCH --array=1533
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=6
 #SBATCH --mem=50GB
-#SBATCH --tmp=80gb
-#SBATCH -t 07:30:00
+#SBATCH --tmp=200gb
+#SBATCH -t 08:30:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=mdemiden@umn.edu
 #SBATCH -p msismall,agsmall#amdsmall

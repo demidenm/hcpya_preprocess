@@ -1,0 +1,69 @@
+{
+    "onset": {
+      "Description": "Onset of the event in seconds"
+    },
+    "duration": {
+      "Description": "The duration of the event in seconds"
+    },
+    "trial_type": {
+      "LongName": "Type of condition / component",
+      "Description": "Indicating associated component of task and stimulus type presented",
+      "Levels": {
+        "present_story": "A story is presented to the participant",
+        "question_story": "A question is presented to the participant",
+        "story_wait": "~500ms window of wait period between story presentation and question",
+        "story_opt1": "The first option for a story question is presented. Participant can response.",
+        "story_opt2": "The second option for a story question is presente. Participant can response.d",
+        "story_answer": "The participant answers the story question",
+        "story_to_question": "Time from presentation onset to beginning of question",
+        "present_storyquest": "Time from presentation onset to end of question",
+        "story_answerfull": "Start of first question to end of story answer period",
+        "full_story": "Full story window, from start of presentation to end of story response period",
+        "change": "Change block, indicating a change in the task type",
+        "present_math": "A math problem is presented to the participant",
+        "question_math": "A math question is presented to the participant",
+        "math_answer": "A window for the participant to answer the math question",
+        "math_to_question": "Start of first question to end of story answer period",
+        "math_answerfull": "Full math answer window, from start of question to end of math response period",
+        "full_math": "Full math window from presentation to end of math response period"
+      }
+    },
+    "block": {
+      "LongName": "Block",
+      "Description": "The block within which the trial occurs"
+    },
+    "response_time": {
+      "LongName": "Response Time",
+      "Description": "The time it takes for the participant to respond in milliseconds",
+      "Units": "ms"
+    },
+    "accuracy": {
+      "LongName": "Accuracy",
+      "Description": "The accuracy of the participant's response",
+      "Levels": {
+            "0": "Correct",
+            "1": "Incorrect"
+        }
+    },
+    "response": {
+      "LongName": "Response",
+      "Description": "The participant's response type / trigger"
+    },
+    "word_opt": {
+      "LongName": "Word Option",
+      "Description": "The specific word option presented for story options 1 or 2"
+    },
+    "overall_acc": {
+      "LongName": "Overall Accuracy",
+      "Description": "The overall accuracy of the participant across all trials"
+    },
+    "filtered_rttime": {
+      "LongName": "Filtered Response Time",
+      "Description": "The response time filtered for outliers using HCPs recommended time"
+    },
+    "math_lvl": {
+      "LongName": "Math Level",
+      "Description": "The difficulty level of the math question"
+      }
+  }
+  

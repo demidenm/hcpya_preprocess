@@ -1,0 +1,63 @@
+{
+    "onset": {
+      "LongName": "Onset Time",
+      "Description": "Onset time of event in seconds"
+    },
+    "duration": {
+      "LongName": "Duration",
+      "Description": "Duration time of event in seconds"
+    },
+    "trial_type": {
+      "LongName": "Trial Type",
+      "Description": "Type of task-related event occurring",
+        "Levels": {
+        "cue_2back": "Cue indicating an upcoming 2-back block",
+        "cue_0back": "Cue indicating an upcoming 0-back block",
+        "2back_nonlure": "2-back trial with a non-target, non-lure stimulus",
+        "2back_lure": "2-back trial with a lure (stimulus matches 1-back, not 2-back)",
+        "2back_target": "2-back trial with a target match (same as 2-back prior stimulus)",
+        "2back_full": "Full duration of a 2-back block including for all trials within block from onset to last offset",
+        "0back_nonlure": "0-back trial with a non-target stimulus",
+        "0back_lure": "0-back trial with a lure (stimulus similar to but not the target)",
+        "0back_target": "0-back trial where stimulus matches the specified target",
+        "0back_full": "Full duration of a 0-back block including for all trials within block from onset to last offset",
+        "fixation": "Fixation or rest block shown between working memory blocks"
+      }
+    },
+    "block_type": {
+      "LongName": "Block Identifier",
+      "Description": "Label for the specific experimental block in the WM task"
+    },
+    "stimulus_type": {
+      "LongName": "Stimulus Type",
+      "Description": "Category of the visual stimulus shown to the participant",
+      "Levels": {
+        "Tools": "Images of tools",
+        "Body": "Images of body parts",
+        "Face": "Images of faces",
+        "Place": "Images of places"
+      }
+    },
+    "response_time": {
+      "LongName": "Response Time",
+      "Description": "Time taken by the participant to respond, in milliseconds",
+      "Units": "ms"
+    },
+    "accuracy": {
+      "LongName": "Response Accuracy",
+      "Description": "Participant’s response accuracy for the trial (1.0 = correct, 0.0 = incorrect) for blocks is entire block average",
+      "Levels": {
+        "0.0": "Incorrect",
+        "1.0": "Correct"
+      }
+    },
+    "target_type": {
+      "LongName": "Target Type",
+      "Description": "Type of stimulus demand by stimulus",
+      "Levels": {
+        "target": "Correct match to task condition (e.g., 2-back or 0-back target)",
+        "nonlure": "Stimulus not expected to match target or lure condition",
+        "lure": "Stimulus resembles target but does not meet matching condition"
+      }
+    }
+  }

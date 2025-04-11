@@ -67,7 +67,7 @@ for task in task_list:
         print(f"No matching runs found for subject {subj_id} and task {task}")
         # Log the absence of runs
         log_file_path = os.path.join(outlog, logfile_name)
-        log_entry = f"{date.today()},{user},{subj_id},{modtype},{task},NA,NA,NA,NA\n"
+        log_entry = f"{date.today()},{user},{subj_id},{modtype},{task},{len(runs)},NA,NA,NA,NA\n"
         os.system(f'echo "{log_entry.strip()}" >> {log_file_path}')
         continue
     
@@ -174,6 +174,7 @@ for task in task_list:
         mask_fullpath = next(Path(working_folder).glob(f"{subj_id}_{ses}_task-{bold_taskname}_dir-*_run-{run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz"))
         dice_coeff = image_similarity(imgfile1=brain_mni_mask, imgfile2=mask_fullpath, similarity_type='dice')
 
+        first_coverage_prob = 0
         if dice_coeff > .70:
             # Running firstlvl function
             firstglm_res = run_firstlvl_computecons(
@@ -228,25 +229,27 @@ for task in task_list:
                         timeseries_extracted = 0
 
         else:
+            first_coverage_prob += 1
+            timeseries_extracted = 0
             firstlvl_ran = 0
             print(f"Error in brain coverage: {subj_id} for {bold_taskname} run-{run} Brain Mask ~ MNI Overlap: {dice_coeff}.")
 
-    if len(runs) > 1:
+    if len(runs) > 1 and first_coverage_prob == 0:
         compute_fixedeff(subjid=subj_id, task=task, sess_lab=ses, condict=mod_config["contrasts"], 
                  inpfold=firstlvl, outfold=fixedeff,prec_weight=False)
         fixedeff_ran = 1
         print(f"{subj_id}: Fixed Effect successfully ran for {task}")
     else:
         fixedeff_ran = 0
-        print(f"{subj_id}: {task} contains <2 runs (e.g runs: {len(runs)}). Skipping Fixed Effects.")
+        print(f"{subj_id}: {task} contains <2 runs (e.g runs: {len(runs)}) or coverage is bad for runs ({first_coverage_prob}). Skipping Fixed Effects.")
 
 
     # log and append
     log_file_path = os.path.join(outlog, logfile_name)
-    log_entry = f"{date.today()},{user},{subj_id},{modtype},{task},{run},{dice_coeff},{firstlvl_ran},{fixedeff_ran},{timeseries_extracted}\n"
+    log_entry = f"{date.today()},{user},{subj_id},{modtype},{task},{len(runs)},{dice_coeff},{firstlvl_ran},{fixedeff_ran},{timeseries_extracted}\n"
     os.system(f'echo "{log_entry.strip()}" >> {log_file_path}')
     print()
-    print(f"Saved to log: Date, USER, Subject, ModelType, TaskName, Run, DiceEst, FirstLvlStatus, FixedEffStatus, Timeseries_extracted")
+    print(f"Saved to log: Date, USER, Subject, ModelType, TaskName, Runs, DiceEst, FirstLvlStatus, FixedEffStatus, Timeseries_extracted")
     print()
 
 # save vif df if at least 1 task match runs found & isn't empty

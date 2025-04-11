@@ -1,0 +1,28 @@
+{
+    "onset": {
+        "Description": "Onset time of events in seconds."
+    },
+    "duration": {
+        "Description": "Duration of event in seconds."
+    },
+    "trial_type": {
+        "LongName": "Trial Type",
+        "Description": "Type of trial being presented or executed.",
+        "Levels": {
+            "cue_righthand": "Visual cue indicating an upcoming right-hand movement.",
+            "righthand": "Subject performs a right-hand movement.",
+            "cue_leftfoot": "Visual cue indicating an upcoming left-foot movement.",
+            "leftfoot": "Subject performs a left-foot movement.",
+            "cue_tongue": "Visual cue indicating an upcoming tongue movement.",
+            "tongue": "Subject performs a tongue movement.",
+            "cue_rightfoot": "Visual cue indicating an upcoming right-foot movement.",
+            "rightfoot": "Subject performs a right-foot movement.",
+            "cue_lefthand": "Visual cue indicating an upcoming left-hand movement.",
+            "lefthand": "Subject performs a left-hand movement.",
+            "fixation": "Fixation cross is shown. Participant remains still and focused."
+        }
+    },
+    "block_type": {
+        "Description": "Block type and order for the motor task."
+    }
+}

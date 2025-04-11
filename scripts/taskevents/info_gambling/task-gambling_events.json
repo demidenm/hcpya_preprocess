@@ -1,0 +1,66 @@
+{
+    "trial_type": {
+        "LongName": "Trial type indicator",
+        "Description": "Trial component and associated stimulus type presented",
+        "Levels": {
+            "quest_mark": "Start of trial, a question mark presentation requiring a response / decision. In HCP, task is rigged.",
+            "filler": "A filler if response is quicker than 1500ms (presented as fixation)",
+            "feedback": "An event indicating feedback following decision",
+            "isi_1sec": "An inter-stimulus interval event lasting ~one second.",
+            "fixation": "Fixation period during the task.",
+            "full_gamble": "Full gamble window from start of question to end of feedback"
+        }
+    },
+    "reward_type": {
+        "LongName": "Reward or Punishment Type",
+        "Description": "Indicates whether the event is a reward or punishment.",
+        "Levels": {
+            "Reward": "Gaining of money, indicated by up green arrow with amount.",
+            "Punishment": "Loss of money, indicated by down red arrow with amount.",
+            "Neutral": "Non-monetary event, indicated by double grey arrow."
+        }
+    },
+    "feedback_type": {
+        "LongName": "Feedback event",
+        "Description": "Events related to feedback following a task. Includes both positive and negative feedback.",
+        "Levels": {
+            "1.0": "Feedback level 1",
+            "2.0": "Feedback level 2",
+            "3.0": "Feedback level 3",
+            "4.0": "Feedback level 4",
+            "5.0": "Feedback level 5",
+            "6.0": "Feedback level 6",
+            "7.0": "Feedback level 7",
+            "8.0": "Feedback level 8",
+            "9.0": "Feedback level 9"
+        }
+    },
+    "block": {
+        "Description": "The block of trials to which the event belongs."
+    },
+    "accuracy": {
+        "LongName": "Response accuracy",
+        "Description": "Indicator for responses during trial.",
+        "Levels": {
+            "0.0": "Incorrect response.",
+            "1.0": "Correct response."
+        }
+    },
+    "response": {
+        "Description": "Response trigger type."
+    },
+    "mostly_reward": {
+        "Description": "Indicating whether block was mostly reward trials >50%.",
+        "Levels": {
+            "0.0": "No",
+            "1.0": "Yes"
+        }
+    },
+    "mostly_loss": {
+        "Description": "Indicating whether block was mostly loss trials >50%.",
+        "Levels": {
+            "0.0": "No",
+            "1.0": "Yes"
+        }
+    }
+}

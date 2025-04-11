@@ -1,0 +1,36 @@
+{
+    "onset": {
+        "Description": "onset time of event in seconds."
+    },
+    "duration": {
+        "Description": "Duration of the event in seconds."
+    },
+    "trial_type": {
+        "LongName": "Condition Types",
+        "Description": "Type of task-related event occurring.",
+        "Levels": {
+            "cue_shape": "Instruction cue indicating a shape matching task will begin.",
+            "shape_block": "Block period during which multiple shape stimuli are presented for matching decisions.",
+            "shape_stim": "A visual shape stimulus is presented, participant must decide if shapes match.",
+            "shape_isi": "Inter-stimulus interval between shape trials.",
+            "cue_face": "Instruction cue indicating a face matching task will begin.",
+            "face_block": "Block period during which multiple face stimuli are presented for matching decisions.",
+            "face_stim": "A facial image is presented, participant must decide if faces match.",
+            "face_isi": "Inter-stimulus interval between face trials."
+        }
+    },
+    "block_type": {
+        "Description": "Type and repetition of the emotion task block."
+    },
+    "response_time": {
+        "Description": "Response time in milliseconds.",
+        "Units": "ms"
+    },
+    "accuracy": {
+        "Description": "Accuracy of the participant's response.",
+        "Levels": {
+            "1.0": "Correct",
+            "0.0": "Incorrect"
+        }
+    }
+}

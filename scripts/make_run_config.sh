@@ -72,8 +72,8 @@ fi
 
 # Set output directories and variables for run files
 scratch_dir="${scratch_dir}/${version}_out"
-curr_folder="$(script_dir)/${preproc}"
-sub_list="$(script_dir)/subj_lists/${preproc}/${sub_file}"
+curr_folder="${script_dir}/${preproc}"
+sub_list="${script_dir}/subj_lists/${preproc}/${sub_file}"
 run_folder="${curr_folder}/run_files.${version}_${session}"
 preproc_template="template.${preproc}"
 template_path="${curr_folder}/${preproc_template}"

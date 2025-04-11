@@ -1,0 +1,57 @@
+{
+    "onset": {
+      "LongName": "Onset Time",
+      "Description": "Onset time of event in seconds"
+    },
+    "duration": {
+      "LongName": "Duration",
+      "Description": "Duration time of event in seconds"
+    },
+    "trial_type": {
+      "LongName": "Trial Type",
+      "Description": "Type of task-related event occurring",
+      "Levels": {
+        "relation_prompt": "Prompt presented to indicate an upcoming relation block",
+        "relation_stim": "Stimulus for a relation trial",
+        "relation_blank": "Blank screen period during the relation task (isi)",
+        "relation_block": "Full block representing the relation component from first trial to last trial of block",
+        "control_prompt": "Prompt presented to indicate an upcoming control task",
+        "control_stim": "Stimulus for a control trial",
+        "control_blank": "Blank screen period during the control task (isi)",
+        "control_block": "Full block representing the control component from first trial to last trial of block",
+        "fix_block": "Fixation block"
+      }
+    },
+    "stim_type": {
+      "LongName": "Stimulus Type",
+      "Description": "Type of stimulus shown to participant during stim trials",
+      "Levels": {
+        "SHA": "Match on shape",
+        "TEX": "Match on texture",
+        "Shape": "Compare on shape",
+        "Texture": "compare on texture"
+      }
+    },
+    "response_time": {
+      "LongName": "Response Time",
+      "Description": "Time taken by participant to respond, in milliseconds",
+      "Units": "ms"
+    },
+    "block": {
+      "LongName": "Block Name",
+      "Description": "Identifies the specific task block in which the trial appears"
+    },
+    "accuracy": {
+      "LongName": "Response Accuracy",
+      "Description": "Participant’s response accuracy for the trial (block is full block accuary), stim is trial accuracy",
+      "Levels": {
+        "1.0": "Correct",
+        "0.0": "Incorrect"
+      }
+    },
+    "response": {
+      "LongName": "Response",
+      "Description": "Response type provided by the participant"
+    }
+}
+  
