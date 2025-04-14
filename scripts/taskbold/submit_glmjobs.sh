@@ -1,10 +1,10 @@
 #!/bin/bash -l
 #SBATCH -J hcp_glms
-#SBATCH --array=1533
+#SBATCH --array=169,171,991,1019,441,113,1087
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=6
-#SBATCH --mem=50GB
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60GB
 #SBATCH --tmp=200gb
 #SBATCH -t 08:30:00
 #SBATCH --mail-type=ALL

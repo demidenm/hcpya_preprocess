@@ -47,17 +47,32 @@ As of March 13, 2025, a pipleine has been included to convert the e-prime task d
 ## Key Components
 
 ### fMRIPrep
+
+**Bucket size**: 28 TB
+**Quantity Objects**: 1,073,009
+
 - **Scripts and Session Management**: Includes `sbatch` scripts, session management, and rerun scripts for preprocessing across different arms and timepoints (HCP-YA includes only session `3T`).
 - **Post-Processing Checks**: Scripts compare outputs, assess similarity, and confirm S3 subject uploads.
 
 ### MRIQC
+
+**Bucket size**: 342 GB
+**Quantity Objects**: 223,678
+
 - **Quality Control**: Performs individual and group-level quality control checks for MRI scans. Outputs QC metrics in `.tsv` format for modalities such as T1w, T2w, and BOLD.
 - **Error Handling**: Includes rerun scripts and mechanisms for managing failed processes.
 
 ### XCP-D
+
+**Bucket size**: 6 TB
+**Quantity Objects**: 434,882
+
 - **Postprocessing Pipeline**: Uses **XCP-D v0.9.0** to generate postprocessed derivatives for resting-state fMRI, including denoised BOLD signals, bandpass-filtered data, and motion-parameter filtering.
 
 ### E-Prime to Events.tsv
+
+**Folder size**: 562 MB
+**Quantity Objects**: 14,545
 
 This part of the repository contains scripts for downloading and converting Human Connectome Project (HCP) E-Prime task data into BIDS-compatible event files.
 Key Features
@@ -68,6 +83,9 @@ Key Features
 - Task Support: Processes data for all major HCP tasks (EMOTION, MOTOR, RELATIONAL, SOCIAL, WM, GAMBLING, LANGUAGE)
 
 ### Task BOLD Models
+
+**Folder size**: 1.6 TB
+**Quantity Objects**: 837,781
 
 This part of the repository contains scripts for preparing the behavioral data, specifying and fitting the GLM models for task-fMRI analyses.
 
