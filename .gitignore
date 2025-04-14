@@ -1,5 +1,5 @@
-ses-3T_modelsran.csv
-s3_task-glm_file-counts.csv
+scripts/taskbold/ses-3T_modelsran.csv
+scripts/taskbold/s3_task-glm_file-counts.csv
 jupyter-notebook
 hcpya_preprocess.egg-info/
 *.ipynb_checkpoints/
