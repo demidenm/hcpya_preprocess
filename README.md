@@ -120,6 +120,20 @@ The completion rate of HCP-YA subjects for XCP-D is shown below. Detailed report
   <img src="./imgs/xcp_d_subject_counts.png" alt="Subject counts for XCP-D" />
 </div>
 
+### Task BOLD GLMs
+The model specifics and additional details about the HCP-YA GLM models are available in the [Task BOLD folder](./scripts/taskbold/). Below, are very surface level completition rates across the two models (HCP and Alternative) that were ran for each of the seven fMRI tasks.
+
+#### HCP
+<div style="text-align: center;">
+  <img src="./scripts/taskbold/imgs/s3output_counts-uniqsubject_model-hcp.png" alt="Task GLM Data on s3"  />
+</div>
+
+#### Alt
+<div style="text-align: center;">
+  <img src="./scripts/taskbold/imgs/s3output_counts-uniqsubject_model-alt.png" alt="Task GLM Data on s3"  />
+</div>
+
+
 ## Subject QC
 
 Low-cost manual quality control checks evaluate fMRIPrep results and the alignment of task events with BOLD signals. Distributions are plotted in the [fMRI README file](./scripts/fmriprep/README.md).
@@ -165,4 +179,13 @@ Peristimulus plots are generated using `masked_timeseries` from the [PyReliMRI p
 
 <div style="text-align: center;">
   <img src="./imgs/brain_corthick-rois.png" alt="Subject counts for XCP-D" />
+</div>
+
+
+### Task BOLD ~ MNI Brain Coverage
+
+[Task BOLD folder](./scripts/taskbold/) contains more information about the models and reports. Below is a figure summarizing the brain coverage between based on Dice coefficient called on the task BOLD run and the MNI brain template.
+
+<div style="text-align: center;">
+  <img src="./scripts/taskbold/imgs/coverage_est-dice.png" alt="Dice Brain Estimates"  />
 </div>

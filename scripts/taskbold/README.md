@@ -2,8 +2,6 @@
 
 ## Summary of Task Modeling Decisions
 
-# Summary of Task Modeling Decisions
-
 Task GLMs were fit for all seven of the HCP tasks using the [fMRIPrep](../fmriprep/) derived MNI152 BOLD and the computed [behavioral events](../taskevents/) files. The summaries below include the model examples and counts of subjects ran for the first and second level models.
 
 General information about subject-level models: Within-run and within-subject models were estimated using Nilearn 0.10.4 [Abraham et al., 2014] in Python 3.9.7. FirstLevel models were computed only if subject-level run data had sufficient brain coverage. To ensure sufficient BOLD coverage in MNI space, a Dice coefficient was calculated to assess the overlap between the binarized `MNI152NLin2009cAsym_res-02` brain template and the subject-specific brain mask derived from the BOLD data. The subject's brain mask was retrieved from the fMRIPrep'd preprocessed data. The Dice coefficient between this brain mask and the reference brain mask (from the standard MNI space) was computed using the image_similarity function in `PyReliMRI`. If coverage was < 70% between the two masks, the first level computation was skipped. This ensured that only valid runs with accurate brain masks were included in the first-level GLM fitting.
@@ -167,7 +165,7 @@ The second figure summarizes the unique file counts per subject for each task an
 The first figure summarizes the unique subject counts on s3 for subject folders for each model type.
 
 <div style="text-align: center;">
-  <img src="./imgs/s3output_counts-uniqsubject_model-hcp.png" alt="Data on s3"  />
+  <img src="./imgs/s3output_counts-uniqsubject_model-alt.png" alt="Data on s3"  />
 </div>
 
 The second figure summarizes the unique file counts per subject for each task and run on s3.
