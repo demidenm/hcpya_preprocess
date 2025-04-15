@@ -130,7 +130,7 @@ The completion rate of HCP-YA subjects for XCP-D is shown below. Detailed report
 </div>
 
 ### Task BOLD GLMs
-The model specifics and additional details about the HCP-YA GLM models are available in the [Task BOLD folder](./scripts/taskbold/). Below, are surface level completition rates for the first-level (run-level) and fixed-effect (within-subect) models across the seven HCP tasks.
+The model specifics and additional details about the HCP-YA GLM models are available in the [Task BOLD folder](./scripts/taskbold/). Below, are surface level completition rates for the first-level (run-level) and fixed-effect (within-subect) models across the seven HCP tasks. Subject runs were not computed if they had insufficient brain coverage with the target MNI152 mask and fixed effect models were not feasible if only a single run was available. Some subjects failed because singular value decomposition errors at the first level, which was N<5 per task
 
 
 <div style="text-align: center;">
