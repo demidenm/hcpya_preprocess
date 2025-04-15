@@ -8,7 +8,9 @@ This repository contains the scripts and configurations required for preprocessi
 
 As of November 26, 2024, the pipeline uses fMRIPrep [v24.0.1](https://pypi.org/project/fmriprep/24.0.1/), MRIQC [v23.1.0](https://pypi.org/project/mriqc/23.1.0/) & XCP-D [v0.9.0](https://xcp-d.readthedocs.io/en/0.9.0/)
 
-As of March 13, 2025, a pipleine has been included to convert the e-prime task data to events.tsv files. This provide expanded onset, durations and trial- and block-level details. In addition, pilot first-, second- and group-level models have been instantiated for each of the seven HCP tasks.
+As of March 13, 2025, a pipleine has been added to convert the e-prime task data to events.tsv files. This provide expanded onset, durations and trial- and block-level details. 
+
+As of March 25, 2025, a pipeline has been added to run Task-specific GLMs based on the `HCP` and `Alternative` framework. This include run-level, subject- and extracted timeseries from model residual variance 4D volmes.
 
 ## Repository Structure
 
@@ -38,9 +40,16 @@ As of March 13, 2025, a pipleine has been included to convert the e-prime task d
         ├── imgs/                   # descriptives of task events
     ├── taskbold/                   # Scripts for to fit subject- and group-level GLM models for HCP tasks
         ├── README.md
-        ├── glm_utils               # Functions to prepare behavioral data and fit models 
+        ├── input_taskmodel.json    # Specific task specific information for glm scripts. Included specifying contrasts of interest
+        ├── grp_conscoords.json     # Specific group map values used in group average plotting and contrast reporting
+        ├── glm_utils.py            # Functions for running / reporting model details
+        ├── prep_eventsdata.py      # Functions to prepare behavioral data prior to model fits
+        ├── run_subjectmodels.py    # Script to compute run- and subject-level models, extract timeseries data from residuals and estimate coverage
         ├── pilot_bold-models.ipynb # Playground for HCP task data prep and fitting models
-
+        ├── template.glms           # templates .sh runs to run glms 
+        ├── make_glmjobs.sh         # Make glm runs for HPC based off of template
+        ├── submit_glmjobs.sh       # sbatch script to run glm runs on HPC
+        ├── imgs/                   # descriptives of files on s3 / computed from HPC runs / group maps and example design+VIF
 
 ```
 
@@ -87,7 +96,7 @@ Key Features
 **Folder size**: 1.6 TB
 **Quantity Objects**: 837,781
 
-This part of the repository contains scripts for preparing the behavioral data, specifying and fitting the GLM models for task-fMRI analyses.
+This part of the repository contains the scripts for preparing the events data for modeling, running the run-level and subject-level contrast maps (beta, variance, z-score), extracting model R-squared maps and residual variance timeseries for the two models.
 
 
 ## Usage
@@ -121,16 +130,11 @@ The completion rate of HCP-YA subjects for XCP-D is shown below. Detailed report
 </div>
 
 ### Task BOLD GLMs
-The model specifics and additional details about the HCP-YA GLM models are available in the [Task BOLD folder](./scripts/taskbold/). Below, are very surface level completition rates across the two models (HCP and Alternative) that were ran for each of the seven fMRI tasks.
+The model specifics and additional details about the HCP-YA GLM models are available in the [Task BOLD folder](./scripts/taskbold/). Below, are surface level completition rates for the first-level (run-level) and fixed-effect (within-subect) models across the seven HCP tasks.
 
-#### HCP
-<div style="text-align: center;">
-  <img src="./scripts/taskbold/imgs/s3output_counts-uniqsubject_model-hcp.png" alt="Task GLM Data on s3"  />
-</div>
 
-#### Alt
 <div style="text-align: center;">
-  <img src="./scripts/taskbold/imgs/s3output_counts-uniqsubject_model-alt.png" alt="Task GLM Data on s3"  />
+  <img src="./scripts/taskbold/imgs/s3output_counts-uniqsubject_model-all.png" alt="Task GLM Data on s3"  />
 </div>
 
 

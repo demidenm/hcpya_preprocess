@@ -12,164 +12,115 @@ After both runs were processed, fixed effects were computed at the subject level
 
 Parcel-specific timeseries data were extracted from the residual timeseries for both models. First, the residual 4D volumes were saved for each of the two runs across all tasks for the HCP and ALT models. To restrict analyses to voxels with 1) sufficient signal and 2) anatomical plausibility, a subject-specific brain mask was computed by combining functional and anatomical criteria. First, a voxel-wise variance map was generated from the preprocessed BOLD data and binarized to include only non-zero voxels. This reflects regions with temporal variability, as variance for zero values and non-signal voxels would be zero. This was intersected with a binarized probabilistic gray matter segmentation image from the subject's anatomical data (thresholded at >1%). The resulting mask—representing the intersection of non-zero functional variance and gray matter probability—was used to constrain subsequent time series extraction and GLM estimation to relevant brain regions using `NiftiLabelsMasker` for the Schaefer 1000 deterministic atlas and `NiftiMapsMasker` for the Dimuo 1024 probabilistic atlas.
 
-## Task Models
+# Task Models
 
-Two separate models were fit to the subject-level timeseries data: `HCP` and `Alt`. HCP are the block-level models described in [Barch et al. 2013](https://www.sciencedirect.com/science/article/pii/S1053811913005272) for each of the seven tasks. In some cases, the HCP and Alt models are comparable except for minor differences (e.g., in the motor task), while in others, such as the Gambling and Language tasks, they vary more meaningfully. 
+## Overview
+
+Two separate models were fit to the subject-level timeseries data: `HCP` and `Alternative`. HCP models are the block-level models described in [Barch et al. 2013](https://www.sciencedirect.com/science/article/pii/S1053811913005272) for each of the seven tasks. In some cases, the HCP and Alternative models are comparable except for minor differences (e.g., in the motor task), while in others, such as the Gambling and Language tasks, they vary more meaningfully.
 
 The variability between the models stems from two primary factors:
-1) The Alt models include response time regressors when they are sensible to include
-2) The Alt models represent stimuli and blocks differently to ensure we're modeling the construct of interest occurring at the times of the individual trials/stimuli and capturing the variability of trials (larger N) rather than blocks (lower N).
+1. The Alternative models include response time regressors when they are sensible to include
+2. The Alternative models represent stimuli and blocks differently to ensure we're modeling the construct of interest occurring at the times of the individual trials/stimuli and capturing the variability of trials (larger N) rather than blocks (lower N)
 
-The below figures include 1) the Design Matrix include all modeled regressors, 2) the estimate variance inflation factor (VIF) for the regressors of interest and 3) the contrasts of interest, in a single subject.
+The figures below include:
+1. The Design Matrix with all modeled regressors 
+2. The estimated variance inflation factor (VIF) for the regressors of interest
+3. The contrasts of interest, in a single subject
 
+## Motor Task
 
-### Motor
+### HCP Model
+![Model for Motor](./imgs/sub-example_task-motor_mod-hcp_stat-designvifs.png)
 
-#### HCP Model
+### Alternative Model
+![Model for Motor](./imgs/sub-example_task-motor_mod-alt_stat-designvifs.png)
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-motor_mod-hcp_stat-designvifs.png" alt="Model for Motor" />
-</div>
+## Gambling Task
 
-#### Alt Model
+### HCP Model
+![Model for Gambling](./imgs/sub-example_task-gambling_mod-hcp_stat-designvifs.png)
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-motor_mod-alt_stat-designvifs.png" alt="Model for Motor" />
-</div>
+### Alternative Model
+![Model for Gambling](./imgs/sub-example_task-gambling_mod-alt_stat-designvifs.png)
 
-### Gambling
+## Emotion Task
 
-#### HCP Model
+### HCP Model
+![Model for Emotion](./imgs/sub-example_task-emotion_mod-hcp_stat-designvifs.png)
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-gambling_mod-hcp_stat-designvifs.png" alt="Model for Gambling"  />
-</div>
+### Alternative Model
+![Model for Emotion](./imgs/sub-example_task-emotion_mod-alt_stat-designvifs.png)
 
-#### Alt Model
+## Social Task
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-gambling_mod-alt_stat-designvifs.png" alt="Model for Gambling" />
-</div>
+### HCP Model
+![Model for Social](./imgs/sub-example_task-social_mod-hcp_stat-designvifs.png)
 
-### Emotion
+### Alternative Model
+![Model for Social](./imgs/sub-example_task-social_mod-alt_stat-designvifs.png)
 
-#### HCP Model
+## Working Memory (WM) Task
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-emotion_mod-hcp_stat-designvifs.png" alt="Model for Emotion"  />
-</div>
+### HCP Model
+![Model for WM](./imgs/sub-example_task-WM_mod-hcp_stat-designvifs.png)
 
-#### Alt Model
+### Alternative Model
+![Model for WM](./imgs/sub-example_task-WM_mod-alt_stat-designvifs.png)
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-emotion_mod-alt_stat-designvifs.png" alt="Model for Emotion"  />
-</div>
+## Relational Task
 
-### Social
+### HCP Model
+![Model for Relational](./imgs/sub-example_task-relational_mod-hcp_stat-designvifs.png)
 
-#### HCP Model
+### Alternative Model
+![Model for Relational](./imgs/sub-example_task-relational_mod-alt_stat-designvifs.png)
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-social_mod-hcp_stat-designvifs.png" alt="Model for Social"  />
-</div>
+## Language Task
 
-#### Alt Model
+### HCP Model
+![Model for Language](./imgs/sub-example_task-language_mod-hcp_stat-designvifs.png)
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-social_mod-alt_stat-designvifs.png" alt="Model for Social"  />
-</div>
+### Alternative Model
+![Model for Language](./imgs/sub-example_task-language_mod-alt_stat-designvifs.png)
 
-### WM
+# fMRI Processing Status Report
 
-#### HCP Model
+## Subject Completion Status
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-WM_mod-hcp_stat-designvifs.png" alt="Model for WM"  />
-</div>
+This report summarizes the Ns for First Level, Fixed Effect, and residual variance computed Timeseries for each of the two models.
 
-#### Alt Model
+### HCP Model
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-WM_mod-alt_stat-designvifs.png" alt="Model for WM"  />
-</div>
+![Unique subjects and models computed](./imgs/modelsran_counts-uniqsubject_model-hcp.png)
 
-### Relational
+### Alternative Model
 
-#### HCP Model
+The Alternative model fits a more complex model. In some instances, a subject that is processed using the HCP model may encounter issues in the Alternative model fitting procedure. This generally affects fewer than 5 subjects for a given task.
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-relational_mod-hcp_stat-designvifs.png" alt="Model for Relational"  />
-</div>
+The First Level Status shows higher N than Fixed Effect Status. This occurs because subjects with (a) fewer than 2 runs and/or (b) poor brain coverage with an MNI template are excluded from model computation. The same criteria apply for the Timeseries Extraction.
 
-#### Alt Model
+![Unique subjects and models computed](./imgs/modelsran_counts-uniqsubject_model-alt.png)
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-relational_mod-alt_stat-designvifs.png" alt="Model for Relational"  />
-</div>
+## Data on S3 Bucket Status
 
-### Language
+This section details the number of unique subject files synchronized to the HCP AWS S3 bucket.
 
-#### HCP Model
+### HCP Model
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-language_mod-hcp_stat-designvifs.png" alt="Model for Language"  />
-</div>
+The figure below summarizes the unique subject counts on S3 for subject folders for each model type:
 
-#### Alt Model
+![Data on S3](./imgs/s3output_counts-uniqsubject_model-hcp.png)
 
-<div style="text-align: center;">
-  <img src="./imgs/sub-example_task-language_mod-alt_stat-designvifs.png" alt="Model for Language"  />
-</div>
+The following figure shows the unique file counts per subject for each task and run on S3:
 
+![Data on S3](./imgs/s3filecounts_counts-uniqsubject_model-hcp.png)
 
-## Subject Completed
+### Alternative Model
 
-The report below includes the Ns for First Level, Fixed Effect and residual variance computed Timeseries for each of the two models. 
+The figure below summarizes the unique subject counts on S3 for subject folders for each model type:
 
-### HCP
+![Data on S3](./imgs/s3output_counts-uniqsubject_model-alt.png)
 
-<div style="text-align: center;">
-  <img src="./imgs/modelsran_counts-uniqsubject_model-hcp.png" alt="Unique subjects and models computed"  />
-</div>
+The following figure shows the unique file counts per subject for each task and run on S3:
 
-### Alt
-
-The Alt model fits a more complex model, in some instances a subject that is ran using the HCP model may have an issue in the Alt model fitting procedure. This is generally N < 5 for a given task. The First Level  Status will have a higher N than Fixed Effect Status. This is due to the fact that if a subject has a) less than 2 runs and/or b) poor brain coverage with an MNI template, the model is not computed. The same is true for the [residual]  Timeseries Extraction. 
-
-<div style="text-align: center;">
-  <img src="./imgs/modelsran_counts-uniqsubject_model-alt.png" alt="Unique subjects and models computed"  />
-</div>
-
-
-## Data on S3 Bucket Completed
-
-This report covers the number of unique subjects files sync'd to the HCP AWS S3 bucket. 
-
-### HCP
-
-The first figure summarizes the unique subject counts on s3 for subject folders for each model type.
-
-<div style="text-align: center;">
-  <img src="./imgs/s3output_counts-uniqsubject_model-hcp.png" alt="Data on s3"  />
-</div>
-
-The second figure summarizes the unique file counts per subject for each task and run on s3.
-
-<div style="text-align: center;">
-  <img src="./imgs/s3filecounts_counts-uniqsubject_model-hcp.png" alt="Data on s3"  />
-</div>
-
-### Alt
-
-
-The first figure summarizes the unique subject counts on s3 for subject folders for each model type.
-
-<div style="text-align: center;">
-  <img src="./imgs/s3output_counts-uniqsubject_model-alt.png" alt="Data on s3"  />
-</div>
-
-The second figure summarizes the unique file counts per subject for each task and run on s3.
-
-<div style="text-align: center;">
-  <img src="./imgs/s3filecounts_counts-uniqsubject_model-alt.png" alt="Data on s3"  />
-</div>
+![Data on S3](./imgs/s3filecounts_counts-uniqsubject_model-alt.png)
