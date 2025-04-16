@@ -1,16 +1,35 @@
-# HCP-Young Adult: Pre/Post Processing & BOLD Analysis.
+# HCP-YA Processing Workflow
 
-Pre-processing: MRIQC & FMRIPrep Preprocessing
-Post-processing: XCP-D & E-Prime to events.tsv conversion
-Analysis: Estimate XCP-D atlas [resting state] BOLD connectivity matrices. Soon to come: Subject-level task fMRI activation maps.
+Curated by: Michael Demidenko
+Last Updated: 04/16/2025
 
-This repository contains the scripts and configurations required for preprocessing fMRI data using **fMRIPrep** and **MRIQC**. The pipeline is for the [Human Connectome Project (HCP) Young Adult (HCP-YA) sample](https://www.humanconnectome.org/#promo-1-content)
+## Overview
+The reports and documentation in this repository outlines the end-to-end processing workflow for the Human Connectome Project Young Adult (HCP-YA) dataset. Starting from the BIDS-formatted data, produces derivatives for both resting-state connectivity (in surface space) and task-based activation analysis (in volumetric space).
 
-As of November 26, 2024, the pipeline uses fMRIPrep [v24.0.1](https://pypi.org/project/fmriprep/24.0.1/), MRIQC [v23.1.0](https://pypi.org/project/mriqc/23.1.0/) & XCP-D [v0.9.0](https://xcp-d.readthedocs.io/en/0.9.0/)
+The workflow encompasses:
 
-As of March 13, 2025, a pipleine has been added to convert the e-prime task data to events.tsv files. This provide expanded onset, durations and trial- and block-level details. 
+1. **Quality Control** (MRIQC) - Reports of image quality metrics
+2. **Preprocessing** (fMRIPrep) - Preprocessing of anatomical and functional data
+3. **Post-processing** (XCP-D) - Denoising and preparation of [surface-based] connectivity analyses
+4. **Task Event Conversion** - Transformation of [raw] E-Prime behavioral data into BIDS-compatible `*_events.tsv` files with associated json descriptor
+5. **Task GLM Analysis** - First-level and subject-level activation models for all HCP tasks, computed regressor/contrast variance inflation factors, r-squared maps and residual connectivity matrices for HCP and an Alt GLM model.
 
-As of March 25, 2025, a pipeline has been added to run Task-specific GLMs based on the `HCP` and `Alternative` framework. This include run-level, subject- and extracted timeseries from model residual variance 4D volmes.
+As of April 2025, the pipeline utilizes:
+- fMRIPrep v24.0.1
+- MRIQC v23.1.0
+- XCP-D v0.9.0
+- Nilearn v0.10.3
+
+## Purpose
+
+This workflow serves multiple purposes:
+
+- **Data Quality Assessment**: Enables users to evaluate quality and identify problematic acquisitions for exclusion.
+- **Standardized Preprocessing**: Consistent preprocessing to minimize methodological variability.
+- **Enhanced Task Analysis**: Provides standardized GLM results and event files with detailed trial-level information and an alternative model than [Barch et al. 2013](https://www.sciencedirect.com/science/article/pii/S1053811913005272)
+- **Reproducibility**: Ensures all processing steps are documented and replicable
+
+The pipeline supports the complete HCP-YA dataset with over 1,000 subjects and handles all seven HCP tasks (EMOTION, MOTOR, RELATIONAL, SOCIAL, WM, GAMBLING, LANGUAGE). The workflow also includes a comprehensive quality control steps at each stage, verifying anatomical/functional alignment, fieldmap correction, event/BOLD synchronization (motor task), and adequate brain coverage for reliable statistical analysis.
 
 ## Repository Structure
 
@@ -53,7 +72,23 @@ As of March 25, 2025, a pipeline has been added to run Task-specific GLMs based 
 
 ```
 
-## Key Components
+## Rerunning Workflow: Usage
+
+The workflows leverages `singularity` containers for MRIQC/fMRIPrep/XCP-D, `s3` buckets and client, High-performance Computers, and `uv` python environment manager for task events and task BOLD analyses.   
+
+1. **Clone the repository**:
+   ```bash
+   git clone git@github.com:demidenm/hcpya_preprocess.git
+   ```
+2. **Set up environment**:
+   ```bash
+   bash setup_uv.sh
+   ```
+3. Update the configuration file (`config.json`) with your specific filenames, sessions, folders, and bucket paths.
+4. Submit preprocessing jobs using `sbatch` scripts located in the `fmriprep/`, `mriqc/`, `xcp_d/`, `tasbold` directories (e.g., `./submit_*`).
+5. Review outputs using the post-processing and QC scripts available in `post_preprocessing_checks/` and `review_results/` for fMRIPrep.
+
+## Key Outputs
 
 ### fMRIPrep
 
@@ -97,15 +132,6 @@ Key Features
 **Quantity Objects**: 837,781
 
 This part of the repository contains the scripts for preparing the events data for modeling, running the run-level and subject-level contrast maps (beta, variance, z-score), extracting model R-squared maps and residual variance timeseries for the two models.
-
-
-## Usage
-
-1. Update the configuration file (`config.json`) with your specific filenames, sessions, folders, and bucket paths.
-2. Submit preprocessing jobs using `sbatch` scripts located in the `fmriprep/`, `mriqc/` or `xcp_d/` directories (e.g., `./submit_*`).
-3. Review outputs using the post-processing and QC scripts available in `post_preprocessing_checks/` and `review_results/` for fMRIPrep.
-
-This codebase is continuously refined for more efficient submission and QA processes.
 
 ## Subject Progress
 
