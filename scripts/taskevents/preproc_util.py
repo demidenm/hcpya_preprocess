@@ -460,7 +460,7 @@ def emotion_eprime_preproc(df: pd.DataFrame) -> pd.DataFrame:
                 # add ISI
                 long_format.append({
                     'onset': row['Fixation.OnsetTime'] - adjust_by_trigger,
-                    'duration': 2000, # using papers defined 2000ms, as calc between rows is meticululous and diff approx ~40-60ms
+                    'duration': 1000, # using ~1000ms as difference between each row, as calc between rows is meticululous and diff approx ~40-60ms
                     'trial_type': f"{row['Block_Label'].split('_')[0].lower()}_isi",
                     'block_type': row['Block_Label'],
                     'response_time': row['StimSlide.RT'],
