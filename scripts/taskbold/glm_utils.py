@@ -552,8 +552,8 @@ def nifti_tstat_to_cohensd(tstat_path:str, sample_n: int):
     Returns:
     NIfTI image containing Cohen's d.
     """
-    
-    t_img = nib.load(tstat_path)
+    load_img
+    t_img = load_img(tstat_path)
     # Get data array from the t-statistics image
     t_data = t_img.get_fdata()
     # Calculate Cohen's d using the t_stat / sqrt(n) formula
@@ -594,8 +594,8 @@ def group_onesample(fixedeffect_paths: list, session: str, task_type: str,
     tstat_map.to_filename(tstat_out)
 
     if save_cohensd:
-        cohensd_out = tstat_out.replace('tstat', 'cohensd')
-        cohensd_map = nifti_tstat_to_cohensd(tstat_map=tstat_out,sample_n=n_maps)
+        cohensd_out = Path(str(tstat_out).replace('tstat', 'cohensd'))
+        cohensd_map = nifti_tstat_to_cohensd(tstat_path=tstat_out, sample_n=n_maps)
         cohensd_map.to_filename(cohensd_out)
 
     if save_zscore:
