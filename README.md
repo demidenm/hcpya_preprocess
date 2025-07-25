@@ -78,7 +78,7 @@ The workflows leverages `singularity` containers for MRIQC/fMRIPrep/XCP-D, `s3` 
 
 1. **Clone the repository**:
    ```bash
-   git clone git@github.com:demidenm/hcpya_preprocess.git
+   git clone https://github.com/demidenm/hcpya_preprocess.git
    ```
 2. **Set up environment**:
    ```bash
