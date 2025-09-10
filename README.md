@@ -1,7 +1,7 @@
 # HCP-YA Processing Workflow
 
 Curated by: Michael Demidenko
-Last Updated: 04/16/2025
+Last Updated: 09/05/2025
 
 ## Overview
 The reports and documentation in this repository outlines the end-to-end processing workflow for the Human Connectome Project Young Adult (HCP-YA) dataset. Starting from the BIDS-formatted data, produces derivatives for both resting-state connectivity (in surface space) and task-based activation analysis (in volumetric space).

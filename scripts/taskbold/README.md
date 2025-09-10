@@ -270,14 +270,19 @@ dice_coeff = image_similarity(imgfile1=brain_mni_mask, imgfile2=mask_fullpath)
 if dice_coeff > .70:  # Proceed with analysis
 ```
 
-#### Task-Specific Event Handling
+#### Task-Specific Event Handling  
 
-Each `prep_*_events()` function handles unique aspects:
+Each `prep_*_events()` function handles unique aspects:  
 
-- **Gambling**: Reward/loss outcome mapping
-- **Motor**: Cue consolidation across movement types  
-- **Emotion**: Cue + block timing combination
-- **Language**: Response time extraction from multiple trial types
-- **Relational**: Stimulus-response pairing
+- **Gambling**: Reward/loss outcome mapping based on `mostly_reward` column
+- **Motor**: Cue consolidation across movement types (combines `cue_*` patterns)   
+- **Emotion**: Cue + block timing combination (aligns block onsets with cue timing)
+- **Language**: Response time extraction from multiple trial types (`story_answerfull`, `math_answerfull`, `dmath_answerfull`)
+- **Relational**: Stimulus-response pairing based on `relation_stim` and `control_stim` trials
+- **Social**: Trial type + social context combination using `social_type` column
+- **Working Memory**: 
+  - **HCP mode**: Cue timing alignment with n-back blocks, stimulus type labeling
+  - **Alt mode**: Response time regressors for target/lure/non-lure conditions across 0-back and 2-back tasks
 
-This design allows the same pipeline to handle the range of cognitive paradigms while maintaining consistent statistical modeling decisions.
+
+
