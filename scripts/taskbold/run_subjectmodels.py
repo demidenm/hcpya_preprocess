@@ -161,11 +161,13 @@ for task in task_list:
             
             all_vif_dfs.append(vif_df) 
 
-            # create / save figures
+            # create / save figures / design
             fig = plot_design_vifs(designmat=design_matrix, regressor_vifs=regress_vifs, contrast_vifs=contrast_vifs, task_name=task)
             save_desvifs = f"{firstlvl}/figures/{task}_design_vifs.png"
             fig.savefig(save_desvifs, dpi=300, bbox_inches='tight')
             plt.close()
+            design_matrix.to_csv(f"{firstlvl}/{subj_id}_{ses}_task-{task}_run-{run}_designmatrix.tsv", sep='\t', index=False)
+            
         except Exception as e:
             raise RuntimeError(f"   Error estimating VIFs: {e}")
             continue
@@ -207,11 +209,14 @@ for task in task_list:
                 vargm_mask = math_img('img1 * img2', img1=var_binned, img2=gm_binned)
 
                 for atlas_type in ['schaefer', 'difumo']:
+                    print(f"{subj_id}: Exacting residuals timeseries for {atlas_type} atlas for {task} run-{run}")
+
                     if atlas_type == 'schaefer':
                         roi_dim = 1000
                     elif atlas_type == 'difumo':
                         roi_dim = 1024
                     try:
+
                         timeseries_dat, _ = extract_timeseries_atlas(
                             resid_nifti=firstglm_res.residuals[0], 
                             atlas_name=atlas_type, 

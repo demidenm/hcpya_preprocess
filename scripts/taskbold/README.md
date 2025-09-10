@@ -124,3 +124,160 @@ The figure below summarizes the unique subject counts on S3 for subject folders 
 The following figure shows the unique file counts per subject for each task and run on S3:
 
 ![Data on S3](./imgs/s3filecounts_counts-uniqsubject_model-alt.png)
+
+
+## Key Components
+
+### Scripts
+- **`make_glmjob.sh`** - Interactive job generator that creates SLURM batch files
+- **`template.glms`** - Template for individual subject processing jobs
+- **`submit_glmjobs.sh`** - SLURM batch script for parallel execution
+- **`run_subjectmodels.py`** - Main Python pipeline for GLM analysis
+
+### Configuration
+- **`input_taskmodel.json`** - Task specifications, model parameters, and contrast definitions
+- **`prep_eventsdata.py`** - Event file preprocessing for different task types
+
+
+### Usage
+
+1. **Generate Jobs**: Run `make_glmjob.sh` and select session type (3T)
+2. **Submit to Cluster**: Execute `submit_glmjobs.sh` via SLURM
+3. **Monitor Progress**: Check logs in `logs/` directory
+
+### Outputs
+
+- **First-level GLMs** - Individual run statistical maps
+- **Fixed-effects** - Combined across-run statistics  
+- **VIF estimates** - Design matrix collinearity metrics
+- **Timeseries** - ROI-based signal extraction
+- **S3 Upload** - Automated cloud storage sync
+
+### Configuration Loading and Task Processing Flow
+
+#### JSON Configuration Structure
+
+The `input_taskmodel.json` defines a hierarchical structure for each task:
+
+```json
+"taskname": {
+    "runs": ["1", "2"],
+    "fwhm": "5.0",           // Smoothing kernel
+    "noise_mod": "ar1",      // Autocorrelation model
+    "boldtr": ".720",        // Repetition time
+    "num_volumes": "405",    // Expected BOLD volumes
+    "model_type": {          // Either "hcp" or "alt"
+        "trialtype_filter": [...],    // Event types to include
+        "nuisance_regressors": "...", // Confound regressors
+        "contrasts": {...}            // Statistical contrasts
+    }
+}
+```
+
+#### Dynamic Event Processing Pipeline
+
+The main script processes each task using this workflow:
+
+```python
+
+config = study_details[task]
+mod_config = config[mod_spec]  # Get model-specific settings
+
+if task == 'motor':
+    events_dat = prep_motor_events(**common_params)
+elif task == 'gambling':
+    events_dat = prep_gamble_events(**common_params, new_trialcol_name='new_trialtype')
+```
+
+#### Event Data Transformation Examples
+
+**Working Memory Task (WM)**
+
+*HCP Model*:
+- Filters: `["2back_full", "0back_full"]`
+- Combines cue + block timing for continuous regressors
+- Creates stimulus-specific trial types: `2back_full_face`, `0back_full_tools`
+
+*Alt Model*:
+- Filters: `["cue_2back", "cue_0back", "2back_full", "0back_full"]` 
+- Adds reaction time regressors from response trials
+- Separates cue and task periods
+
+**Social Task**
+*HCP Model*:
+
+```python
+#  combined trial types from two columns
+events_dat = comb_names(
+    eventsdf=eventdf_cpy, 
+    fst_colname='trial_type',     # "movie"
+    scnd_colname='social_type',   # "mental"/"random"
+    new_colname='new_trialtype'   # Result: "movie_mental", "movie_random"
+)
+```
+
+*Alt Model*:
+```python
+# Adds reaction time modeling
+events_dat = add_reactiontime_regressor(
+    eventdf_cpy, 
+    trial_type_col='trial_type', 
+    resp_trialtype='response',
+    response_colname='response_time',
+    rtreg_name='rt'
+)
+```
+
+#### Design Matrix Construction
+
+The processed events are feed into design matrix creation:
+
+```python
+design_matrix = create_design_matrix(
+    eventdf=events_dat,
+    conf_path=conf_path,
+    conflist_filt=mod_config['nuisance_regressors'],  # From JSON
+    volumes=bold_volumes,
+    time_rep=float(config['boldtr']),                 # From JSON
+    hrf_type=config['hrf_type'],                      # From JSON
+    trialtype_colname='new_trialtype' if task in ['gambling', 'social', 'WM'] else 'trial_type'
+)
+```
+
+#### Contrast Computation
+
+Contrasts are defined in JSON and computed automatically:
+
+```json
+"contrasts": {
+    "2backv0back": "0.25 * `2back_full_body` + 0.25 * `2back_full_face` + ... - 0.25 * `0back_full_body` - ...",
+    "facevplace": "0.5 * `2back_full_face` + 0.5 * `0back_full_face` - 0.5 * `2back_full_place` - ..."
+}
+```
+
+#### Quality Control Integration
+
+The pipeline validates against JSON specifications:
+
+```python
+# volume counts
+bold_volumes = get_numvolumes(nifti_path_4d=bold_path)
+if bold_volumes != n_vols:  # n_vols from JSON
+    print(f"Warning: Mismatch in expected ({n_vols}) vs actual BOLD volumes")
+
+# brain mask coverage check
+dice_coeff = image_similarity(imgfile1=brain_mni_mask, imgfile2=mask_fullpath)
+if dice_coeff > .70:  # Proceed with analysis
+```
+
+#### Task-Specific Event Handling
+
+Each `prep_*_events()` function handles unique aspects:
+
+- **Gambling**: Reward/loss outcome mapping
+- **Motor**: Cue consolidation across movement types  
+- **Emotion**: Cue + block timing combination
+- **Language**: Response time extraction from multiple trial types
+- **Relational**: Stimulus-response pairing
+
+This design allows the same pipeline to handle the range of cognitive paradigms while maintaining consistent statistical modeling decisions.

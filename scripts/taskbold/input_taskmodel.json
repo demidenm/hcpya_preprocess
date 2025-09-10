@@ -167,7 +167,7 @@
             "present_math", "math_answerfull"],
             "prep_needed": "True",
             "nuisance_regressors": "cosine|trans|rot",
-            "model_rt": "False",
+            "model_rt": "True",
             "contrasts":{
                 "presentmath": "present_math",
                 "presentstory": "present_storyquest",
@@ -211,7 +211,7 @@
             "control_prompt", "control_block","rt"],
             "prep_needed": "True",
             "nuisance_regressors": "cosine|trans|rot",
-            "model_rt": "False",
+            "model_rt": "True",
             "contrasts":{
                 "relation": "relation_block",
                 "match": "control_block",
@@ -302,7 +302,7 @@
             "trialtype_filter": ["cue_2back", "cue_0back", "2back_full", "0back_full", "rt"],
             "prep_needed": "True",
             "nuisance_regressors": "cosine|trans|rot",
-            "model_rt": "False",
+            "model_rt": "True",
             "contrasts": {
                 "cue0back": "cue_0back",
                 "cue2back": "cue_2back",
